@@ -572,9 +572,6 @@
         </table>
       </div>
       <div class="hint-sm" id="cmp-note" style="margin-top:8px"></div>
-      <div class="hint-sm" style="margin-top:4px">
-        Не учтены налоги, страхование, непредвиденный ремонт, расходы покупки/продажи и коммунальные платежи, если их оплачивает собственник.
-      </div>
     </div>
 
     <!-- Chart -->
@@ -1174,7 +1171,7 @@ const Calc = {
     const tbody = document.getElementById('cmp-tbody');
     const tfoot = document.getElementById('cmp-tfoot');
     document.getElementById('cmp-note').textContent =
-      `Итоговый капитал = накопленная рента + капитал в квартире (стоимость минус остаток долга) на год N. ` +
+      `Итоговый капитал = накопленная рента + капитал в квартире (стоимость минус остаток долга) на год ${H}. ` +
       `Вклад — ${d.depositMonthly ? 'ежемесячная' : 'годовая'} капитализация.`;
     tbody.innerHTML = '';
     tfoot.innerHTML = '';

@@ -494,9 +494,9 @@
         <select id="room-select"></select>
       </div>
 
-      <!-- Сценарий цены лота -->
+      <!-- Сценарий цены квартиры -->
       <div class="field-group">
-        <label class="field-label">Сценарий цены лота</label>
+        <label class="field-label">Сценарий цены квартиры</label>
         <div class="segment-tier" id="price-tier-seg">
           <button type="button" data-tier="p25">Доступный</button>
           <button type="button" data-tier="p50">Типичный</button>
@@ -616,7 +616,7 @@
 /* ══════════════════════════════════════════════
    DATA CONSTANTS
    Источник: unistroy.ru, публичный API /api/flats/,
-   выгрузка активных лотов в продаже (без исторических цен).
+   выгрузка активных квартир в продаже (без исторических цен).
 ══════════════════════════════════════════════ */
 const CITIES = [
   { code: 'mhc', label: 'Махачкала' },
@@ -628,8 +628,8 @@ const CITIES = [
 ];
 
 // Встроенный массив — резервный снимок, если свежий файл данных ещё не создан.
-// priceP25 / priceP50 / priceP75 — цены фактических лотов в 25-м,
-// 50-м (медиана) и 75-м перцентилях. areaP* — площадь того же лота.
+// priceP25 / priceP50 / priceP75 — цены фактических квартир в 25-м,
+// 50-м (медиана) и 75-м перцентилях. areaP* — площадь той же квартиры.
 // priceMin / priceMax оставлены для отображения полного диапазона витрины.
 const PROJECTS = window.CALCULATOR_PROJECTS || [
   /* ── Махачкала ── */
@@ -782,7 +782,7 @@ const STR_OWNER_SHARE      = 0.72;
 
 // Фолбэк для ЖК/комнатности без данных в прайс-листе (студия/1/2к не по всем
 // проектам, комнатность 3+ не тарифицирована вовсе) — оценка доходности как
-// % от стоимости лота в год, калибровано по строкам прайс-листа.
+// % от стоимости квартиры в год, калибровано по строкам прайс-листа.
 const RENT_YIELD = {
   'Студия': { ltr: 0.070, daily: 0.115 },
   '1':      { ltr: 0.060, daily: 0.098 },
@@ -790,12 +790,6 @@ const RENT_YIELD = {
   '3':      { ltr: 0.038, daily: 0.062 },
   '4':      { ltr: 0.032, daily: 0.052 },
   '5':      { ltr: 0.028, daily: 0.045 },
-};
-
-const PRICE_TIER_LABELS = {
-  p25: 'Доступный сценарий (P25)',
-  p50: 'Типичный лот (P50)',
-  p75: 'Выше среднего (P75)',
 };
 
 const RENTAL_MODELS = [
@@ -885,12 +879,12 @@ const Calc = {
     const area      = this.areaForTier(room, d.priceTier);
     const { monthlyRent, dailyAnnualIncome, isEstimated } = this.getRentFigures(d.projectSlug, d.roomLabel, unitPrice);
 
-    // Минимальная сумма инвестиций, при которой этот лот проходит по лимиту
+    // Минимальная сумма инвестиций, при которой эта квартира проходит по лимиту
     // ипотеки (тело кредита ≤ 45% суммы клиента): unitPrice ≤ invest × 1.45.
     const requiredInvestAmount = unitPrice / (1 + MAX_MORTGAGE_SHARE);
 
-    // Покупаем максимум целых лотов этого же ЖК/комнатности на введённую
-    // сумму. Дополнительный лот в ипотеку возможен, только когда тело
+    // Покупаем максимум целых квартир этого же ЖК/комнатности на введённую
+    // сумму. Дополнительная квартира в ипотеку возможна, только когда тело
     // кредита не превышает 45% исходной суммы клиента. Остаток остаётся
     // наличными без роста.
     let units = 0, mortgagedUnits = 0, principal = 0, cashRemainder = 0;
@@ -944,7 +938,7 @@ const Calc = {
       }
     }
 
-    // totalCost — суммарная стоимость ВСЕХ купленных лотов (unitPrice × units)
+    // totalCost — суммарная стоимость ВСЕХ купленных квартир (unitPrice × units)
     const totalCost = unitPrice * units;
 
     // Years array
@@ -994,7 +988,7 @@ const Calc = {
         // Долгосрочная: 11 месяцев × (ставка − 12% УК)
         // Гарантированная: 12 месяцев × (ставка − 25% УК), гарантированно
         // Посуточная: чистый годовой доход, оценённый по доходности комнатности
-        // Рента считается по одному лоту и умножается на кол-во купленных лотов
+        // Рента считается по одной квартире и умножается на кол-во купленных квартир
         if (modelId === 'longterm') {
           yr = monthlyRent * 11 * 0.88 * g;
         } else if (modelId === 'guaranteed') {
@@ -1058,24 +1052,20 @@ const Calc = {
       const projMax = Math.max(...proj.rooms.map(rm => rm.priceMax));
       const projCount = proj.rooms.reduce((s, rm) => s + rm.count, 0);
       document.getElementById('project-info-display').innerHTML =
-        `${projCount} лотов в продаже · ${rub(projMin)}–${rub(projMax)}`;
+        `${projCount} квартир в продаже · ${rub(projMin)}–${rub(projMax)}`;
 
       /* Price display for selected room + tier */
-      const hasQuantiles = this.hasQuantilePrices(r.room);
       const shownPrice = r.isAffordable ? r.totalCost : r.unitPrice;
-      const lotsText = r.units > 1 ? ` за ${r.units} ${pluralLots(r.units)}` : '';
+      const lotsText = r.units > 1 ? ` за ${r.units} ${pluralFlats(r.units)}` : '';
       const areaText = r.units > 1 ? `≈${r.area.toFixed(1)} м² каждый` : `≈${r.area.toFixed(1)} м²`;
       document.getElementById('apt-price-display').innerHTML =
-        `Цена (${PRICE_TIER_LABELS[d.priceTier]}): <strong>${rub(shownPrice)}</strong>${lotsText}, ${areaText}<br>` +
-        `<span class="hint-sm">Диапазон по ${r.room.count} лотам: ${rub(r.room.priceMin)}–${rub(r.room.priceMax)}.</span>` +
-        (hasQuantiles
-          ? `<br><span class="hint-sm">P25 / P50 / P75 рассчитаны по фактическим лотам в текущей витрине.</span>`
-          : `<br><span class="hint-sm">Квантильные цены станут доступны после обновления выгрузки; временно используется средняя цена.</span>`);
+        `Цена: <strong>${rub(shownPrice)}</strong>${lotsText}, ${areaText}<br>` +
+        `<span class="hint-sm">Диапазон по ${r.room.count} квартирам: ${rub(r.room.priceMin)}–${rub(r.room.priceMax)}.</span>`;
 
       /* Purchase status */
       const ps = document.getElementById('purchase-status');
       if (!r.isAffordable) {
-        ps.innerHTML = `<span class="badge badge-yellow">Для этого лота нужна сумма инвестиций от ${rub(r.requiredInvestAmount)}</span>`;
+        ps.innerHTML = `<span class="badge badge-yellow">Для этой квартиры нужна сумма инвестиций от ${rub(r.requiredInvestAmount)}</span>`;
       } else if (r.mortgagedUnits === 0) {
         ps.innerHTML = `<span class="badge badge-green"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg>Полная оплата</span>` +
           (r.cashRemainder > 0
@@ -1085,8 +1075,7 @@ const Calc = {
         const cashUnits = r.units - r.mortgagedUnits;
         let html = `<div class="hint-sm" style="margin-bottom:6px">
           <svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v9M9 10v9M15 10v9M19 10v9"/><path d="M3 19h18"/></svg>
-          Покупаете <strong>${r.units} ${pluralLots(r.units)}</strong>: ${cashUnits} ${pluralLots(cashUnits)} наличными + ещё ${r.mortgagedUnits} ${pluralLots(r.mortgagedUnits)} в ипотеку (доплата <strong>${rub(r.principal)}</strong>)<br>
-          <span class="hint-sm">Лимит ипотеки: не более ${rub(r.mortgageLimit)} (45% от исходной суммы).</span>
+          Покупаете <strong>${r.units} ${pluralFlats(r.units)}</strong>: ${cashUnits} ${pluralFlats(cashUnits)} наличными + ещё ${r.mortgagedUnits} ${pluralFlats(r.mortgagedUnits)} в ипотеку (доплата <strong>${rub(r.principal)}</strong>)
         </div>
         <div class="mortgage-fields">
           <div class="two-col-fields">
@@ -1110,8 +1099,7 @@ const Calc = {
       } else {
         let html = `<div class="hint-sm" style="margin-bottom:6px">
           <svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v9M9 10v9M15 10v9M19 10v9"/><path d="M3 19h18"/></svg>
-          Стоимость лота выше вашей суммы — недостающая часть <strong>${rub(r.principal)}</strong> оформляется в ипотеку<br>
-          <span class="hint-sm">Лимит ипотеки: не более ${rub(r.mortgageLimit)} (45% от исходной суммы).</span>
+          Стоимость квартиры выше вашей суммы — недостающая часть <strong>${rub(r.principal)}</strong> оформляется в ипотеку
         </div>
         <div class="mortgage-fields">
           <div class="two-col-fields">
@@ -1141,29 +1129,21 @@ const Calc = {
       const modelMap = { longterm: 0, guaranteed: 1, daily: 2 };
       const selRow   = modelMap[d.rentalModel] ?? -1;
       const rows = [
-        ['Долгосрочная',    ltNet,   '≈ ' + rub(ltNet) + '/мес ср.',   `(11 мес. × ставка × 88%)`],
-        ['Гарантированная', gurNet,  rub(gurNet) + '/мес',             `(каждый месяц × 75%)`],
-        ['Посуточная',      dayNet,  '≈ ' + rub(dayNet) + '/мес ср.', `(${rub(r.dailyAnnualIncome)}/год)`],
+        ['Долгосрочная',    '≈ ' + rub(ltNet) + '/мес ср.'],
+        ['Гарантированная', rub(gurNet) + '/мес'],
+        ['Посуточная',      '≈ ' + rub(dayNet) + '/мес ср.'],
       ];
       const roomLabel = d.roomLabel === 'Студия' ? 'Студия' : d.roomLabel + '-комн.';
-      const unitsNote = r.units > 1
-        ? `<div class="hint-sm" style="margin-top:6px">Ставки выше — за 1 лот. В сравнительной таблице доход и капитал рассчитаны за все ${r.units} ${pluralLots(r.units)}.</div>`
-        : `<div class="hint-sm" style="margin-top:6px">Ставки и доход выше — за 1 лот.</div>`;
       document.getElementById('rent-info-display').innerHTML =
-        `<div class="rent-info-label">Доход собственника за 1 лот — ${proj.label}, ${roomLabel}</div>` +
+        `<div class="rent-info-label">Доход собственника за 1 квартиру — ${proj.label}, ${roomLabel}</div>` +
         `<table class="rent-info-table">` +
         rows.map((row, i) =>
           `<tr class="${i === selRow ? 'active-model' : ''}">
             <td>${row[0]}</td>
-            <td style="color:var(--muted);font-size:.72rem">${row[3]}</td>
-            <td>${row[2]}</td>
+            <td>${row[1]}</td>
           </tr>`
         ).join('') +
-        `</table>` +
-        unitsNote +
-        (r.isEstimated
-          ? `<div class="hint-sm" style="margin-top:6px">Для этой комнатности нет ставки в прайс-листе — оценка по доходности (${((RENT_YIELD[d.roomLabel]||RENT_YIELD['1']).ltr*100).toFixed(1)}% годовых гросс LTR)</div>`
-          : `<div class="hint-sm" style="margin-top:6px">Ставки — из прайс-листа УК. Посуточная: ${STR_RENTED_DAYS} сдаваемых суток/год, минус агрегатор ${STR_AGGREGATOR_FEE*100}% и уборка ${rub(STR_CLEANING_PER_DAY)}/сутки, собственнику ${STR_OWNER_SHARE*100}%</div>`);
+        `</table>`;
     }
 
     /* — Winner determination — */
@@ -1388,7 +1368,7 @@ const Calc = {
 
   /* ── strategy hint ──
      Ищет лучшую комбинацию ЖК × комнатность в выбранном регионе (по средней
-     цене лота) для введённой суммы — сравнивает с банковским вкладом. */
+     цене квартиры) для введённой суммы — сравнивает с банковским вкладом. */
   _computeHint() {
     const d = this.data;
     const H = d.horizon;
@@ -1424,7 +1404,7 @@ const Calc = {
     };
 
     // Evaluate a project/room combo at its median price — покупаем максимум
-    // целых лотов на бюджет, а остаток учитываем наличными без роста. Ипотеку
+    // целых квартир на бюджет, а остаток учитываем наличными без роста. Ипотеку
     // в рекомендации предлагаем, только если её тело не больше 45% от суммы
     // клиента — иначе получится
     // «пришёл с 6 млн, возьми ещё ипотеку на 10 млн», что не подходит как
@@ -1462,8 +1442,8 @@ const Calc = {
       const nFull    = Math.floor(budget / cost);
       const cashLeft = budget - nFull * cost;
 
-      // Вариант A: nFull лотов за наличные, остаток — наличными без роста
-      // (если бюджета не хватает даже на один лот целиком — один лот в ипотеку,
+      // Вариант A: nFull квартир за наличные, остаток — наличными без роста
+      // (если бюджета не хватает даже на одну квартиру целиком — одна квартира в ипотеку,
       // но только пока тело кредита в пределах лимита ниже)
       const options = [];
       if (nFull >= 1) {
@@ -1481,7 +1461,7 @@ const Calc = {
         options.push({ units: 1, mortgagedUnits: 1, remainder: 0, mortAnn, model: m.bestModel, wealth: m.bestW });
       }
 
-      // Вариант B: ещё один лот сверху в ипотеку под остаток как первый взнос
+      // Вариант B: ещё одна квартира сверху в ипотеку под остаток как первый взнос
       // (тоже только если тело кредита не превышает лимит)
       if (nFull >= 1 && cashLeft >= cost * 0.20) {
         const principal = cost - cashLeft;
@@ -1527,7 +1507,7 @@ const Calc = {
     });
 
     // Every project/room combo in the selected city (пропускаем единичные
-    // лоты — они не показательны как «типовая» рекомендация)
+    // квартиры — они не показательны как «типовая» рекомендация)
     PROJECTS.filter(p => p.city === d.cityCode).forEach(project => {
       project.rooms.filter(room => room.count >= 3).forEach(room => {
         const s = evalCombo(project, room, invest);
@@ -1544,7 +1524,7 @@ const Calc = {
 
     const reason = best.model === 'deposit'
       ? `При текущих ставках (${d.depositRate}%) вклад опережает арендные стратегии за ${H} ${pluralYr(H)} в регионе «${cityLabel}».`
-      : `Лучшее соотношение цены и доходности среди лотов «${cityLabel}» на вашу сумму.`;
+      : `Лучшее соотношение цены и доходности среди квартир «${cityLabel}» на вашу сумму.`;
 
     return {
       ...best,
@@ -1809,12 +1789,12 @@ function pluralYr(n) {
   return 'лет';
 }
 
-function pluralLots(n) {
+function pluralFlats(n) {
   const m10 = n % 10, m100 = n % 100;
-  if (m100 >= 11 && m100 <= 19) return 'лотов';
-  if (m10 === 1) return 'лот';
-  if (m10 >= 2 && m10 <= 4) return 'лота';
-  return 'лотов';
+  if (m100 >= 11 && m100 <= 19) return 'квартир';
+  if (m10 === 1) return 'квартира';
+  if (m10 >= 2 && m10 <= 4) return 'квартиры';
+  return 'квартир';
 }
 
 /* ── Start ── */

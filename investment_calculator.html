@@ -1,0 +1,1824 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Инвестиционный калькулятор | Унистрой Аренда</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Archivo:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      /* ── Унистрой brand tokens ── */
+      --dark:        #364B4B;
+      --dark-2:      #2B3D3D;
+      --dark-3:      #223030;
+      --accent:      #A5FF00;
+      --accent-deep: #8FE000;
+      --mint:        #E5FFF1;
+      --mint-2:      #F2FBF6;
+      --white:       #FFFFFF;
+      --ink:         #17161A;
+      --graphite:    #262729;
+      --gray:        #B1B3B3;
+      --gray-2:      #8A8C8C;
+      --line:        rgba(54, 75, 75, 0.12);
+      --line-dark:   rgba(255, 255, 255, 0.12);
+
+      --font-display: 'Archivo', 'Montserrat', system-ui, sans-serif;
+      --font-body:    'Montserrat', system-ui, sans-serif;
+
+      --r-sm: 8px;
+      --r-md: 14px;
+      --r-lg: 22px;
+      --shadow-sm: 0 2px 8px rgba(23, 22, 26, 0.06);
+      --shadow-md: 0 14px 40px rgba(23, 22, 26, 0.10);
+      --shadow-lg: 0 30px 80px rgba(23, 22, 26, 0.16);
+      --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+      /* ── mapped aliases used throughout this file ── */
+      --text:     var(--ink);
+      --muted:    var(--gray-2);
+      --border:   var(--line);
+      --card:     var(--white);
+      --warn-bg:  #FFF7E8;
+      --warn-bdr: #E8A33D;
+      --warn-ink: #8A5A15;
+      --radius:   var(--r-lg);
+    }
+    html { font-size: 15px; }
+    body {
+      font-family: var(--font-body);
+      background: var(--mint-2);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    /* ── HEADER ── */
+    .page-header {
+      background: var(--dark);
+      color: #fff;
+      padding: 16px 28px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .page-header .logo { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; font-size: 15px; color: var(--white); white-space: nowrap; }
+    .page-header .logo .mark-sq { width: 28px; height: 28px; border-radius: 7px; background: var(--accent); display: grid; place-items: center; color: var(--ink); font-size: 15px; font-weight: 800; flex-shrink: 0; }
+    .page-header .logo small { display: block; font-family: var(--font-body); font-weight: 600; letter-spacing: 0.13em; font-size: 9px; color: var(--accent); text-transform: uppercase; margin-top: 1px; }
+    .page-header .divider { width: 1px; align-self: stretch; background: var(--line-dark); }
+    .page-header h1 { font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.01em; font-size: 1.2rem; font-weight: 800; line-height: 1.15; }
+    .page-header p  { font-size: 0.82rem; color: rgba(255,255,255,.68); margin-top: 2px; }
+    @media (max-width: 600px) {
+      .page-header { flex-wrap: wrap; gap: 10px 20px; padding: 14px 16px; }
+      .page-header .divider { display: none; }
+    }
+
+    /* ── LAYOUT ── */
+    .main-layout {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .left-panel  { width: 380px; min-width: 340px; flex-shrink: 0; display: flex; flex-direction: column; gap: 14px; }
+    .right-panel { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+
+    @media (max-width: 768px) {
+      .main-layout { flex-direction: column; padding: 12px; align-items: stretch; }
+      .left-panel  { width: 100%; min-width: 0; }
+      .right-panel { width: 100%; }
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--r-md);
+      padding: 16px 18px;
+      box-shadow: var(--shadow-sm);
+    }
+    .card-title {
+      font-family: var(--font-display);
+      font-size: .74rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--dark);
+      margin-bottom: 12px;
+    }
+
+    /* ── FORM ELEMENTS ── */
+    label.field-label {
+      display: block;
+      font-size: .78rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .field-group { margin-bottom: 12px; }
+
+    input[type="text"],
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1.5px solid var(--line);
+      border-radius: var(--r-sm);
+      font-size: .9rem;
+      font-family: var(--font-body);
+      color: var(--text);
+      background: var(--white);
+      transition: border-color .15s var(--ease);
+      -moz-appearance: textfield;
+    }
+    input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    select:focus { outline: none; border-color: var(--dark); }
+    select:disabled { background: var(--mint-2); color: var(--muted); cursor: not-allowed; }
+
+    .amount-input {
+      font-family: var(--font-display);
+      font-size: 1.3rem !important;
+      font-weight: 800;
+      color: var(--dark) !important;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--mint);
+      outline: none;
+      margin: 10px 0 2px;
+      cursor: pointer;
+      border: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 3px solid var(--white);
+      box-shadow: 0 2px 8px rgba(23,22,26,.25);
+      cursor: pointer;
+      transition: transform .12s var(--ease);
+    }
+    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.1); }
+    input[type="range"]::-moz-range-thumb {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 3px solid var(--white);
+      box-shadow: 0 2px 8px rgba(23,22,26,.25);
+      cursor: pointer;
+    }
+
+    .hint-sm { font-size: .72rem; color: var(--muted); margin-top: 3px; }
+
+    /* ── PRICE TIER SEGMENT ── */
+    .segment-tier { display: grid; grid-template-columns: repeat(3,1fr); gap: 4px; background: var(--mint-2); border-radius: 999px; padding: 4px; }
+    .segment-tier button {
+      border: none; background: transparent; padding: 8px 6px; border-radius: 999px;
+      font-weight: 700; font-size: .82rem; color: var(--dark); cursor: pointer;
+      transition: .15s var(--ease); font-family: var(--font-body);
+    }
+    .segment-tier button.active { background: var(--accent); color: var(--ink); }
+    .segment-tier button:hover:not(.active) { background: rgba(54,75,75,.07); }
+
+    .two-col-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 16px;
+    }
+
+    /* ── STATUS BADGES ── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: .78rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-top: 6px;
+    }
+    .badge-green { background: var(--mint); color: var(--dark); }
+    .badge-yellow { background: var(--warn-bg); color: var(--warn-ink); }
+
+    /* ── MORTGAGE BLOCK ── */
+    .mortgage-fields {
+      background: var(--mint-2);
+      border-radius: var(--r-sm);
+      padding: 10px 12px;
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .mortgage-fields .two-col-fields { gap: 8px 12px; }
+
+    /* ── WINNER BANNER ── */
+    .winner-banner {
+      border-radius: var(--r-lg);
+      padding: 18px 22px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--dark) 0%, var(--dark-3) 100%);
+    }
+    .winner-banner .wb-label { font-size: .78rem; opacity: .85; margin-bottom: 4px; }
+    .winner-banner .wb-amount { font-family: var(--font-display); font-size: 2rem; font-weight: 800; letter-spacing: -.01em; line-height: 1.1; color: var(--accent); }
+    .winner-banner .wb-delta { font-size: .88rem; opacity: .9; margin-top: 6px; }
+    .winner-banner .wb-note  { font-size: .75rem; opacity: .75; margin-top: 5px; font-style: italic; }
+    .winner-banner .wb-close { font-size: .8rem; opacity: .8; margin-top: 4px; background: rgba(255,255,255,.18); border-radius: var(--r-sm); padding: 3px 8px; display: inline-block; }
+
+    /* ── COMPARISON TABLE ── */
+    .table-wrap { overflow-x: auto; }
+    table.cmp-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .82rem;
+    }
+    .cmp-table th {
+      background: var(--mint-2);
+      color: var(--muted);
+      font-weight: 700;
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      padding: 7px 10px;
+      text-align: right;
+      white-space: nowrap;
+    }
+    .cmp-table th:first-child { text-align: left; }
+    .cmp-table td {
+      padding: 8px 10px;
+      border-top: 1px solid var(--border);
+      text-align: right;
+      white-space: nowrap;
+    }
+    .cmp-table td:first-child { text-align: left; font-weight: 600; }
+    .cmp-table td strong { font-weight: 700; }
+    .cmp-table tr.winner-row td { background: var(--mint); color: var(--dark); }
+    .cmp-table tr.winner-row td:first-child::before {
+      content: '';
+      display: inline-block;
+      width: 13px; height: 13px;
+      margin-right: 5px;
+      vertical-align: -2px;
+      background: currentColor;
+      -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M8 4h8v5a4 4 0 01-8 0V4z'/><path d='M8 5H5a1 1 0 00-1 1v1a3 3 0 003 3M16 5h3a1 1 0 011 1v1a3 3 0 01-3 3'/><path d='M12 13v3'/><path d='M9 20h6M10 17h4v3h-4z'/></svg>") no-repeat center / contain;
+      mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M8 4h8v5a4 4 0 01-8 0V4z'/><path d='M8 5H5a1 1 0 00-1 1v1a3 3 0 003 3M16 5h3a1 1 0 011 1v1a3 3 0 01-3 3'/><path d='M12 13v3'/><path d='M9 20h6M10 17h4v3h-4z'/></svg>") no-repeat center / contain;
+    }
+    .cmp-table .note-row td { font-size: .75rem; color: var(--muted); background: var(--mint-2); }
+
+    /* ── CHART ── */
+    .chart-wrap { position: relative; height: 280px; }
+
+    /* ── DETAIL ACCORDION ── */
+    details.detail-acc summary {
+      cursor: pointer;
+      font-size: .82rem;
+      font-weight: 700;
+      color: var(--dark);
+      padding: 6px 0;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    details.detail-acc summary::before {
+      content: '';
+      display: inline-block;
+      width: 12px; height: 12px;
+      background: var(--accent-deep);
+      -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='M9 6l6 6-6 6'/></svg>") no-repeat center / contain;
+      mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='M9 6l6 6-6 6'/></svg>") no-repeat center / contain;
+      transition: transform .2s var(--ease);
+    }
+    details.detail-acc[open] summary::before { transform: rotate(90deg); }
+    details.detail-acc summary::-webkit-details-marker { display: none; }
+    table.det-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .78rem;
+      margin-top: 10px;
+    }
+    .det-table th {
+      background: var(--mint-2);
+      color: var(--muted);
+      font-weight: 700;
+      font-size: .7rem;
+      text-transform: uppercase;
+      padding: 6px 8px;
+      text-align: right;
+      white-space: nowrap;
+    }
+    .det-table th:first-child { text-align: left; }
+    .det-table td { padding: 6px 8px; border-top: 1px solid var(--border); text-align: right; }
+    .det-table td:first-child { text-align: center; font-weight: 600; }
+
+    /* ── UTILS ── */
+    .hidden { display: none !important; }
+    .ic14 { display: inline-block; vertical-align: -3px; margin-right: 5px; flex-shrink: 0; }
+    .row-flex { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .slider-label-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; }
+    .slider-val-pill {
+      font-size: .78rem;
+      font-weight: 700;
+      color: var(--dark);
+      background: var(--mint);
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+    .section-divider {
+      font-family: var(--font-display);
+      font-size: .72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--dark);
+      border-bottom: 2px solid var(--mint);
+      padding-bottom: 4px;
+      margin: 4px 0 10px;
+    }
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: .82rem;
+      margin-top: 6px;
+    }
+    .checkbox-row input[type="checkbox"] { accent-color: var(--dark); width: 15px; height: 15px; }
+
+    .apt-price-display {
+      font-size: .82rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .apt-price-display strong { color: var(--text); }
+
+    /* ── RENT INFO DISPLAY ── */
+    .rent-info-table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+    .rent-info-table td {
+      padding: 5px 6px;
+      font-size: .8rem;
+      border-top: 1px solid var(--border);
+    }
+    .rent-info-table td:last-child { text-align: right; font-weight: 700; }
+    .rent-info-table tr.active-model td { background: var(--mint); }
+    .rent-info-table tr.active-model td:first-child { color: var(--dark); font-weight: 700; }
+    .rent-info-label { font-size: .72rem; color: var(--muted); margin-bottom: 2px; }
+
+    /* ── STRATEGY HINT ── */
+    .strategy-hint {
+      background: var(--white);
+      border: 2px solid var(--accent-deep);
+      border-radius: var(--r-lg);
+      padding: 14px 16px;
+    }
+    .sh-head { font-size: .72rem; font-weight: 700; text-transform: uppercase;
+               letter-spacing: .05em; color: var(--muted); margin-bottom: 8px; }
+    .sh-winner-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .sh-badge {
+      font-size: .78rem; font-weight: 700; padding: 3px 10px;
+      border-radius: 999px; background: var(--mint); color: var(--dark);
+    }
+    .sh-sublabel { font-size: .78rem; color: var(--muted); }
+    .sh-numbers { margin-top: 8px; display: flex; gap: 16px; flex-wrap: wrap; }
+    .sh-num { }
+    .sh-num-val { font-family: var(--font-display); font-size: 1.1rem; font-weight: 800; color: var(--dark); }
+    .sh-num-lbl { font-size: .7rem; color: var(--muted); }
+    .sh-reason { font-size: .75rem; color: var(--muted); margin-top: 8px; line-height: 1.5; }
+    .sh-mort { font-size: .74rem; color: var(--warn-ink); background: var(--warn-bg);
+               border-radius: var(--r-sm); padding: 4px 8px; margin-top: 6px; display: inline-block; }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="logo">
+    <div class="mark-sq">У</div>
+    <div>
+      УНИСТРОЙ
+      <small>АРЕНДА</small>
+    </div>
+  </div>
+  <div class="divider"></div>
+  <div>
+    <h1>Инвестиционный калькулятор</h1>
+    <p>Недвижимость vs банковский вклад</p>
+  </div>
+</div>
+
+<div class="main-layout">
+
+  <!-- ═══════════════ LEFT PANEL ═══════════════ -->
+  <div class="left-panel">
+
+    <!-- Сумма инвестиций -->
+    <div class="card">
+      <div class="card-title">Сумма инвестиций</div>
+      <div class="field-group">
+        <label class="field-label">Введите сумму</label>
+        <input type="text" id="invest-input" class="amount-input" placeholder="6 000 000 ₽">
+        <input type="range" id="invest-slider" min="1000000" max="70000000" step="100000">
+        <div class="row-flex" style="margin-top:2px">
+          <span class="hint-sm">1 млн ₽</span>
+          <span class="hint-sm">70 млн ₽</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Strategy hint -->
+    <div id="strategy-hint" class="strategy-hint hidden">
+      <div class="sh-head"><svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 00-3.5 10.9c.5.4.8 1 .8 1.6V16h5.4v-.5c0-.6.3-1.2.8-1.6A6 6 0 0012 3z"/></svg>Лучшая стратегия для вашей суммы</div>
+      <div class="sh-winner-row">
+        <span class="sh-badge" id="sh-badge">—</span>
+        <span class="sh-sublabel" id="sh-sublabel"></span>
+      </div>
+      <div class="sh-numbers">
+        <div class="sh-num">
+          <div class="sh-num-val" id="sh-wealth">—</div>
+          <div class="sh-num-lbl">итог за <span id="sh-years">—</span></div>
+        </div>
+        <div class="sh-num">
+          <div class="sh-num-val" id="sh-roi">—</div>
+          <div class="sh-num-lbl">ROI</div>
+        </div>
+      </div>
+      <div id="sh-mort"></div>
+      <div class="sh-reason" id="sh-reason"></div>
+    </div>
+
+    <!-- Горизонт планирования -->
+    <div class="card">
+      <div class="field-group">
+        <div class="slider-label-row">
+          <label class="field-label" style="margin:0">Горизонт планирования</label>
+          <span class="slider-val-pill" id="horizon-pill">5 лет</span>
+        </div>
+        <input type="range" id="horizon-slider" min="1" max="15" step="1">
+        <div class="row-flex" style="margin-top:2px">
+          <span class="hint-sm">1 год</span>
+          <span class="hint-sm">15 лет</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Объект недвижимости -->
+    <div class="card" id="property-card">
+      <div class="card-title">Объект недвижимости</div>
+
+      <!-- Регион -->
+      <div class="field-group">
+        <label class="field-label">Регион</label>
+        <select id="city-select"></select>
+      </div>
+
+      <!-- ЖК -->
+      <div class="field-group">
+        <label class="field-label">ЖК</label>
+        <select id="project-select"></select>
+        <div class="apt-price-display" id="project-info-display"></div>
+      </div>
+
+      <!-- Комнатность -->
+      <div class="field-group">
+        <label class="field-label">Комнатность</label>
+        <select id="room-select"></select>
+      </div>
+
+      <!-- Сценарий цены лота -->
+      <div class="field-group">
+        <label class="field-label">Сценарий цены лота</label>
+        <div class="segment-tier" id="price-tier-seg">
+          <button type="button" data-tier="p25">Доступный</button>
+          <button type="button" data-tier="p50">Типичный</button>
+          <button type="button" data-tier="p75">Выше среднего</button>
+        </div>
+        <div class="apt-price-display" id="apt-price-display"></div>
+      </div>
+
+      <!-- Статус / Ипотека -->
+      <div id="purchase-status"></div>
+    </div>
+
+    <!-- Модель аренды -->
+    <div class="card" id="rental-card">
+      <div class="card-title">Аренда</div>
+
+      <div class="field-group">
+        <label class="field-label">Выделенная модель аренды</label>
+        <select id="rental-model-select"></select>
+        <div class="hint-sm">Все модели участвуют в сравнении; выбор выделяет одну из них в блоке доходности.</div>
+      </div>
+
+      <!-- Информационный дисплей — заполняется JS -->
+      <div id="rent-info-display" style="margin-top:4px;"></div>
+    </div>
+
+    <!-- Параметры инвестиции -->
+    <div class="card">
+      <div class="card-title">Параметры</div>
+
+      <div class="field-group" id="appreciation-group">
+        <label class="field-label">Рост стоимости жилья, %/год</label>
+        <input type="number" id="appreciation-input" min="0" max="50" step="0.5">
+      </div>
+      <div class="field-group" id="rent-growth-group">
+        <label class="field-label">Ежегодный рост аренды, %</label>
+        <input type="number" id="rent-growth-input" min="0" max="30" step="0.5">
+      </div>
+
+      <div class="section-divider">Вклад</div>
+      <div class="field-group">
+        <label class="field-label">Ставка вклада, % годовых</label>
+        <input type="number" id="deposit-rate-input" min="1" max="40" step="0.1">
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="deposit-monthly-cb">
+        <label for="deposit-monthly-cb">Ежемесячная капитализация</label>
+      </div>
+      <div class="hint-sm" id="remainder-hint" style="margin-top:8px"></div>
+    </div>
+
+  </div><!-- /left-panel -->
+
+  <!-- ═══════════════ RIGHT PANEL ═══════════════ -->
+  <div class="right-panel">
+
+    <!-- Winner banner -->
+    <div id="winner-banner" class="winner-banner">
+      <div class="wb-label"><svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 01-8 0V4z"/><path d="M8 5H5a1 1 0 00-1 1v1a3 3 0 003 3M16 5h3a1 1 0 011 1v1a3 3 0 01-3 3"/><path d="M12 13v3"/><path d="M9 20h6M10 17h4v3h-4z"/></svg>Лучшая стратегия</div>
+      <div class="wb-amount" id="wb-amount">—</div>
+      <div class="wb-delta" id="wb-delta"></div>
+      <div class="wb-note" id="wb-note"></div>
+    </div>
+
+    <!-- Comparison table -->
+    <div class="card">
+      <div class="card-title">Сравнение стратегий</div>
+      <div class="table-wrap">
+        <table class="cmp-table" id="cmp-table">
+          <thead>
+            <tr>
+              <th>Модель</th>
+              <th>Год 1 доход</th>
+              <th>Аренда за период</th>
+              <th>Капитал в кв.</th>
+              <th><strong>Итоговый капитал</strong></th>
+              <th>ROI</th>
+            </tr>
+          </thead>
+          <tbody id="cmp-tbody"></tbody>
+          <tfoot id="cmp-tfoot"></tfoot>
+        </table>
+      </div>
+      <div class="hint-sm" id="cmp-note" style="margin-top:8px"></div>
+      <div class="hint-sm" style="margin-top:4px">
+        Не учтены налоги, страхование, непредвиденный ремонт, расходы покупки/продажи и коммунальные платежи, если их оплачивает собственник.
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="card">
+      <div class="card-title">Динамика по годам</div>
+      <div class="chart-wrap">
+        <canvas id="chart"></canvas>
+      </div>
+    </div>
+
+    <!-- Detail accordion -->
+    <div class="card">
+      <details class="detail-acc" id="detail-acc">
+        <summary>Показать детальный расчёт</summary>
+        <div class="table-wrap">
+          <table class="det-table" id="det-table">
+            <thead id="det-thead"></thead>
+            <tbody id="det-tbody"></tbody>
+          </table>
+        </div>
+      </details>
+    </div>
+
+  </div><!-- /right-panel -->
+
+</div><!-- /main-layout -->
+
+<script src="scripts/output/calculator_projects_data.js"></script>
+<script>
+/* ══════════════════════════════════════════════
+   DATA CONSTANTS
+   Источник: unistroy.ru, публичный API /api/flats/,
+   выгрузка активных лотов в продаже (без исторических цен).
+══════════════════════════════════════════════ */
+const CITIES = [
+  { code: 'mhc', label: 'Махачкала' },
+  { code: 'kzn', label: 'Казань' },
+  { code: 'ekb', label: 'Екатеринбург' },
+  { code: 'spb', label: 'Санкт-Петербург' },
+  { code: 'per', label: 'Пермь' },
+  { code: 'tlt', label: 'Тольятти' },
+];
+
+// Встроенный массив — резервный снимок, если свежий файл данных ещё не создан.
+// priceP25 / priceP50 / priceP75 — цены фактических лотов в 25-м,
+// 50-м (медиана) и 75-м перцентилях. areaP* — площадь того же лота.
+// priceMin / priceMax оставлены для отображения полного диапазона витрины.
+const PROJECTS = window.CALCULATOR_PROJECTS || [
+  /* ── Махачкала ── */
+  { slug: 'grandbereg', city: 'mhc', label: 'Гранд Берег', rooms: [
+    { label: 'Студия', count: 58, priceMin: 5614000, priceMax: 7614000, priceAvg: 6243759, areaMin: 28.11, areaMax: 35.24 },
+    { label: '1', count: 47, priceMin: 6802000, priceMax: 10233000, priceAvg: 8406851, areaMin: 33.87, areaMax: 46.48 },
+    { label: '2', count: 86, priceMin: 9721000, priceMax: 13738000, priceAvg: 11888279, areaMin: 56.02, areaMax: 83.45 },
+  ]},
+  /* ── Казань ── */
+  { slug: 'aqua', city: 'kzn', label: 'Аквамарин', rooms: [
+    { label: 'Студия', count: 14, priceMin: 8720000, priceMax: 9730000, priceAvg: 9057143, areaMin: 29.3, areaMax: 32.1 },
+    { label: '1', count: 11, priceMin: 9810000, priceMax: 11940000, priceAvg: 10457273, areaMin: 35.9, areaMax: 51.1 },
+    { label: '2', count: 74, priceMin: 11840000, priceMax: 17200000, priceAvg: 14394324, areaMin: 45.8, areaMax: 76.6 },
+  ]},
+  { slug: 'atmos', city: 'kzn', label: 'Атмосфера', rooms: [
+    { label: 'Студия', count: 26, priceMin: 5640000, priceMax: 7260000, priceAvg: 6245385, areaMin: 25.69, areaMax: 25.84 },
+    { label: '1', count: 70, priceMin: 6610000, priceMax: 8230000, priceAvg: 7027143, areaMin: 33.69, areaMax: 47.16 },
+    { label: '2', count: 99, priceMin: 7390000, priceMax: 10410000, priceAvg: 8563838, areaMin: 45.13, areaMax: 80 },
+  ]},
+  { slug: 'letokzn', city: 'kzn', label: 'Лето', rooms: [
+    { label: 'Студия', count: 14, priceMin: 9720000, priceMax: 11430000, priceAvg: 10177786, areaMin: 32.66, areaMax: 33.73 },
+    { label: '1', count: 32, priceMin: 10050000, priceMax: 14740000, priceAvg: 11120281, areaMin: 32.95, areaMax: 52.62 },
+    { label: '2', count: 65, priceMin: 10610000, priceMax: 22000000, priceAvg: 15160923, areaMin: 38.28, areaMax: 78.44 },
+  ]},
+  { slug: 'statum', city: 'kzn', label: 'Статум', rooms: [
+    { label: '1', count: 172, priceMin: 11000000, priceMax: 34510000, priceAvg: 14827674, areaMin: 31.11, areaMax: 138.9 },
+    { label: '2', count: 197, priceMin: 14150000, priceMax: 23000000, priceAvg: 17925482, areaMin: 48.44, areaMax: 90 },
+    { label: '4', count: 1, priceMin: 33720000, priceMax: 33720000, priceAvg: 33720000, areaMin: 108.2, areaMax: 108.2 },
+  ]},
+  { slug: 'zalesnaia', city: 'kzn', label: 'Уникод на Залесной', rooms: [
+    { label: 'Студия', count: 3, priceMin: 7230000, priceMax: 7430000, priceAvg: 7336667, areaMin: 36.48, areaMax: 36.48 },
+    { label: '1', count: 39, priceMin: 7060000, priceMax: 8840000, priceAvg: 8326154, areaMin: 30.27, areaMax: 44.05 },
+    { label: '2', count: 51, priceMin: 8510000, priceMax: 11260000, priceAvg: 10365686, areaMin: 47.64, areaMax: 67.44 },
+  ]},
+  { slug: 'tech', city: 'kzn', label: 'Уникод на Технической', rooms: [
+    { label: 'Студия', count: 40, priceMin: 8440000, priceMax: 8930000, priceAvg: 8684000, areaMin: 28, areaMax: 30.6 },
+    { label: '1', count: 49, priceMin: 8540000, priceMax: 11250000, priceAvg: 9366122, areaMin: 29.9, areaMax: 44.65 },
+    { label: '2', count: 76, priceMin: 11050000, priceMax: 15960000, priceAvg: 12642500, areaMin: 49, areaMax: 74.76 },
+  ]},
+  { slug: 'unicum_amir', city: 'kzn', label: 'Уникум на Амирхана', rooms: [
+    { label: '1', count: 42, priceMin: 11120000, priceMax: 39510000, priceAvg: 14044762, areaMin: 32.57, areaMax: 154.2 },
+    { label: '2', count: 80, priceMin: 16010000, priceMax: 19600000, priceAvg: 17465625, areaMin: 55.05, areaMax: 67.31 },
+  ]},
+  { slug: 'unicum_pob', city: 'kzn', label: 'Уникум на Проспекте Победы', rooms: [
+    { label: 'Студия', count: 9, priceMin: 9450000, priceMax: 10450000, priceAvg: 9943333, areaMin: 27.91, areaMax: 31.47 },
+    { label: '1', count: 8, priceMin: 11710000, priceMax: 12480000, priceAvg: 12135000, areaMin: 39.83, areaMax: 46.01 },
+    { label: '2', count: 20, priceMin: 14570000, priceMax: 18640000, priceAvg: 16381000, areaMin: 57.42, areaMax: 88.71 },
+  ]},
+  { slug: 'tsarciti', city: 'kzn', label: 'Царёво Сити', rooms: [
+    { label: 'Студия', count: 60, priceMin: 5800000, priceMax: 8080000, priceAvg: 6487667, areaMin: 23.49, areaMax: 34.54 },
+    { label: '1', count: 141, priceMin: 6710000, priceMax: 10090000, priceAvg: 7570000, areaMin: 26, areaMax: 42.96 },
+    { label: '2', count: 161, priceMin: 7670000, priceMax: 11500000, priceAvg: 9072547, areaMin: 45.44, areaMax: 66.05 },
+  ]},
+  { slug: 'qkulagina', city: 'kzn', label: 'Q на Кулагина', rooms: [
+    { label: 'Студия', count: 4, priceMin: 8260000, priceMax: 9710000, priceAvg: 8977500, areaMin: 26.96, areaMax: 33.72 },
+    { label: '1', count: 43, priceMin: 9700000, priceMax: 12910000, priceAvg: 10883488, areaMin: 33.96, areaMax: 58.07 },
+    { label: '2', count: 171, priceMin: 12240000, priceMax: 16640000, priceAvg: 13920000, areaMin: 56.02, areaMax: 92.9 },
+    { label: '4', count: 2, priceMin: 18290000, priceMax: 24750000, priceAvg: 21520000, areaMin: 106.05, areaMax: 151.8 },
+  ]},
+  /* ── Екатеринбург ── */
+  { slug: 'skies', city: 'ekb', label: 'Небосклоны', rooms: [
+    { label: 'Студия', count: 2, priceMin: 11988000, priceMax: 16113000, priceAvg: 14050500, areaMin: 75.5, areaMax: 100 },
+  ]},
+  { slug: 'parkblock', city: 'ekb', label: 'Парковый квартал 2.0', rooms: [
+    { label: 'Студия', count: 19, priceMin: 6675000, priceMax: 8637000, priceAvg: 6915526, areaMin: 29.3, areaMax: 34.2 },
+    { label: '1', count: 152, priceMin: 8082000, priceMax: 30220000, priceAvg: 9856408, areaMin: 32.7, areaMax: 143.2 },
+    { label: '2', count: 326, priceMin: 7891000, priceMax: 18844000, priceAvg: 11779113, areaMin: 34.8, areaMax: 88.81 },
+  ]},
+  { slug: 'riverside', city: 'ekb', label: 'Риверсайд', rooms: [
+    { label: 'Студия', count: 127, priceMin: 4680000, priceMax: 12181000, priceAvg: 5601118, areaMin: 23.87, areaMax: 79.95 },
+    { label: '1', count: 281, priceMin: 5650000, priceMax: 14441000, priceAvg: 7097125, areaMin: 33.86, areaMax: 81.82 },
+    { label: '2', count: 239, priceMin: 6930000, priceMax: 16198000, priceAvg: 9341339, areaMin: 47.09, areaMax: 82.26 },
+    { label: '4', count: 3, priceMin: 15532000, priceMax: 18062000, priceAvg: 16492667, areaMin: 107.14, areaMax: 126.2 },
+  ]},
+  { slug: 'stadium', city: 'ekb', label: 'Стадиум', rooms: [
+    { label: 'Студия', count: 17, priceMin: 4966000, priceMax: 5967000, priceAvg: 5320294, areaMin: 27.8, areaMax: 30.1 },
+    { label: '1', count: 100, priceMin: 6400000, priceMax: 10414000, priceAvg: 7353760, areaMin: 34.6, areaMax: 53.7 },
+    { label: '2', count: 163, priceMin: 7728000, priceMax: 14780000, priceAvg: 9244067, areaMin: 47.9, areaMax: 85.2 },
+    { label: '4', count: 7, priceMin: 13736000, priceMax: 14593000, priceAvg: 14398000, areaMin: 113, areaMax: 116.3 },
+  ]},
+  /* ── Санкт-Петербург ── */
+  { slug: 'lisino', city: 'spb', label: 'Лисино Город-парк', rooms: [
+    { label: 'Студия', count: 47, priceMin: 9426000, priceMax: 14656000, priceAvg: 10509683, areaMin: 27.1, areaMax: 40.8 },
+    { label: '1', count: 161, priceMin: 8724000, priceMax: 35078000, priceAvg: 14434181, areaMin: 33.3, areaMax: 101.15 },
+    { label: '2', count: 189, priceMin: 12634150, priceMax: 26861000, priceAvg: 20446097, areaMin: 46.9, areaMax: 81.05 },
+  ]},
+  /* ── Пермь ── */
+  { slug: 'berth', city: 'per', label: 'Причал', rooms: [
+    { label: 'Студия', count: 1, priceMin: 5699000, priceMax: 5699000, priceAvg: 5699000, areaMin: 26.7, areaMax: 26.7 },
+    { label: '1', count: 90, priceMin: 5510000, priceMax: 7740000, priceAvg: 7040333, areaMin: 28.86, areaMax: 39.91 },
+    { label: '2', count: 47, priceMin: 7510000, priceMax: 9910000, priceAvg: 9369191, areaMin: 50.7, areaMax: 60.1 },
+  ]},
+  { slug: 'unicum_engels', city: 'per', label: 'Уникум на Энгельса', rooms: [
+    { label: 'Студия', count: 100, priceMin: 5900000, priceMax: 8700000, priceAvg: 7356200, areaMin: 23.4, areaMax: 33.01 },
+    { label: '2', count: 50, priceMin: 8250000, priceMax: 12750000, priceAvg: 10134400, areaMin: 35.8, areaMax: 54.96 },
+    { label: '4', count: 13, priceMin: 13710000, priceMax: 19560000, priceAvg: 16083846, areaMin: 63.61, areaMax: 90.82 },
+  ]},
+  /* ── Тольятти ── */
+  { slug: 'unicum_lenin', city: 'tlt', label: 'Уникум на Ленинском', rooms: [
+    { label: 'Студия', count: 10, priceMin: 10918000, priceMax: 16409000, priceAvg: 12989500, areaMin: 69.07, areaMax: 94.15 },
+    { label: '1', count: 5, priceMin: 7200000, priceMax: 10255000, priceAvg: 8059400, areaMin: 41.8, areaMax: 56.82 },
+    { label: '2', count: 19, priceMin: 8986000, priceMax: 13322000, priceAvg: 11281947, areaMin: 52.04, areaMax: 74.82 },
+  ]},
+  { slug: 'bulvar', city: 'tlt', label: 'Южный Бульвар', rooms: [
+    { label: 'Студия', count: 3, priceMin: 9909000, priceMax: 12297000, priceAvg: 10775000, areaMin: 86.3, areaMax: 104.1 },
+    { label: '1', count: 48, priceMin: 5680000, priceMax: 8070000, priceAvg: 6590771, areaMin: 35.22, areaMax: 49.03 },
+    { label: '2', count: 48, priceMin: 7840000, priceMax: 10066000, priceAvg: 8614729, areaMin: 51.6, areaMax: 68.92 },
+    { label: '4', count: 6, priceMin: 10895000, priceMax: 12214000, priceAvg: 11439333, areaMin: 94.84, areaMax: 101.9 },
+  ]},
+];
+
+const ROOM_ORDER = ['Студия', '1', '2', '3', '4', '5'];
+
+// Ставки аренды по ЖК — источник: цены_для_калк.xlsx (юнит-экономика УК).
+// daily  — суточная ставка объявления, ₽/сутки (до вычета агрегатора/уборки/комиссии).
+// monthly — базовая месячная ставка гросс для долгосрочной/гарантированной аренды, ₽/мес.
+// Есть не по всем ЖК/комнатности (файл покрывает Студия/1к/2к) — где нет, считаем
+// оценочно по RENT_YIELD ниже.
+const RENT_RATES = {
+  atmos:         { 'Студия': { daily: 3000, monthly: 28000 }, '1': { daily: 4000, monthly: 35000 }, '2': { daily: 4000, monthly: 42000 } },
+  tsarciti:      { 'Студия': { daily: 3000, monthly: 32000 }, '1': { daily: 4000, monthly: 39000 }, '2': { daily: 4000, monthly: 46000 } },
+  letokzn:       { 'Студия': { daily: 4000, monthly: 42000 }, '1': { daily: 4000, monthly: 56000 }, '2': { daily: 4000, monthly: 56000 } },
+  unicum_pob:    { 'Студия': { daily: 4000, monthly: 49000 }, '1': { daily: 5000, monthly: 56000 }, '2': { daily: 6000, monthly: 63000 } },
+  aqua:          { 'Студия': { daily: 4000, monthly: 49000 }, '1': { daily: 5000, monthly: 56000 }, '2': { daily: 6000, monthly: 63000 } },
+  qkulagina:     { 'Студия': { daily: 4000, monthly: 49000 }, '1': { daily: 5000, monthly: 56000 }, '2': { daily: 6000, monthly: 63000 } },
+  tech:          { 'Студия': { daily: 5000, monthly: 49000 }, '1': { daily: 6000, monthly: 56000 }, '2': { daily: 7000, monthly: 63000 } },
+  unicum_amir:   { 'Студия': { daily: 5000, monthly: 56000 }, '1': { daily: 6000, monthly: 63000 }, '2': { daily: 6000, monthly: 70000 } },
+  zalesnaia:     { 'Студия': { daily: 3000, monthly: 35000 }, '1': { daily: 4000, monthly: 42000 }, '2': { daily: 4000, monthly: 49000 } },
+  statum:        { 'Студия': { daily: 6000, monthly: 56000 }, '1': { daily: 6000, monthly: 63000 }, '2': { daily: 7000, monthly: 70000 } },
+  riverside:     { 'Студия': { daily: 4000, monthly: 46000 }, '1': { daily: 4000, monthly: 49000 }, '2': { daily: 6000, monthly: 56000 } },
+  skies:         { 'Студия': { daily: 3000, monthly: 42000 }, '1': { daily: 4000, monthly: 49000 }, '2': { daily: 4000, monthly: 56000 } },
+  parkblock:     { 'Студия': { daily: 5000, monthly: 63000 }, '1': { daily: 6000, monthly: 77000 }, '2': { daily: 6000, monthly: 84000 } },
+  stadium:       { 'Студия': { daily: 4000, monthly: 49000 }, '1': { daily: 4000, monthly: 56000 }, '2': { daily: 6000, monthly: 63000 } },
+  lisino:        { 'Студия': { daily: 6000, monthly: 63000 }, '1': { daily: 7000, monthly: 84000 }, '2': { daily: 8000, monthly: 105000 } },
+  grandbereg:    { 'Студия': { daily: 4000, monthly: 42000 }, '1': { daily: 6000, monthly: 56000 }, '2': { daily: 7000, monthly: 77000 } },
+  bulvar:        { 'Студия': { daily: 3000, monthly: 35000 }, '1': { daily: 4000, monthly: 42000 }, '2': { daily: 4000, monthly: 49000 } },
+  unicum_lenin:  { 'Студия': { daily: 4000, monthly: 42000 }, '1': { daily: 4000, monthly: 49000 }, '2': { daily: 5000, monthly: 56000 } },
+  berth:         { 'Студия': { daily: 2000, monthly: 35000 }, '1': { daily: 3000, monthly: 38000 }, '2': { daily: 3000, monthly: 49000 } },
+  unicum_engels: { 'Студия': { daily: 4000, monthly: 49000 }, '1': { daily: 5000, monthly: 56000 }, '2': { daily: 6000, monthly: 70000 } },
+};
+
+// Юнит-экономика посуточной аренды (см. ТЗ калькулятора):
+// доступно 265 суток в год (простой 100 дней), комиссия агрегатора 15% от
+// выручки, уборка 500 ₽/сутки аренды (1500 ₽ за заезд, средний постой 3 дня),
+// собственник получает 72% операционной прибыли (28% — комиссия УК).
+const STR_RENTED_DAYS      = 265;
+const STR_AGGREGATOR_FEE   = 0.15;
+const STR_CLEANING_PER_DAY = 500;
+const STR_OWNER_SHARE      = 0.72;
+
+// Фолбэк для ЖК/комнатности без данных в прайс-листе (студия/1/2к не по всем
+// проектам, комнатность 3+ не тарифицирована вовсе) — оценка доходности как
+// % от стоимости лота в год, калибровано по строкам прайс-листа.
+const RENT_YIELD = {
+  'Студия': { ltr: 0.070, daily: 0.115 },
+  '1':      { ltr: 0.060, daily: 0.098 },
+  '2':      { ltr: 0.046, daily: 0.076 },
+  '3':      { ltr: 0.038, daily: 0.062 },
+  '4':      { ltr: 0.032, daily: 0.052 },
+  '5':      { ltr: 0.028, daily: 0.045 },
+};
+
+const PRICE_TIER_LABELS = {
+  p25: 'Доступный сценарий (P25)',
+  p50: 'Типичный лот (P50)',
+  p75: 'Выше среднего (P75)',
+};
+
+const RENTAL_MODELS = [
+  { id: 'longterm',     label: 'Долгосрочная аренда' },
+  { id: 'guaranteed',   label: 'Гарантированная аренда' },
+  { id: 'daily',        label: 'Посуточная аренда' },
+  { id: 'deposit_only', label: 'Только вклад (без квартиры)' },
+];
+
+// Ипотека допускается только в пределах 45% от исходной суммы клиента.
+// Остальная часть этой суммы — первоначальный взнос по объекту.
+const MAX_MORTGAGE_SHARE = 0.45;
+
+/* ══════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════ */
+const rub = n => Math.round(n).toLocaleString('ru-RU') + ' ₽';
+const pct = n => (+n).toFixed(1) + '%';
+const fmtM = n => {
+  if (Math.abs(n) >= 1e6) return (n / 1e6).toFixed(2).replace('.', ',') + ' млн ₽';
+  return rub(n);
+};
+const parseAmt = s => parseInt(String(s).replace(/\D/g, '')) || 0;
+const fmtAmt  = n => Math.round(n).toLocaleString('ru-RU');
+
+/* ══════════════════════════════════════════════
+   CALC MODULE
+══════════════════════════════════════════════ */
+const Calc = {
+  /* ── data ── */
+  data: {
+    investAmount:       6000000,
+    cityCode:           'mhc',
+    projectSlug:        'grandbereg',
+    roomLabel:          '1',
+    priceTier:          'p50',   // 'p25' | 'p50' | 'p75'
+    rentalModel:        'daily',
+    rentGrowth:         5,
+    appreciation:       10,
+    horizon:            5,
+    depositRate:        11,
+    depositMonthly:     true,
+    mortgageRate:       12,
+    mortgageYears:      15,
+  },
+
+  /* ── helpers: project/room lookup ── */
+  getProject(slug) { return PROJECTS.find(p => p.slug === slug); },
+  getRoom(project, roomLabel) { return project.rooms.find(r => r.label === roomLabel); },
+  hasQuantilePrices(room) {
+    return ['priceP25', 'priceP50', 'priceP75', 'areaP25', 'areaP50', 'areaP75']
+      .every(key => Number.isFinite(room[key]));
+  },
+  priceForTier(room, tier) {
+    const field = { p25: 'priceP25', p50: 'priceP50', p75: 'priceP75' }[tier] || 'priceP50';
+    return room[field] ?? room.priceAvg;
+  },
+  areaForTier(room, tier) {
+    const field = { p25: 'areaP25', p50: 'areaP50', p75: 'areaP75' }[tier] || 'areaP50';
+    return room[field] ?? (room.areaMin + room.areaMax) / 2;
+  },
+  // Ставки аренды по прайс-листу ЖК, с фолбэком на % от цены (RENT_YIELD),
+  // когда для проекта/комнатности нет данных в прайс-листе.
+  getRentFigures(projectSlug, roomLabel, price) {
+    const rate = RENT_RATES[projectSlug] && RENT_RATES[projectSlug][roomLabel];
+    if (rate) {
+      const opProfitPerDay   = rate.daily * (1 - STR_AGGREGATOR_FEE) - STR_CLEANING_PER_DAY;
+      const dailyAnnualIncome = Math.max(0, STR_RENTED_DAYS * opProfitPerDay * STR_OWNER_SHARE);
+      return { monthlyRent: rate.monthly, dailyAnnualIncome, isEstimated: false };
+    }
+    const yieldInfo = RENT_YIELD[roomLabel] || RENT_YIELD['1'];
+    return {
+      monthlyRent: price * yieldInfo.ltr / 12,
+      dailyAnnualIncome: price * yieldInfo.daily,
+      isEstimated: true,
+    };
+  },
+
+  /* ── compute ── */
+  compute() {
+    const d = this.data;
+    const project = this.getProject(d.projectSlug);
+    const room    = this.getRoom(project, d.roomLabel);
+    const isDepositOnly = d.rentalModel === 'deposit_only';
+
+    const unitPrice = this.priceForTier(room, d.priceTier);
+    const area      = this.areaForTier(room, d.priceTier);
+    const { monthlyRent, dailyAnnualIncome, isEstimated } = this.getRentFigures(d.projectSlug, d.roomLabel, unitPrice);
+
+    // Минимальная сумма инвестиций, при которой этот лот проходит по лимиту
+    // ипотеки (тело кредита ≤ 45% суммы клиента): unitPrice ≤ invest × 1.45.
+    const requiredInvestAmount = unitPrice / (1 + MAX_MORTGAGE_SHARE);
+
+    // Покупаем максимум целых лотов этого же ЖК/комнатности на введённую
+    // сумму. Дополнительный лот в ипотеку возможен, только когда тело
+    // кредита не превышает 45% исходной суммы клиента. Остаток остаётся
+    // наличными без роста.
+    let units = 0, mortgagedUnits = 0, principal = 0, cashRemainder = 0;
+    let monthlyMortgage = 0, annualMortgage = 0;
+    let mortgageTotalPaid = 0, mortgageOverpay = 0;
+    let needsMortgage = false;
+    let isAffordable = true;
+    const mortgageLimit = d.investAmount * MAX_MORTGAGE_SHARE;
+
+    if (!isDepositOnly) {
+      const nFull    = Math.floor(d.investAmount / unitPrice);
+      const cashLeft = d.investAmount - nFull * unitPrice;
+
+      if (nFull >= 1 && cashLeft >= unitPrice * 0.20) {
+        const candidatePrincipal = unitPrice - cashLeft;
+        if (candidatePrincipal <= mortgageLimit) {
+          units = nFull + 1;
+          mortgagedUnits = 1;
+          principal = candidatePrincipal;
+        } else {
+          units = nFull;
+          cashRemainder = cashLeft;
+        }
+      } else if (nFull >= 1) {
+        units = nFull;
+        cashRemainder = cashLeft;
+      } else {
+        const candidatePrincipal = unitPrice - d.investAmount;
+        if (candidatePrincipal <= mortgageLimit) {
+          units = 1;
+          mortgagedUnits = 1;
+          principal = candidatePrincipal;
+        } else {
+          isAffordable = false;
+          cashRemainder = d.investAmount;
+        }
+      }
+
+      needsMortgage = mortgagedUnits > 0;
+      if (needsMortgage) {
+        const mr = d.mortgageRate / 12 / 100;
+        const n  = d.mortgageYears * 12;
+        if (mr > 0) {
+          monthlyMortgage = principal * mr * Math.pow(1 + mr, n) / (Math.pow(1 + mr, n) - 1);
+        } else {
+          monthlyMortgage = principal / n;
+        }
+        annualMortgage   = monthlyMortgage * 12;
+        mortgageTotalPaid = monthlyMortgage * n;
+        mortgageOverpay   = mortgageTotalPaid - principal;
+      }
+    }
+
+    // totalCost — суммарная стоимость ВСЕХ купленных лотов (unitPrice × units)
+    const totalCost = unitPrice * units;
+
+    // Years array
+    const H = d.horizon;
+    const years = Array.from({ length: H + 1 }, (_, i) => i);
+
+    // При продаже на горизонте H из стоимости квартиры вычитается остаток
+    // долга: в капитал инвестора входит не весь объект, а его собственный
+    // капитал (equity).
+    const mortgageBalanceAtMonths = (months) => {
+      if (!needsMortgage) return 0;
+      const n = d.mortgageYears * 12;
+      const paidMonths = Math.min(months, n);
+      if (paidMonths >= n) return 0;
+      const mr = d.mortgageRate / 12 / 100;
+      if (mr > 0) {
+        const growth = Math.pow(1 + mr, paidMonths);
+        return Math.max(0, principal * growth - monthlyMortgage * (growth - 1) / mr);
+      }
+      return Math.max(0, principal - monthlyMortgage * paidMonths);
+    };
+    const mortgageBalanceArr = years.map(i => mortgageBalanceAtMonths(i * 12));
+
+    // Deposit — базируется на всей введённой сумме (честное сравнение:
+    // «вложить всё в недвижимость + остаток наличными» vs «всё на вклад»)
+    const depRate = d.depositRate / 100;
+    const depositArr = years.map(i =>
+      d.depositMonthly
+        ? d.investAmount * Math.pow(1 + depRate / 12, i * 12)
+        : d.investAmount * Math.pow(1 + depRate, i)
+    );
+
+    // Остаток не кладём на вклад и учитываем как наличные без роста.
+    const remainderArr = years.map(() => cashRemainder);
+
+    // Rental model calc
+    const computeModel = (modelId) => {
+      const rentArr  = [0];
+      const cumArr   = [0];
+      const flowArr  = [0];
+      let cum = 0;
+
+      for (let i = 1; i <= H; i++) {
+        const g = Math.pow(1 + d.rentGrowth / 100, i - 1);
+        let yr = 0;
+
+        // Долгосрочная: 11 месяцев × (ставка − 12% УК)
+        // Гарантированная: 12 месяцев × (ставка − 25% УК), гарантированно
+        // Посуточная: чистый годовой доход, оценённый по доходности комнатности
+        // Рента считается по одному лоту и умножается на кол-во купленных лотов
+        if (modelId === 'longterm') {
+          yr = monthlyRent * 11 * 0.88 * g;
+        } else if (modelId === 'guaranteed') {
+          yr = monthlyRent * 12 * 0.75 * g;
+        } else if (modelId === 'daily') {
+          yr = dailyAnnualIncome * g;
+        }
+        yr *= units;
+
+        const mort = (needsMortgage && i <= d.mortgageYears) ? annualMortgage : 0;
+        const net  = yr - mort;
+        cum += net;
+
+        rentArr.push(yr);
+        flowArr.push(net);
+        cumArr.push(cum);
+      }
+
+      const propArr   = years.map(i => totalCost * Math.pow(1 + d.appreciation / 100, i));
+      const equityArr = years.map(i => propArr[i] - mortgageBalanceArr[i]);
+      const wealthArr = years.map(i => equityArr[i] + cumArr[i] + remainderArr[i]);
+
+      return { rentArr, flowArr, cumArr, propArr, equityArr, wealthArr };
+    };
+
+    const longterm   = computeModel('longterm');
+    const guaranteed = computeModel('guaranteed');
+    const daily      = computeModel('daily');
+
+    // ROI всех стратегий считаем относительно исходной суммы клиента.
+    const roi = (final) => (final - d.investAmount) / d.investAmount * 100;
+
+    return {
+      project, room, area,
+      unitPrice, units, mortgagedUnits,
+      totalCost, monthlyRent, dailyAnnualIncome, isEstimated,
+      cashRemainder, principal, mortgageLimit, mortgageBalanceArr, requiredInvestAmount,
+      monthlyMortgage, annualMortgage, mortgageOverpay, mortgageTotalPaid,
+      needsMortgage, isDepositOnly, isAffordable,
+      depositArr, remainderArr,
+      longterm, guaranteed, daily,
+      roi,
+    };
+  },
+
+  /* ── render ── */
+  render(r) {
+    const d = this.data;
+    const H = d.horizon;
+    const isDepOnly = r.isDepositOnly;
+
+    /* — Property card visibility — */
+    document.getElementById('property-card').classList.toggle('hidden', isDepOnly);
+    document.getElementById('rental-card').classList.toggle('hidden', isDepOnly);
+    document.getElementById('appreciation-group').classList.toggle('hidden', isDepOnly);
+
+    if (!isDepOnly) {
+      /* Project (ЖК) info display */
+      const proj = r.project;
+      const projMin = Math.min(...proj.rooms.map(rm => rm.priceMin));
+      const projMax = Math.max(...proj.rooms.map(rm => rm.priceMax));
+      const projCount = proj.rooms.reduce((s, rm) => s + rm.count, 0);
+      document.getElementById('project-info-display').innerHTML =
+        `${projCount} лотов в продаже · ${rub(projMin)}–${rub(projMax)}`;
+
+      /* Price display for selected room + tier */
+      const hasQuantiles = this.hasQuantilePrices(r.room);
+      const shownPrice = r.isAffordable ? r.totalCost : r.unitPrice;
+      const lotsText = r.units > 1 ? ` за ${r.units} ${pluralLots(r.units)}` : '';
+      const areaText = r.units > 1 ? `≈${r.area.toFixed(1)} м² каждый` : `≈${r.area.toFixed(1)} м²`;
+      document.getElementById('apt-price-display').innerHTML =
+        `Цена (${PRICE_TIER_LABELS[d.priceTier]}): <strong>${rub(shownPrice)}</strong>${lotsText}, ${areaText}<br>` +
+        `<span class="hint-sm">Диапазон по ${r.room.count} лотам: ${rub(r.room.priceMin)}–${rub(r.room.priceMax)}.</span>` +
+        (hasQuantiles
+          ? `<br><span class="hint-sm">P25 / P50 / P75 рассчитаны по фактическим лотам в текущей витрине.</span>`
+          : `<br><span class="hint-sm">Квантильные цены станут доступны после обновления выгрузки; временно используется средняя цена.</span>`);
+
+      /* Purchase status */
+      const ps = document.getElementById('purchase-status');
+      if (!r.isAffordable) {
+        ps.innerHTML = `<span class="badge badge-yellow">Для этого лота нужна сумма инвестиций от ${rub(r.requiredInvestAmount)}</span>`;
+      } else if (r.mortgagedUnits === 0) {
+        ps.innerHTML = `<span class="badge badge-green"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg>Полная оплата</span>` +
+          (r.cashRemainder > 0
+            ? `<div class="hint-sm" style="margin-top:6px">Остаток <strong>${rub(r.cashRemainder)}</strong> учтён как наличные без роста</div>`
+            : '');
+      } else if (r.units > r.mortgagedUnits) {
+        const cashUnits = r.units - r.mortgagedUnits;
+        let html = `<div class="hint-sm" style="margin-bottom:6px">
+          <svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v9M9 10v9M15 10v9M19 10v9"/><path d="M3 19h18"/></svg>
+          Покупаете <strong>${r.units} ${pluralLots(r.units)}</strong>: ${cashUnits} ${pluralLots(cashUnits)} наличными + ещё ${r.mortgagedUnits} ${pluralLots(r.mortgagedUnits)} в ипотеку (доплата <strong>${rub(r.principal)}</strong>)<br>
+          <span class="hint-sm">Лимит ипотеки: не более ${rub(r.mortgageLimit)} (45% от исходной суммы).</span>
+        </div>
+        <div class="mortgage-fields">
+          <div class="two-col-fields">
+            <div class="field-group" style="margin:0">
+              <label class="field-label">Ставка, %</label>
+              <input type="number" id="mort-rate-input" value="${d.mortgageRate}" min="1" max="40" step="0.1">
+            </div>
+            <div class="field-group" style="margin:0">
+              <label class="field-label">Срок, лет</label>
+              <input type="number" id="mort-years-input" value="${d.mortgageYears}" min="1" max="30" step="1">
+            </div>
+          </div>
+          <div class="hint-sm">
+            Платёж: <strong>${rub(r.monthlyMortgage)}/мес</strong> &nbsp;|&nbsp;
+            Переплата: <strong>${rub(r.mortgageOverpay)}</strong>
+          </div>
+        </div>`;
+
+        ps.innerHTML = html;
+        this._bindMortgageInputs();
+      } else {
+        let html = `<div class="hint-sm" style="margin-bottom:6px">
+          <svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v9M9 10v9M15 10v9M19 10v9"/><path d="M3 19h18"/></svg>
+          Стоимость лота выше вашей суммы — недостающая часть <strong>${rub(r.principal)}</strong> оформляется в ипотеку<br>
+          <span class="hint-sm">Лимит ипотеки: не более ${rub(r.mortgageLimit)} (45% от исходной суммы).</span>
+        </div>
+        <div class="mortgage-fields">
+          <div class="two-col-fields">
+            <div class="field-group" style="margin:0">
+              <label class="field-label">Ставка, %</label>
+              <input type="number" id="mort-rate-input" value="${d.mortgageRate}" min="1" max="40" step="0.1">
+            </div>
+            <div class="field-group" style="margin:0">
+              <label class="field-label">Срок, лет</label>
+              <input type="number" id="mort-years-input" value="${d.mortgageYears}" min="1" max="30" step="1">
+            </div>
+          </div>
+          <div class="hint-sm">
+            Платёж: <strong>${rub(r.monthlyMortgage)}/мес</strong> &nbsp;|&nbsp;
+            Переплата: <strong>${rub(r.mortgageOverpay)}</strong>
+          </div>
+        </div>`;
+
+        ps.innerHTML = html;
+        this._bindMortgageInputs();
+      }
+
+      /* — Rent info display — */
+      const ltNet  = r.monthlyRent * 11 * 0.88 / 12; // средн. в мес
+      const gurNet = r.monthlyRent * 0.75;            // каждый месяц
+      const dayNet = r.dailyAnnualIncome / 12;        // средн. в мес
+      const modelMap = { longterm: 0, guaranteed: 1, daily: 2 };
+      const selRow   = modelMap[d.rentalModel] ?? -1;
+      const rows = [
+        ['Долгосрочная',    ltNet,   '≈ ' + rub(ltNet) + '/мес ср.',   `(11 мес. × ставка × 88%)`],
+        ['Гарантированная', gurNet,  rub(gurNet) + '/мес',             `(каждый месяц × 75%)`],
+        ['Посуточная',      dayNet,  '≈ ' + rub(dayNet) + '/мес ср.', `(${rub(r.dailyAnnualIncome)}/год)`],
+      ];
+      const roomLabel = d.roomLabel === 'Студия' ? 'Студия' : d.roomLabel + '-комн.';
+      const unitsNote = r.units > 1
+        ? `<div class="hint-sm" style="margin-top:6px">Ставки выше — за 1 лот. В сравнительной таблице доход и капитал рассчитаны за все ${r.units} ${pluralLots(r.units)}.</div>`
+        : `<div class="hint-sm" style="margin-top:6px">Ставки и доход выше — за 1 лот.</div>`;
+      document.getElementById('rent-info-display').innerHTML =
+        `<div class="rent-info-label">Доход собственника за 1 лот — ${proj.label}, ${roomLabel}</div>` +
+        `<table class="rent-info-table">` +
+        rows.map((row, i) =>
+          `<tr class="${i === selRow ? 'active-model' : ''}">
+            <td>${row[0]}</td>
+            <td style="color:var(--muted);font-size:.72rem">${row[3]}</td>
+            <td>${row[2]}</td>
+          </tr>`
+        ).join('') +
+        `</table>` +
+        unitsNote +
+        (r.isEstimated
+          ? `<div class="hint-sm" style="margin-top:6px">Для этой комнатности нет ставки в прайс-листе — оценка по доходности (${((RENT_YIELD[d.roomLabel]||RENT_YIELD['1']).ltr*100).toFixed(1)}% годовых гросс LTR)</div>`
+          : `<div class="hint-sm" style="margin-top:6px">Ставки — из прайс-листа УК. Посуточная: ${STR_RENTED_DAYS} сдаваемых суток/год, минус агрегатор ${STR_AGGREGATOR_FEE*100}% и уборка ${rub(STR_CLEANING_PER_DAY)}/сутки, собственнику ${STR_OWNER_SHARE*100}%</div>`);
+    }
+
+    /* — Winner determination — */
+    const candidates = {};
+    if (!isDepOnly && r.isAffordable) {
+      candidates.longterm   = r.longterm.wealthArr[H];
+      candidates.guaranteed = r.guaranteed.wealthArr[H];
+      candidates.daily      = r.daily.wealthArr[H];
+    }
+    candidates.deposit = r.depositArr[H];
+
+    const maxWealth = Math.max(...Object.values(candidates));
+    const sorted    = Object.entries(candidates).sort((a, b) => b[1] - a[1]);
+    const winner    = sorted[0][0];
+    const second    = sorted[1];
+    const close     = second && (maxWealth - second[1]) / maxWealth < 0.05;
+
+    const modelLabels = {
+      longterm:   'Долгосрочная аренда',
+      guaranteed: 'Гарантированная аренда',
+      daily:      'Посуточная аренда',
+      deposit:    'Банковский вклад',
+    };
+
+    /* — Winner banner — */
+    document.getElementById('wb-amount').textContent = rub(maxWealth);
+    const deltaVsDeposit = maxWealth - r.depositArr[H];
+    const trophyIcon = '<svg class="ic14" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 01-8 0V4z"/><path d="M8 5H5a1 1 0 00-1 1v1a3 3 0 003 3M16 5h3a1 1 0 011 1v1a3 3 0 01-3 3"/><path d="M12 13v3"/><path d="M9 20h6M10 17h4v3h-4z"/></svg>';
+    if (winner === 'deposit') {
+      document.getElementById('wb-delta').innerHTML =
+        `${trophyIcon}${modelLabels[winner]} — итоговый капитал через ${H} ${pluralYr(H)}`;
+    } else {
+      document.getElementById('wb-delta').textContent =
+        `Обгоняет банковский вклад на ${rub(deltaVsDeposit)} (+${pct(deltaVsDeposit / r.depositArr[H] * 100)})`;
+    }
+    const noteEl = document.getElementById('wb-note');
+    if (close) {
+      noteEl.textContent = 'Разница незначительна. Учитывайте риски.';
+    } else if (winner === 'daily') {
+      noteEl.textContent = '*Посуточная аренда требует активного управления или доверенного управляющего';
+    } else if (winner === 'guaranteed') {
+      noteEl.textContent = '*Гарантированный доход: риск минимален';
+    } else {
+      noteEl.textContent = '';
+    }
+
+    /* — Comparison table — */
+    const tbody = document.getElementById('cmp-tbody');
+    const tfoot = document.getElementById('cmp-tfoot');
+    document.getElementById('cmp-note').textContent =
+      `Итоговый капитал = накопленная рента + капитал в квартире (стоимость минус остаток долга) на год N. ` +
+      `Вклад — ${d.depositMonthly ? 'ежемесячная' : 'годовая'} капитализация.`;
+    tbody.innerHTML = '';
+    tfoot.innerHTML = '';
+
+    const addRow = (id, label, yr1, cumRent, propVal, total) => {
+      const isWin = id === winner;
+      const tr = document.createElement('tr');
+      if (isWin) tr.className = 'winner-row';
+      const roiVal = r.roi(total);
+      tr.innerHTML = `
+        <td>${label}</td>
+        <td>${yr1 !== null ? rub(yr1) : '—'}</td>
+        <td>${yr1 !== null ? rub(cumRent) : '—'}</td>
+        <td>${yr1 !== null ? rub(propVal) : '—'}</td>
+        <td><strong>${rub(total)}</strong></td>
+        <td>${pct(roiVal)}</td>
+      `;
+      tbody.appendChild(tr);
+    };
+
+    if (!isDepOnly && r.isAffordable) {
+      addRow('longterm',   'Долгосрочная аренда',   r.longterm.rentArr[1],   r.longterm.cumArr[H],   r.longterm.equityArr[H],   r.longterm.wealthArr[H]);
+      addRow('guaranteed', 'Гарантированная аренда', r.guaranteed.rentArr[1], r.guaranteed.cumArr[H], r.guaranteed.equityArr[H], r.guaranteed.wealthArr[H]);
+      addRow('daily',      'Посуточная аренда',      r.daily.rentArr[1],      r.daily.cumArr[H],      r.daily.equityArr[H],      r.daily.wealthArr[H]);
+    }
+    addRow('deposit', 'Банковский вклад', null, null, null, r.depositArr[H]);
+
+    /* Footer notes */
+    let footHtml = '';
+    if (r.monthlyMortgage > 0) {
+      footHtml += `<tr class="note-row"><td colspan="6">Ипотека: платёж ${rub(r.monthlyMortgage)}/мес, переплата ${rub(r.mortgageOverpay)}, учтена в расчёте.</td></tr>`;
+    }
+    if (r.cashRemainder > 0) {
+      footHtml += `<tr class="note-row"><td colspan="6">Остаток ${rub(r.cashRemainder)} учтён как наличные без роста.</td></tr>`;
+    }
+    tfoot.innerHTML = footHtml;
+
+    /* Hint про остаток */
+    const remHint = document.getElementById('remainder-hint');
+    if (r.cashRemainder > 0) {
+      remHint.textContent = `Остаток ${rub(r.cashRemainder)} — учтён как наличные без роста`;
+    } else if (!r.isDepositOnly && r.isAffordable) {
+      remHint.textContent = 'Остаток появится, когда сумма > стоимости объекта';
+    } else if (!r.isDepositOnly) {
+      remHint.textContent = 'Выбранный объект недоступен при лимите ипотеки 45% от суммы инвестиций';
+    } else {
+      remHint.textContent = '';
+    }
+
+    /* — Chart — */
+    const years = Array.from({ length: H + 1 }, (_, i) => i);
+    const labels = years.map(i => `Год ${i}`);
+
+    const chartDatasets = [
+      {
+        label: 'Банковский вклад',
+        data: r.depositArr,
+        borderColor: '#8A8C8C',
+        backgroundColor: 'rgba(138,140,140,0.08)',
+        borderWidth: 2.5,
+        pointRadius: 3,
+        fill: true,
+        tension: 0.3,
+        borderDash: [6, 4],
+      },
+    ];
+
+    if (!isDepOnly && r.isAffordable) {
+      chartDatasets.push({
+        label: 'Долгосрочная аренда',
+        data: r.longterm.wealthArr,
+        borderColor: '#364B4B',
+        backgroundColor: 'rgba(54,75,75,0.07)',
+        borderWidth: 2.5,
+        pointRadius: 3,
+        fill: false,
+        tension: 0.3,
+        borderDash: [],
+      });
+      chartDatasets.push({
+        label: 'Гарантированная аренда',
+        data: r.guaranteed.wealthArr,
+        borderColor: '#6E8B8B',
+        backgroundColor: 'transparent',
+        borderWidth: 2,
+        pointRadius: 3,
+        fill: false,
+        tension: 0.3,
+        borderDash: [2, 3],
+      });
+      chartDatasets.push({
+        label: 'Посуточная аренда',
+        data: r.daily.wealthArr,
+        borderColor: '#8FE000',
+        backgroundColor: 'transparent',
+        borderWidth: 2.5,
+        pointRadius: 3,
+        fill: false,
+        tension: 0.3,
+        borderDash: [],
+      });
+    }
+
+    if (this._chart) {
+      this._chart.data.labels   = labels;
+      this._chart.data.datasets = chartDatasets;
+      this._chart.update('none');
+    }
+
+    /* — Detail table — */
+    const winnerModel = winner === 'deposit' ? null : winner;
+    const winnerData  = winnerModel ? r[winnerModel] : null;
+    const det_thead   = document.getElementById('det-thead');
+    const det_tbody   = document.getElementById('det-tbody');
+
+    if (winnerData) {
+      det_thead.innerHTML = `<tr>
+        <th>Год</th>
+        <th>Рента (брутто)</th>
+        <th>Ипотека</th>
+        <th>Чистый поток</th>
+        <th>Накоп. рента</th>
+        <th>Стоимость кв.</th>
+        <th>Остаток долга</th>
+        <th>Капитал в кв.</th>
+        <th>Вклад</th>
+      </tr>`;
+      let rows = '';
+      for (let i = 1; i <= H; i++) {
+        const mort = r.monthlyMortgage > 0 && i <= d.mortgageYears ? rub(r.annualMortgage) : '—';
+        rows += `<tr>
+          <td>${i}</td>
+          <td>${rub(winnerData.rentArr[i])}</td>
+          <td>${mort}</td>
+          <td>${rub(winnerData.flowArr[i])}</td>
+          <td>${rub(winnerData.cumArr[i])}</td>
+          <td>${rub(winnerData.propArr[i])}</td>
+          <td>${rub(r.mortgageBalanceArr[i])}</td>
+          <td>${rub(winnerData.equityArr[i])}</td>
+          <td>${rub(r.depositArr[i])}</td>
+        </tr>`;
+      }
+      det_tbody.innerHTML = rows;
+    } else {
+      det_thead.innerHTML = `<tr><th>Год</th><th>Вклад</th></tr>`;
+      let rows = '';
+      for (let i = 1; i <= H; i++) {
+        rows += `<tr><td>${i}</td><td>${rub(r.depositArr[i])}</td></tr>`;
+      }
+      det_tbody.innerHTML = rows;
+    }
+
+    /* — Strategy hint — */
+    this._renderHint();
+  },
+
+  /* ── bind mortgage inputs (dynamic) ── */
+  _bindMortgageInputs() {
+    const ps = document.getElementById('purchase-status');
+    const mr = ps.querySelector('#mort-rate-input');
+    const my = ps.querySelector('#mort-years-input');
+    if (mr) mr.addEventListener('input', () => {
+      this.data.mortgageRate = parseFloat(mr.value) || 12;
+      this._saveLS(); this._recompute();
+    });
+    if (my) my.addEventListener('input', () => {
+      this.data.mortgageYears = parseInt(my.value) || 15;
+      this._saveLS(); this._recompute();
+    });
+  },
+
+  /* ── strategy hint ──
+     Ищет лучшую комбинацию ЖК × комнатность в выбранном регионе (по средней
+     цене лота) для введённой суммы — сравнивает с банковским вкладом. */
+  _computeHint() {
+    const d = this.data;
+    const H = d.horizon;
+    const invest = d.investAmount;
+    const depRate = d.depositRate / 100;
+
+    const depGrow = (p) => d.depositMonthly
+      ? p * Math.pow(1 + depRate / 12, H * 12)
+      : p * Math.pow(1 + depRate, H);
+
+    const propGrow = (c) => c * Math.pow(1 + d.appreciation / 100, H);
+
+    const cumRentFn = (monthlyRent, dailyAnnualIncome, model, mortAnnual) => {
+      let yr1 = 0;
+      if (model === 'longterm')   yr1 = monthlyRent * 11 * 0.88;
+      if (model === 'guaranteed') yr1 = monthlyRent * 12 * 0.75;
+      if (model === 'daily')      yr1 = dailyAnnualIncome;
+      let total = 0;
+      for (let i = 1; i <= H; i++) {
+        const yr   = yr1 * Math.pow(1 + d.rentGrowth / 100, i - 1);
+        const mort = (mortAnnual > 0 && i <= d.mortgageYears) ? mortAnnual : 0;
+        total += yr - mort;
+      }
+      return total;
+    };
+
+    const mortPayAnnual = (principal) => {
+      const mr = d.mortgageRate / 12 / 100;
+      const n  = d.mortgageYears * 12;
+      return mr > 0
+        ? principal * mr * Math.pow(1 + mr, n) / (Math.pow(1 + mr, n) - 1) * 12
+        : principal / n;
+    };
+
+    // Evaluate a project/room combo at its median price — покупаем максимум
+    // целых лотов на бюджет, а остаток учитываем наличными без роста. Ипотеку
+    // в рекомендации предлагаем, только если её тело не больше 45% от суммы
+    // клиента — иначе получится
+    // «пришёл с 6 млн, возьми ещё ипотеку на 10 млн», что не подходит как
+    // разумная рекомендация, даже если по цифрам это выгоднее.
+    const evalCombo = (project, room, budget) => {
+      const cost = room.priceP50 ?? room.priceAvg;
+      const maxMortPrincipal = budget * MAX_MORTGAGE_SHARE;
+
+      const { monthlyRent, dailyAnnualIncome } = this.getRentFigures(project.slug, room.label, cost);
+      const mortgageBalanceAtHorizon = (principal, mortAnn) => {
+        if (!principal) return 0;
+        const totalMonths = d.mortgageYears * 12;
+        const paidMonths = Math.min(H * 12, totalMonths);
+        if (paidMonths >= totalMonths) return 0;
+        const mr = d.mortgageRate / 12 / 100;
+        const payment = mortAnn / 12;
+        if (mr > 0) {
+          const growth = Math.pow(1 + mr, paidMonths);
+          return Math.max(0, principal * growth - payment * (growth - 1) / mr);
+        }
+        return Math.max(0, principal - payment * paidMonths);
+      };
+      const perUnitWealth = (m, principal = 0, mortAnn = 0) =>
+        propGrow(cost) - mortgageBalanceAtHorizon(principal, mortAnn) +
+        cumRentFn(monthlyRent, dailyAnnualIncome, m, mortAnn);
+      const bestModelFor = (principal = 0, mortAnn = 0) => {
+        let bestW = -Infinity, bestModel = 'daily';
+        ['longterm', 'guaranteed', 'daily'].forEach(m => {
+          const w = perUnitWealth(m, principal, mortAnn);
+          if (w > bestW) { bestW = w; bestModel = m; }
+        });
+        return { bestW, bestModel };
+      };
+
+      const nFull    = Math.floor(budget / cost);
+      const cashLeft = budget - nFull * cost;
+
+      // Вариант A: nFull лотов за наличные, остаток — наличными без роста
+      // (если бюджета не хватает даже на один лот целиком — один лот в ипотеку,
+      // но только пока тело кредита в пределах лимита ниже)
+      const options = [];
+      if (nFull >= 1) {
+        const cashModel = bestModelFor();
+        options.push({
+          units: nFull, mortgagedUnits: 0, remainder: cashLeft,
+          model: cashModel.bestModel,
+          wealth: nFull * cashModel.bestW + cashLeft,
+        });
+      } else {
+        const principal = cost - budget;
+        if (principal > maxMortPrincipal) return null; // ипотека больше 45% суммы клиента — не рекомендуем
+        const mortAnn = mortPayAnnual(principal);
+        const m = bestModelFor(principal, mortAnn);
+        options.push({ units: 1, mortgagedUnits: 1, remainder: 0, mortAnn, model: m.bestModel, wealth: m.bestW });
+      }
+
+      // Вариант B: ещё один лот сверху в ипотеку под остаток как первый взнос
+      // (тоже только если тело кредита не превышает лимит)
+      if (nFull >= 1 && cashLeft >= cost * 0.20) {
+        const principal = cost - cashLeft;
+        if (principal <= maxMortPrincipal) {
+          const mortAnn = mortPayAnnual(principal);
+          const cashModel = bestModelFor();
+          const mortModel = bestModelFor(principal, mortAnn);
+          options.push({
+            units: nFull + 1, mortgagedUnits: 1, remainder: 0, mortAnn,
+            model: cashModel.bestModel,
+            wealth: nFull * cashModel.bestW + mortModel.bestW,
+          });
+        }
+      }
+
+      const best = options.sort((a, b) => b.wealth - a.wealth)[0];
+      const roomLabel = room.label === 'Студия' ? 'Студия' : room.label + '-комн.';
+      return {
+        key: `${project.slug}_${room.label}`,
+        label: project.label + ', ' + roomLabel + (best.units > 1 ? ' × ' + best.units : ''),
+        model: best.model,
+        wealth: best.wealth,
+        cost: cost * best.units,
+        units: best.units,
+        needsMortgage: best.mortgagedUnits > 0,
+        mortMonthly: best.mortgagedUnits > 0 ? (best.mortAnn || 0) / 12 : 0,
+      };
+    };
+
+    const modelName = { longterm: 'долгосрочная', guaranteed: 'гарантированная', daily: 'посуточная' };
+
+    const strategies = [];
+
+    // Deposit
+    strategies.push({
+      key: 'deposit',
+      label: 'Банковский вклад',
+      model: 'deposit',
+      wealth: depGrow(invest),
+      cost: invest,
+      needsMortgage: false,
+      mortMonthly: 0,
+    });
+
+    // Every project/room combo in the selected city (пропускаем единичные
+    // лоты — они не показательны как «типовая» рекомендация)
+    PROJECTS.filter(p => p.city === d.cityCode).forEach(project => {
+      project.rooms.filter(room => room.count >= 3).forEach(room => {
+        const s = evalCombo(project, room, invest);
+        if (s) strategies.push(s);
+      });
+    });
+
+    // Sort by wealth
+    strategies.sort((a, b) => b.wealth - a.wealth);
+
+    const best = strategies[0];
+    const roi  = (best.wealth - invest) / invest * 100;
+    const cityLabel = (CITIES.find(c => c.code === d.cityCode) || {}).label || '';
+
+    const reason = best.model === 'deposit'
+      ? `При текущих ставках (${d.depositRate}%) вклад опережает арендные стратегии за ${H} ${pluralYr(H)} в регионе «${cityLabel}».`
+      : `Лучшее соотношение цены и доходности среди лотов «${cityLabel}» на вашу сумму.`;
+
+    return {
+      ...best,
+      sublabel: best.model === 'deposit' ? `${d.depositRate}% годовых` : modelName[best.model] + ' аренда',
+      roi,
+      reason,
+    };
+  },
+
+  _renderHint() {
+    const h   = this._computeHint();
+    const el  = document.getElementById('strategy-hint');
+    const H   = this.data.horizon;
+
+    el.classList.remove('hidden');
+
+    const badge = document.getElementById('sh-badge');
+    badge.textContent = h.label;
+
+    document.getElementById('sh-sublabel').textContent = h.sublabel;
+
+    const wealthEl = document.getElementById('sh-wealth');
+    wealthEl.textContent = fmtM(h.wealth);
+
+    const roiEl = document.getElementById('sh-roi');
+    roiEl.textContent = (h.roi >= 0 ? '+' : '') + h.roi.toFixed(1) + '%';
+
+    document.getElementById('sh-years').textContent = H + ' ' + pluralYr(H);
+    document.getElementById('sh-reason').textContent = h.reason;
+
+    const mortEl = document.getElementById('sh-mort');
+    if (h.needsMortgage && h.mortMonthly > 0) {
+      mortEl.innerHTML = `<span class="sh-mort"><svg class="ic14" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v9M9 10v9M15 10v9M19 10v9"/><path d="M3 19h18"/></svg>Ипотека: ${rub(h.mortMonthly)}/мес</span>`;
+    } else {
+      mortEl.innerHTML = '';
+    }
+  },
+
+  /* ── debounced recompute ── */
+  _timer: null,
+  _recompute() {
+    clearTimeout(this._timer);
+    this._timer = setTimeout(() => {
+      const r = this.compute();
+      this.render(r);
+    }, 300);
+  },
+
+  /* ── localStorage ── */
+  _saveLS() {
+    try { localStorage.setItem('calc_v5', JSON.stringify(this.data)); } catch(e) {}
+  },
+  _loadLS() {
+    try {
+      const s = localStorage.getItem('calc_v5');
+      if (s) Object.assign(this.data, JSON.parse(s));
+    } catch(e) {}
+
+    // Валидация каскада город → ЖК → комнатность на случай несовместимых
+    // сохранённых данных (например, из старой версии калькулятора)
+    const d = this.data;
+    if (!CITIES.find(c => c.code === d.cityCode)) d.cityCode = CITIES[0].code;
+    let projs = PROJECTS.filter(p => p.city === d.cityCode);
+    if (!projs.find(p => p.slug === d.projectSlug)) d.projectSlug = projs[0].slug;
+    const proj = this.getProject(d.projectSlug);
+    if (!proj.rooms.find(r => r.label === d.roomLabel)) d.roomLabel = proj.rooms[0].label;
+    if (!['p25', 'p50', 'p75'].includes(d.priceTier)) d.priceTier = 'p50';
+  },
+
+  /* ── chart instance ── */
+  _chart: null,
+
+  /* ── cascading selects: город → ЖК → комнатность ── */
+  _populateCitySelect() {
+    const sel = document.getElementById('city-select');
+    sel.innerHTML = '';
+    CITIES.forEach(c => sel.add(new Option(c.label, c.code)));
+    sel.value = this.data.cityCode;
+  },
+  _populateProjectSelect() {
+    const sel = document.getElementById('project-select');
+    sel.innerHTML = '';
+    PROJECTS.filter(p => p.city === this.data.cityCode).forEach(p => sel.add(new Option(p.label, p.slug)));
+    sel.value = this.data.projectSlug;
+  },
+  _populateRoomSelect() {
+    const sel = document.getElementById('room-select');
+    sel.innerHTML = '';
+    const proj = this.getProject(this.data.projectSlug);
+    proj.rooms.forEach(rm => {
+      const label = rm.label === 'Студия' ? 'Студия' : rm.label + '-комн.';
+      sel.add(new Option(label, rm.label));
+    });
+    sel.value = this.data.roomLabel;
+  },
+  _updatePriceTierUI() {
+    const room = this.getRoom(this.getProject(this.data.projectSlug), this.data.roomLabel);
+    const hasQuantiles = this.hasQuantilePrices(room);
+    if (!hasQuantiles) this.data.priceTier = 'p50';
+    document.querySelectorAll('#price-tier-seg button').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.tier === this.data.priceTier);
+      btn.disabled = !hasQuantiles && btn.dataset.tier !== 'p50';
+    });
+  },
+
+  /* ── init ── */
+  init() {
+    this._loadLS();
+
+    /* Populate selects */
+    this._populateCitySelect();
+    this._populateProjectSelect();
+    this._populateRoomSelect();
+    this._updatePriceTierUI();
+
+    const renSel = document.getElementById('rental-model-select');
+    RENTAL_MODELS.forEach(m => {
+      const opt = new Option(m.label, m.id);
+      renSel.add(opt);
+    });
+    renSel.value = this.data.rentalModel;
+
+    /* Set field values */
+    const invInput = document.getElementById('invest-input');
+    const invSlider = document.getElementById('invest-slider');
+    invInput.value  = fmtAmt(this.data.investAmount);
+    invSlider.value = Math.min(Math.max(this.data.investAmount, 1000000), 70000000);
+
+    document.getElementById('rent-growth-input').value  = this.data.rentGrowth;
+    document.getElementById('appreciation-input').value = this.data.appreciation;
+    document.getElementById('horizon-slider').value     = this.data.horizon;
+    document.getElementById('horizon-pill').textContent = this.data.horizon + ' ' + pluralYr(this.data.horizon);
+    document.getElementById('deposit-rate-input').value = this.data.depositRate;
+    document.getElementById('deposit-monthly-cb').checked = this.data.depositMonthly;
+
+    /* Create chart */
+    Chart.defaults.font.family = "'Montserrat', system-ui, sans-serif";
+    Chart.defaults.color = '#6b7a7a';
+    const ctx = document.getElementById('chart').getContext('2d');
+    this._chart = new Chart(ctx, {
+      type: 'line',
+      data: { labels: [], datasets: [] },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { position: 'top', labels: { font: { size: 11, weight: 600 }, usePointStyle: true, padding: 14, color: '#262729' } },
+          tooltip: {
+            backgroundColor: '#223030',
+            titleColor: '#ffffff',
+            bodyColor: '#ffffff',
+            padding: 10,
+            cornerRadius: 8,
+            callbacks: {
+              label: ctx => ' ' + ctx.dataset.label + ': ' + fmtM(ctx.parsed.y),
+            }
+          }
+        },
+        scales: {
+          x: { grid: { color: '#E5FFF1' }, ticks: { font: { size: 11 } } },
+          y: {
+            grid: { color: '#E5FFF1' },
+            ticks: { font: { size: 11 }, callback: v => fmtM(v) }
+          }
+        }
+      }
+    });
+
+    /* ── Event listeners ── */
+
+    invInput.addEventListener('input', () => {
+      const raw = parseAmt(invInput.value);
+      if (raw > 0) {
+        this.data.investAmount = raw;
+        invSlider.value = Math.min(Math.max(raw, 1000000), 70000000);
+        this._saveLS(); this._recompute();
+      }
+    });
+    invInput.addEventListener('blur', () => {
+      invInput.value = fmtAmt(this.data.investAmount);
+    });
+
+    invSlider.addEventListener('input', () => {
+      const v = parseInt(invSlider.value);
+      this.data.investAmount = v;
+      invInput.value = fmtAmt(v);
+      this._saveLS(); this._recompute();
+    });
+
+    document.getElementById('city-select').addEventListener('change', (e) => {
+      this.data.cityCode = e.target.value;
+      const projs = PROJECTS.filter(p => p.city === this.data.cityCode);
+      this.data.projectSlug = projs[0].slug;
+      this.data.roomLabel   = projs[0].rooms[0].label;
+      this._populateProjectSelect();
+      this._populateRoomSelect();
+      this._saveLS(); this._recompute();
+    });
+
+    document.getElementById('project-select').addEventListener('change', (e) => {
+      this.data.projectSlug = e.target.value;
+      const proj = this.getProject(this.data.projectSlug);
+      this.data.roomLabel = proj.rooms[0].label;
+      this._populateRoomSelect();
+      this._saveLS(); this._recompute();
+    });
+
+    document.getElementById('room-select').addEventListener('change', (e) => {
+      this.data.roomLabel = e.target.value;
+      this._saveLS(); this._recompute();
+    });
+
+    document.querySelectorAll('#price-tier-seg button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        this.data.priceTier = btn.dataset.tier;
+        this._updatePriceTierUI();
+        this._saveLS(); this._recompute();
+      });
+    });
+
+    renSel.addEventListener('change', () => {
+      this.data.rentalModel = renSel.value;
+      this._saveLS(); this._recompute();
+    });
+
+    const numBind = (id, key, parse) => {
+      document.getElementById(id).addEventListener('input', (e) => {
+        this.data[key] = parse(e.target.value);
+        this._saveLS(); this._recompute();
+      });
+    };
+
+    numBind('rent-growth-input',  'rentGrowth',   v => parseFloat(v) || 0);
+    numBind('appreciation-input', 'appreciation', v => parseFloat(v) || 0);
+    numBind('deposit-rate-input', 'depositRate',  v => parseFloat(v) || 0);
+
+    document.getElementById('horizon-slider').addEventListener('input', (e) => {
+      const v = parseInt(e.target.value);
+      this.data.horizon = v;
+      document.getElementById('horizon-pill').textContent = v + ' ' + pluralYr(v);
+      this._saveLS(); this._recompute();
+    });
+
+    document.getElementById('deposit-monthly-cb').addEventListener('change', (e) => {
+      this.data.depositMonthly = e.target.checked;
+      this._saveLS(); this._recompute();
+    });
+
+    /* Initial render */
+    const r = this.compute();
+    this.render(r);
+  },
+};
+
+/* ── plural helper ── */
+function pluralYr(n) {
+  const m10 = n % 10, m100 = n % 100;
+  if (m100 >= 11 && m100 <= 19) return 'лет';
+  if (m10 === 1) return 'год';
+  if (m10 >= 2 && m10 <= 4) return 'года';
+  return 'лет';
+}
+
+function pluralLots(n) {
+  const m10 = n % 10, m100 = n % 100;
+  if (m100 >= 11 && m100 <= 19) return 'лотов';
+  if (m10 === 1) return 'лот';
+  if (m10 >= 2 && m10 <= 4) return 'лота';
+  return 'лотов';
+}
+
+/* ── Start ── */
+Calc.init();
+</script>
+</body>
+</html>

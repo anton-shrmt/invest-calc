@@ -537,7 +537,6 @@
         <input type="checkbox" id="deposit-monthly-cb">
         <label for="deposit-monthly-cb">Ежемесячная капитализация</label>
       </div>
-      <div class="hint-sm" id="remainder-hint" style="margin-top:8px"></div>
     </div>
 
   </div><!-- /left-panel -->
@@ -1202,16 +1201,6 @@ const Calc = {
       footHtml += `<tr class="note-row"><td colspan="6">Остаток ${rub(r.cashRemainder)} учтён как наличные без роста.</td></tr>`;
     }
     tfoot.innerHTML = footHtml;
-
-    /* Hint про остаток */
-    const remHint = document.getElementById('remainder-hint');
-    if (r.cashRemainder > 0) {
-      remHint.textContent = `Остаток ${rub(r.cashRemainder)} — учтён как наличные без роста`;
-    } else if (r.isAffordable) {
-      remHint.textContent = 'Остаток появится, когда сумма > стоимости объекта';
-    } else {
-      remHint.textContent = 'Выбранный объект недоступен при лимите ипотеки 45% от суммы инвестиций';
-    }
 
     /* — Chart — */
     const years = Array.from({ length: H + 1 }, (_, i) => i);

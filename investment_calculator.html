@@ -618,6 +618,16 @@ const CITIES = [
   { code: 'tlt', label: 'Тольятти' },
 ];
 
+// Предложный падеж («в …») — для естественных формулировок в подсказках.
+const CITY_IN = {
+  mhc: 'Махачкале',
+  kzn: 'Казани',
+  ekb: 'Екатеринбурге',
+  spb: 'Санкт-Петербурге',
+  per: 'Перми',
+  tlt: 'Тольятти',
+};
+
 // Встроенный массив — резервный снимок, если свежий файл данных ещё не создан.
 // priceP25 / priceP50 / priceP75 — цены фактических квартир в 25-м,
 // 50-м (медиана) и 75-м перцентилях. areaP* — площадь той же квартиры.
@@ -1478,11 +1488,11 @@ const Calc = {
 
     const best = strategies[0];
     const roi  = (best.wealth - invest) / invest * 100;
-    const cityLabel = (CITIES.find(c => c.code === d.cityCode) || {}).label || '';
+    const cityIn = CITY_IN[d.cityCode] || (CITIES.find(c => c.code === d.cityCode) || {}).label || '';
 
     const reason = best.model === 'deposit'
-      ? `При текущих ставках (${d.depositRate}%) вклад опережает арендные стратегии за ${H} ${pluralYr(H)} в регионе «${cityLabel}».`
-      : `Лучшее соотношение цены и доходности среди квартир «${cityLabel}» на вашу сумму.`;
+      ? `При текущих ставках (${d.depositRate}%) вклад опережает арендные стратегии за ${H} ${pluralYr(H)} в ${cityIn}.`
+      : `Лучшее соотношение цены и доходности среди квартир в ${cityIn} на вашу сумму инвестиций.`;
 
     return {
       ...best,

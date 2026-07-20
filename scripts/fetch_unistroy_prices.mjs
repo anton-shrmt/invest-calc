@@ -241,6 +241,7 @@ function toCalculatorProjectsJs(projects, fetchedAt) {
 
   return `// Автосгенерировано fetch_unistroy_prices.mjs — ${fetchedAt.slice(0, 10)}\n` +
     `// P25/P50/P75 рассчитаны по фактическим лотам; 3-комнатные исключены.\n` +
+    `window.CALCULATOR_PROJECTS_META = ${JSON.stringify({ fetchedAt, source: 'unistroy.ru, публичный API /api/flats/' })};\n` +
     `window.CALCULATOR_PROJECTS = ${JSON.stringify(calculatorProjects, null, 2)};\n`;
 }
 

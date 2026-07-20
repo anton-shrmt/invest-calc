@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Archivo:wght@600;700;800;900&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous" referrerpolicy="no-referrer" onerror="window.Chart = null"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -23,7 +23,7 @@
       --ink:         #17161A;
       --graphite:    #262729;
       --gray:        #B1B3B3;
-      --gray-2:      #8A8C8C;
+      --gray-2:      #657070;
       --line:        rgba(54, 75, 75, 0.12);
       --line-dark:   rgba(255, 255, 255, 0.12);
 
@@ -70,7 +70,7 @@
     .page-header .logo small { display: block; font-family: var(--font-body); font-weight: 600; letter-spacing: 0.13em; font-size: 9px; color: var(--accent); text-transform: uppercase; margin-top: 1px; }
     .page-header .divider { width: 1px; align-self: stretch; background: var(--line-dark); }
     .page-header h1 { font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.01em; font-size: 1.2rem; font-weight: 800; line-height: 1.15; }
-    .page-header p  { font-size: 0.82rem; color: rgba(255,255,255,.68); margin-top: 2px; }
+    .page-header p  { font-size: 0.82rem; color: rgba(255,255,255,.72); margin-top: 2px; }
     @media (max-width: 600px) {
       .page-header { flex-wrap: wrap; gap: 10px 20px; padding: 14px 16px; }
       .page-header .divider { display: none; }
@@ -139,7 +139,9 @@
     input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
     input[type="text"]:focus,
     input[type="number"]:focus,
-    select:focus { outline: none; border-color: var(--dark); }
+    select:focus { outline: 3px solid rgba(165, 255, 0, .48); outline-offset: 1px; border-color: var(--dark); }
+    button:focus-visible,
+    summary:focus-visible { outline: 3px solid rgba(165, 255, 0, .58); outline-offset: 3px; }
     select:disabled { background: var(--mint-2); color: var(--muted); cursor: not-allowed; }
 
     .amount-input {
@@ -147,6 +149,7 @@
       font-size: 1.3rem !important;
       font-weight: 800;
       color: var(--dark) !important;
+      letter-spacing: .01em;
     }
 
     input[type="range"] {
@@ -181,16 +184,6 @@
     }
 
     .hint-sm { font-size: .72rem; color: var(--muted); margin-top: 3px; }
-
-    /* ── PRICE TIER SEGMENT ── */
-    .segment-tier { display: grid; grid-template-columns: repeat(3,1fr); gap: 4px; background: var(--mint-2); border-radius: 999px; padding: 4px; }
-    .segment-tier button {
-      border: none; background: transparent; padding: 8px 6px; border-radius: 999px;
-      font-weight: 700; font-size: .82rem; color: var(--dark); cursor: pointer;
-      transition: .15s var(--ease); font-family: var(--font-body);
-    }
-    .segment-tier button.active { background: var(--accent); color: var(--ink); }
-    .segment-tier button:hover:not(.active) { background: rgba(54,75,75,.07); }
 
     .two-col-fields {
       display: grid;
@@ -230,15 +223,21 @@
       padding: 18px 22px;
       color: #fff;
       background: linear-gradient(135deg, var(--dark) 0%, var(--dark-3) 100%);
+      box-shadow: var(--shadow-md);
     }
     .winner-banner .wb-label { font-size: .78rem; opacity: .85; margin-bottom: 4px; }
     .winner-banner .wb-amount { font-family: var(--font-display); font-size: 2rem; font-weight: 800; letter-spacing: -.01em; line-height: 1.1; color: var(--accent); }
     .winner-banner .wb-delta { font-size: .88rem; opacity: .9; margin-top: 6px; }
     .winner-banner .wb-note  { font-size: .75rem; opacity: .75; margin-top: 5px; font-style: italic; }
     .winner-banner .wb-close { font-size: .8rem; opacity: .8; margin-top: 4px; background: rgba(255,255,255,.18); border-radius: var(--r-sm); padding: 3px 8px; display: inline-block; }
+    .wb-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 15px; padding-top: 12px; border-top: 1px solid var(--line-dark); }
+    .wb-kpi { min-width: 0; }
+    .wb-kpi span { display: block; font-size: .64rem; line-height: 1.25; text-transform: uppercase; letter-spacing: .06em; opacity: .62; }
+    .wb-kpi strong { display: block; margin-top: 3px; font-family: var(--font-display); font-size: .84rem; line-height: 1.25; color: var(--white); overflow-wrap: anywhere; }
 
     /* ── COMPARISON TABLE ── */
     .table-wrap { overflow-x: auto; }
+    .table-scroll-hint { display: none; }
     table.cmp-table {
       width: 100%;
       border-collapse: collapse;
@@ -360,8 +359,31 @@
       font-size: .82rem;
       color: var(--muted);
       margin-top: 4px;
+      line-height: 1.45;
     }
     .apt-price-display strong { color: var(--text); }
+    .price-label { color: var(--muted); font-size: .75rem; font-weight: 600; }
+    .price-meta { color: var(--muted); font-size: .72rem; }
+    .data-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 9px; }
+    .data-actions .hint-sm { margin: 0; }
+    .update-prices-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 32px;
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--dark);
+      background: var(--white);
+      font-size: .74rem;
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: background-color .15s var(--ease), border-color .15s var(--ease), transform .15s var(--ease);
+    }
+    .update-prices-link:hover { background: var(--mint); border-color: rgba(54,75,75,.28); transform: translateY(-1px); }
+    .update-prices-link:focus-visible { outline: 3px solid rgba(165,255,0,.58); outline-offset: 2px; }
 
     /* ── RENT INFO DISPLAY ── */
     .rent-info-table { width: 100%; border-collapse: collapse; margin-top: 4px; }
@@ -379,6 +401,7 @@
       border: 2px solid var(--accent-deep);
       border-radius: var(--r-lg);
       padding: 14px 16px;
+      box-shadow: var(--shadow-sm);
     }
     .sh-head { font-size: .72rem; font-weight: 700; text-transform: uppercase;
                letter-spacing: .05em; color: var(--muted); margin-bottom: 8px; }
@@ -395,6 +418,38 @@
     .sh-reason { font-size: .75rem; color: var(--muted); margin-top: 8px; line-height: 1.5; }
     .sh-mort { font-size: .74rem; color: var(--warn-ink); background: var(--warn-bg);
                border-radius: var(--r-sm); padding: 4px 8px; margin-top: 6px; display: inline-block; }
+    .field-status { min-height: 1.2em; margin-top: 5px; font-size: .74rem; color: var(--warn-ink); line-height: 1.35; }
+    .form-actions { display: flex; justify-content: flex-end; margin-top: 10px; }
+    .link-button { appearance: none; border: none; background: none; font: inherit; font-size: .78rem; font-weight: 700; color: var(--dark); text-decoration: underline; cursor: pointer; }
+    .model-disclaimer { margin-top: 8px; font-size: .72rem; color: var(--muted); line-height: 1.45; }
+    .chart-fallback { display: grid; place-items: center; height: 100%; padding: 20px; text-align: center; color: var(--muted); background: var(--mint-2); border-radius: var(--r-sm); font-size: .84rem; }
+    .chart-fallback[hidden] { display: none; }
+    @media (max-width: 600px) {
+      .page-header h1 { font-size: 1.08rem; }
+      .wb-kpis { grid-template-columns: 1fr 1fr; }
+      .wb-kpi:last-child { grid-column: 1 / -1; }
+      .data-actions { align-items: flex-start; flex-direction: column; }
+      .update-prices-link { width: 100%; }
+      .table-scroll-hint { display: block; font-size: .72rem; color: var(--muted); margin: -2px 0 7px; }
+      .cmp-table { min-width: 0; }
+      .cmp-table thead { display: none; }
+      .cmp-table tbody, .cmp-table tr, .cmp-table td { display: block; width: 100%; }
+      .cmp-table tbody tr { padding: 8px 10px; border-top: 1px solid var(--border); }
+      .cmp-table td { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; border: 0; text-align: right; white-space: normal; }
+      .cmp-table td::before { content: attr(data-label); color: var(--muted); font-size: .69rem; font-weight: 700; text-align: left; text-transform: uppercase; letter-spacing: .04em; }
+      .cmp-table td:first-child { font-size: .88rem; padding-bottom: 7px; }
+      .cmp-table td:first-child::before { display: none; }
+      .cmp-table tr.winner-row td:first-child::before { display: inline-block; content: ''; }
+      .cmp-table tfoot, .cmp-table tfoot tr, .cmp-table tfoot td { display: block; width: 100%; }
+      .cmp-table .note-row td { padding: 8px 10px; text-align: left; }
+      .chart-wrap { height: 250px; }
+    }
+    @media (min-width: 769px) {
+      .winner-banner { position: sticky; top: 16px; z-index: 2; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+    }
   </style>
 </head>
 <body>
@@ -409,8 +464,8 @@
   </div>
   <div class="divider"></div>
   <div>
-    <h1>Инвестиционный калькулятор</h1>
-    <p>Недвижимость vs банковский вклад</p>
+    <h1>Калькулятор доходности</h1>
+    <p>Прогноз квартиры и банковского вклада на 1–15 лет</p>
   </div>
 </div>
 
@@ -423,19 +478,20 @@
     <div class="card">
       <div class="card-title">Сумма инвестиций</div>
       <div class="field-group">
-        <label class="field-label">Введите сумму</label>
-        <input type="text" id="invest-input" class="amount-input" placeholder="6 000 000 ₽">
-        <input type="range" id="invest-slider" min="1000000" max="70000000" step="100000">
+        <label class="field-label" for="invest-input">Ваш бюджет, ₽</label>
+        <input type="text" id="invest-input" class="amount-input" inputmode="numeric" aria-describedby="invest-help" placeholder="6 000 000 ₽">
+        <input type="range" id="invest-slider" min="1000000" max="70000000" step="100000" aria-label="Сумма инвестиций на слайдере">
         <div class="row-flex" style="margin-top:2px">
           <span class="hint-sm">1 млн ₽</span>
           <span class="hint-sm">70 млн ₽</span>
         </div>
+        <div class="field-status" id="invest-help" aria-live="polite"></div>
       </div>
     </div>
 
     <!-- Strategy hint -->
     <div id="strategy-hint" class="strategy-hint hidden">
-      <div class="sh-head"><svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 00-3.5 10.9c.5.4.8 1 .8 1.6V16h5.4v-.5c0-.6.3-1.2.8-1.6A6 6 0 0012 3z"/></svg>Лучшая стратегия для вашей суммы</div>
+      <div class="sh-head" id="sh-title"><svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 00-3.5 10.9c.5.4.8 1 .8 1.6V16h5.4v-.5c0-.6.3-1.2.8-1.6A6 6 0 0012 3z"/></svg>Прогноз для выбранного объекта</div>
       <div class="sh-winner-row">
         <span class="sh-badge" id="sh-badge">—</span>
         <span class="sh-sublabel" id="sh-sublabel"></span>
@@ -458,7 +514,7 @@
     <div class="card">
       <div class="field-group">
         <div class="slider-label-row">
-          <label class="field-label" style="margin:0">Горизонт планирования</label>
+          <label class="field-label" for="horizon-slider" style="margin:0">Горизонт планирования</label>
           <span class="slider-val-pill" id="horizon-pill">5 лет</span>
         </div>
         <input type="range" id="horizon-slider" min="1" max="15" step="1">
@@ -475,32 +531,29 @@
 
       <!-- Регион -->
       <div class="field-group">
-        <label class="field-label">Регион</label>
+        <label class="field-label" for="city-select">Регион</label>
         <select id="city-select"></select>
       </div>
 
       <!-- ЖК -->
       <div class="field-group">
-        <label class="field-label">ЖК</label>
+        <label class="field-label" for="project-select">ЖК</label>
         <select id="project-select"></select>
         <div class="apt-price-display" id="project-info-display"></div>
       </div>
 
       <!-- Комнатность -->
       <div class="field-group">
-        <label class="field-label">Комнатность</label>
+        <label class="field-label" for="room-select">Комнатность</label>
         <select id="room-select"></select>
       </div>
 
-      <!-- Сценарий цены квартиры -->
       <div class="field-group">
-        <label class="field-label">Сценарий цены квартиры</label>
-        <div class="segment-tier" id="price-tier-seg">
-          <button type="button" data-tier="p25">Доступный</button>
-          <button type="button" data-tier="p50">Типичный</button>
-          <button type="button" data-tier="p75">Выше среднего</button>
-        </div>
         <div class="apt-price-display" id="apt-price-display"></div>
+        <div class="data-actions">
+          <span class="hint-sm">Типичная цена рассчитана по активным квартирам</span>
+          <a class="update-prices-link" href="https://github.com/anton-shrmt/invest-calc/actions/workflows/update-prices.yml" target="_blank" rel="noopener" title="Открыть ручное обновление в GitHub">↻ Обновить цены</a>
+        </div>
       </div>
 
       <!-- Статус / Ипотека -->
@@ -520,23 +573,24 @@
       <div class="card-title">Параметры</div>
 
       <div class="field-group" id="appreciation-group">
-        <label class="field-label">Рост стоимости жилья, %/год</label>
+        <label class="field-label" for="appreciation-input">Рост стоимости жилья, %/год</label>
         <input type="number" id="appreciation-input" min="0" max="50" step="0.5">
       </div>
       <div class="field-group" id="rent-growth-group">
-        <label class="field-label">Ежегодный рост аренды, %</label>
+        <label class="field-label" for="rent-growth-input">Ежегодный рост аренды, %</label>
         <input type="number" id="rent-growth-input" min="0" max="30" step="0.5">
       </div>
 
       <div class="section-divider">Вклад</div>
       <div class="field-group">
-        <label class="field-label">Ставка вклада, % годовых</label>
+        <label class="field-label" for="deposit-rate-input">Ставка вклада, % годовых</label>
         <input type="number" id="deposit-rate-input" min="1" max="40" step="0.1">
       </div>
       <div class="checkbox-row">
         <input type="checkbox" id="deposit-monthly-cb">
         <label for="deposit-monthly-cb">Ежемесячная капитализация</label>
       </div>
+      <div class="form-actions"><button type="button" class="link-button" id="reset-calc">Вернуть значения по умолчанию</button></div>
     </div>
 
   </div><!-- /left-panel -->
@@ -545,23 +599,29 @@
   <div class="right-panel">
 
     <!-- Winner banner -->
-    <div id="winner-banner" class="winner-banner">
-      <div class="wb-label"><svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 01-8 0V4z"/><path d="M8 5H5a1 1 0 00-1 1v1a3 3 0 003 3M16 5h3a1 1 0 011 1v1a3 3 0 01-3 3"/><path d="M12 13v3"/><path d="M9 20h6M10 17h4v3h-4z"/></svg>Лучшая стратегия</div>
+    <div id="winner-banner" class="winner-banner" aria-live="polite">
+      <div class="wb-label" id="wb-label"><svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 01-8 0V4z"/><path d="M8 5H5a1 1 0 00-3 3M16 5h3a1 1 0 011 1v1a3 3 0 01-3 3"/><path d="M12 13v3"/><path d="M9 20h6M10 17h4v3h-4z"/></svg>Итог для выбранного объекта</div>
       <div class="wb-amount" id="wb-amount">—</div>
       <div class="wb-delta" id="wb-delta"></div>
       <div class="wb-note" id="wb-note"></div>
+      <div class="wb-kpis">
+        <div class="wb-kpi"><span>Типичная цена</span><strong id="wb-price">—</strong></div>
+        <div class="wb-kpi"><span>Доход в 1-й год</span><strong id="wb-income">—</strong></div>
+        <div class="wb-kpi"><span>Лучший сценарий</span><strong id="wb-scenario">—</strong></div>
+      </div>
     </div>
 
     <!-- Comparison table -->
     <div class="card">
       <div class="card-title">Сравнение стратегий</div>
+      <div class="table-scroll-hint">Показатели адаптированы в карточки для мобильного экрана.</div>
       <div class="table-wrap">
         <table class="cmp-table" id="cmp-table">
           <thead>
             <tr>
               <th>Модель</th>
               <th>Год 1 доход</th>
-              <th>Аренда за период</th>
+              <th>Доход за период</th>
               <th>Капитал в кв.</th>
               <th><strong>Итоговый капитал</strong></th>
               <th>ROI</th>
@@ -579,6 +639,7 @@
       <div class="card-title">Динамика по годам</div>
       <div class="chart-wrap">
         <canvas id="chart"></canvas>
+        <div class="chart-fallback" id="chart-fallback" hidden>График временно недоступен. Все значения остаются в таблице сравнения и детальном расчёте.</div>
       </div>
     </div>
 
@@ -599,7 +660,10 @@
 
 </div><!-- /main-layout -->
 
-<script src="scripts/output/calculator_projects_data.js"></script>
+<script>
+  // Цены обновляются каждые 12 часов; ключ не даёт браузеру использовать вчерашний прайс из кэша.
+  document.write('<script src="scripts/output/calculator_projects_data.js?v=' + Math.floor(Date.now() / 43200000) + '"><' + '/script>');
+</script>
 <script>
 /* ══════════════════════════════════════════════
    DATA CONSTANTS
@@ -739,6 +803,11 @@ const PROJECTS = window.CALCULATOR_PROJECTS || [
   ]},
 ];
 
+const PRICE_DATA_META = window.CALCULATOR_PROJECTS_META || {
+  fetchedAt: '2026-07-13T16:32:58.684Z',
+  source: 'unistroy.ru, публичный API /api/flats/',
+};
+
 const ROOM_ORDER = ['Студия', '1', '2', '3', '4', '5'];
 
 // Ставки аренды по ЖК — источник: цены_для_калк.xlsx (юнит-экономика УК).
@@ -776,6 +845,10 @@ const RENT_RATES = {
 const STR_RENTED_DAYS      = 265;
 const STR_AGGREGATOR_FEE   = 0.15;
 const STR_CLEANING_PER_DAY = 500;
+// Коммунальные, расходные материалы, страховка, фотосъёмка и продвижение.
+// Калибровано на базовом сценарии из «Сценариев аренды»: 5 000 ₽/сутки,
+// 265 дней → около 624 500 ₽ владельцу после всех операционных расходов.
+const STR_OTHER_ANNUAL_COST = 126400;
 const STR_OWNER_SHARE      = 0.72;
 
 // Фолбэк для ЖК/комнатности без данных в прайс-листе (студия/1/2к не по всем
@@ -805,6 +878,17 @@ const fmtM = n => {
 };
 const parseAmt = s => parseInt(String(s).replace(/\D/g, '')) || 0;
 const fmtAmt  = n => Math.round(n).toLocaleString('ru-RU');
+const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+const isNumberInRange = (value, min, max) => Number.isFinite(value) && value >= min && value <= max;
+const formatDataDate = value => {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? 'дата неизвестна' : date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+};
+const dataAgeHours = value => {
+  const timestamp = new Date(value).getTime();
+  return Number.isFinite(timestamp) ? Math.max(0, (Date.now() - timestamp) / 36e5) : Infinity;
+};
+const escapeHtml = value => String(value).replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[char]);
 
 /* ══════════════════════════════════════════════
    CALC MODULE
@@ -816,7 +900,6 @@ const Calc = {
     cityCode:           'mhc',
     projectSlug:        'grandbereg',
     roomLabel:          '1',
-    priceTier:          'p50',   // 'p25' | 'p50' | 'p75'
     rentGrowth:         5,
     appreciation:       10,
     horizon:            5,
@@ -824,30 +907,31 @@ const Calc = {
     depositMonthly:     true,
     mortgageRate:       12,
     mortgageYears:      15,
+    purchaseCostPct:    0,
+    saleCostPct:        0,
+    annualPropertyCosts: 0,
+    cashReinvestRate:   0,
   },
 
   /* ── helpers: project/room lookup ── */
   getProject(slug) { return PROJECTS.find(p => p.slug === slug); },
   getRoom(project, roomLabel) { return project.rooms.find(r => r.label === roomLabel); },
-  hasQuantilePrices(room) {
-    return ['priceP25', 'priceP50', 'priceP75', 'areaP25', 'areaP50', 'areaP75']
-      .every(key => Number.isFinite(room[key]));
+  priceForTier(room) {
+    return room.priceP50 ?? room.priceAvg;
   },
-  priceForTier(room, tier) {
-    const field = { p25: 'priceP25', p50: 'priceP50', p75: 'priceP75' }[tier] || 'priceP50';
-    return room[field] ?? room.priceAvg;
-  },
-  areaForTier(room, tier) {
-    const field = { p25: 'areaP25', p50: 'areaP50', p75: 'areaP75' }[tier] || 'areaP50';
-    return room[field] ?? (room.areaMin + room.areaMax) / 2;
+  areaForTier(room) {
+    return room.areaP50 ?? (room.areaMin + room.areaMax) / 2;
   },
   // Ставки аренды по прайс-листу ЖК, с фолбэком на % от цены (RENT_YIELD),
   // когда для проекта/комнатности нет данных в прайс-листе.
   getRentFigures(projectSlug, roomLabel, price) {
     const rate = RENT_RATES[projectSlug] && RENT_RATES[projectSlug][roomLabel];
     if (rate) {
-      const opProfitPerDay   = rate.daily * (1 - STR_AGGREGATOR_FEE) - STR_CLEANING_PER_DAY;
-      const dailyAnnualIncome = Math.max(0, STR_RENTED_DAYS * opProfitPerDay * STR_OWNER_SHARE);
+      const grossRevenue = rate.daily * STR_RENTED_DAYS;
+      const aggregatorFee = grossRevenue * STR_AGGREGATOR_FEE;
+      const cleaningCost = STR_CLEANING_PER_DAY * STR_RENTED_DAYS;
+      const operatingProfit = grossRevenue - aggregatorFee - cleaningCost - STR_OTHER_ANNUAL_COST;
+      const dailyAnnualIncome = Math.max(0, operatingProfit * STR_OWNER_SHARE);
       return { monthlyRent: rate.monthly, dailyAnnualIncome, isEstimated: false };
     }
     const yieldInfo = RENT_YIELD[roomLabel] || RENT_YIELD['1'];
@@ -864,18 +948,20 @@ const Calc = {
     const project = this.getProject(d.projectSlug);
     const room    = this.getRoom(project, d.roomLabel);
 
-    const unitPrice = this.priceForTier(room, d.priceTier);
-    const area      = this.areaForTier(room, d.priceTier);
+    const unitPrice = this.priceForTier(room);
+    const area      = this.areaForTier(room);
     const { monthlyRent, dailyAnnualIncome, isEstimated } = this.getRentFigures(d.projectSlug, d.roomLabel, unitPrice);
 
-    // Минимальная сумма инвестиций, при которой эта квартира проходит по лимиту
-    // ипотеки (тело кредита ≤ 45% суммы клиента): unitPrice ≤ invest × 1.45.
-    const requiredInvestAmount = unitPrice / (1 + MAX_MORTGAGE_SHARE);
+    // Расходы покупки оплачиваются из собственных средств и не финансируются
+    // ипотекой. Поэтому они участвуют в проверке доступности, а не только в ROI.
+    const purchaseCostPerUnit = unitPrice * d.purchaseCostPct / 100;
+    const fullCashPerUnit = unitPrice + purchaseCostPerUnit;
+    const requiredInvestAmount = fullCashPerUnit / (1 + MAX_MORTGAGE_SHARE);
 
     // Покупаем максимум целых квартир этого же ЖК/комнатности на введённую
     // сумму. Дополнительная квартира в ипотеку возможна, только когда тело
-    // кредита не превышает 45% исходной суммы клиента. Остаток остаётся
-    // наличными без роста.
+    // кредита не превышает 45% исходной суммы клиента. Расходы покупки
+    // вычитаются из наличных до расчёта первоначального взноса.
     let units = 0, mortgagedUnits = 0, principal = 0, cashRemainder = 0;
     let monthlyMortgage = 0, annualMortgage = 0;
     let mortgageTotalPaid = 0, mortgageOverpay = 0;
@@ -883,11 +969,12 @@ const Calc = {
     let isAffordable = true;
     const mortgageLimit = d.investAmount * MAX_MORTGAGE_SHARE;
 
-    const nFull    = Math.floor(d.investAmount / unitPrice);
-    const cashLeft = d.investAmount - nFull * unitPrice;
+    const nFull    = Math.floor(d.investAmount / fullCashPerUnit);
+    const cashLeft = d.investAmount - nFull * fullCashPerUnit;
 
-    if (nFull >= 1 && cashLeft >= unitPrice * 0.20) {
-      const candidatePrincipal = unitPrice - cashLeft;
+    if (nFull >= 1 && cashLeft - purchaseCostPerUnit >= unitPrice * 0.20) {
+      const downPayment = cashLeft - purchaseCostPerUnit;
+      const candidatePrincipal = unitPrice - downPayment;
       if (candidatePrincipal <= mortgageLimit) {
         units = nFull + 1;
         mortgagedUnits = 1;
@@ -900,8 +987,9 @@ const Calc = {
       units = nFull;
       cashRemainder = cashLeft;
     } else {
-      const candidatePrincipal = unitPrice - d.investAmount;
-      if (candidatePrincipal <= mortgageLimit) {
+      const downPayment = d.investAmount - purchaseCostPerUnit;
+      const candidatePrincipal = unitPrice - downPayment;
+      if (downPayment >= 0 && candidatePrincipal <= mortgageLimit) {
         units = 1;
         mortgagedUnits = 1;
         principal = candidatePrincipal;
@@ -958,15 +1046,17 @@ const Calc = {
         : d.investAmount * Math.pow(1 + depRate, i)
     );
 
-    // Остаток не кладём на вклад и учитываем как наличные без роста.
-    const remainderArr = years.map(() => cashRemainder);
+    const purchaseCosts = purchaseCostPerUnit * units;
+    const reinvestRate = d.cashReinvestRate / 100;
 
     // Rental model calc
     const computeModel = (modelId) => {
       const rentArr  = [0];
       const cumArr   = [0];
       const flowArr  = [0];
+      const cashArr  = [cashRemainder];
       let cum = 0;
+      let cash = cashRemainder;
 
       for (let i = 1; i <= H; i++) {
         const g = Math.pow(1 + d.rentGrowth / 100, i - 1);
@@ -986,19 +1076,23 @@ const Calc = {
         yr *= units;
 
         const mort = (needsMortgage && i <= d.mortgageYears) ? annualMortgage : 0;
-        const net  = yr - mort;
+        const propertyCosts = d.annualPropertyCosts * units;
+        const net  = yr - mort - propertyCosts;
         cum += net;
+        cash = cash * (1 + reinvestRate) + net;
 
         rentArr.push(yr);
         flowArr.push(net);
         cumArr.push(cum);
+        cashArr.push(cash);
       }
 
       const propArr   = years.map(i => totalCost * Math.pow(1 + d.appreciation / 100, i));
       const equityArr = years.map(i => propArr[i] - mortgageBalanceArr[i]);
-      const wealthArr = years.map(i => equityArr[i] + cumArr[i] + remainderArr[i]);
+      const saleCostArr = years.map(i => i === H ? propArr[i] * d.saleCostPct / 100 : 0);
+      const wealthArr = years.map(i => equityArr[i] + cashArr[i] - saleCostArr[i]);
 
-      return { rentArr, flowArr, cumArr, propArr, equityArr, wealthArr };
+      return { rentArr, flowArr, cumArr, cashArr, propArr, equityArr, saleCostArr, wealthArr };
     };
 
     const longterm   = computeModel('longterm');
@@ -1013,9 +1107,10 @@ const Calc = {
       unitPrice, units, mortgagedUnits,
       totalCost, monthlyRent, dailyAnnualIncome, isEstimated,
       cashRemainder, principal, mortgageLimit, mortgageBalanceArr, requiredInvestAmount,
+      purchaseCosts, annualPropertyCosts: d.annualPropertyCosts, cashReinvestRate: d.cashReinvestRate,
       monthlyMortgage, annualMortgage, mortgageOverpay, mortgageTotalPaid,
       needsMortgage, isAffordable,
-      depositArr, remainderArr,
+      depositArr,
       longterm, guaranteed, daily,
       roi,
     };
@@ -1031,21 +1126,27 @@ const Calc = {
     const projMin = Math.min(...proj.rooms.map(rm => rm.priceMin));
     const projMax = Math.max(...proj.rooms.map(rm => rm.priceMax));
     const projCount = proj.rooms.reduce((s, rm) => s + rm.count, 0);
+    const priceDataAge = dataAgeHours(PRICE_DATA_META.fetchedAt);
+    const freshnessNote = priceDataAge > 24
+      ? `<br><span class="badge badge-yellow">Данные старше 24 часов — уточните актуальность у менеджера</span>`
+      : '';
     document.getElementById('project-info-display').innerHTML =
-      `${projCount} квартир в продаже · ${rub(projMin)}–${rub(projMax)}`;
+      `${projCount} квартир в продаже · ${rub(projMin)}–${rub(projMax)}<br>` +
+      `<span class="price-meta">Обновлено: ${formatDataDate(PRICE_DATA_META.fetchedAt)}</span>${freshnessNote}`;
 
     /* Price display for selected room + tier */
     const shownPrice = r.isAffordable ? r.totalCost : r.unitPrice;
     const lotsText = r.units > 1 ? ` за ${r.units} ${pluralFlats(r.units)}` : '';
     const areaText = r.units > 1 ? `≈${r.area.toFixed(1)} м² каждый` : `≈${r.area.toFixed(1)} м²`;
     document.getElementById('apt-price-display').innerHTML =
-      `Цена: <strong>${rub(shownPrice)}</strong>${lotsText}, ${areaText}<br>` +
+      `<span class="price-label">Типичная цена</span><br><strong>${rub(shownPrice)}</strong>${lotsText}, ${areaText}<br>` +
       `<span class="hint-sm">Диапазон по ${r.room.count} квартирам: ${rub(r.room.priceMin)}–${rub(r.room.priceMax)}.</span>`;
 
     /* Purchase status */
     const ps = document.getElementById('purchase-status');
     if (!r.isAffordable) {
-      ps.innerHTML = `<span class="badge badge-yellow">Для этой квартиры нужна сумма инвестиций от ${rub(r.requiredInvestAmount)}</span>`;
+      ps.innerHTML = `<span class="badge badge-yellow">Для этой квартиры нужна сумма инвестиций от ${rub(r.requiredInvestAmount)}</span>` +
+        (d.purchaseCostPct > 0 ? `<div class="hint-sm" style="margin-top:6px">В минимальную сумму уже включены расходы покупки: ${rub(r.unitPrice * d.purchaseCostPct / 100)}.</div>` : '');
     } else if (r.mortgagedUnits === 0) {
       ps.innerHTML = `<span class="badge badge-green"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg>Полная оплата</span>` +
         (r.cashRemainder > 0
@@ -1060,11 +1161,11 @@ const Calc = {
       <div class="mortgage-fields">
         <div class="two-col-fields">
           <div class="field-group" style="margin:0">
-            <label class="field-label">Ставка, %</label>
+            <label class="field-label" for="mort-rate-input">Ставка, %</label>
             <input type="number" id="mort-rate-input" value="${d.mortgageRate}" min="1" max="40" step="0.1">
           </div>
           <div class="field-group" style="margin:0">
-            <label class="field-label">Срок, лет</label>
+            <label class="field-label" for="mort-years-input">Срок, лет</label>
             <input type="number" id="mort-years-input" value="${d.mortgageYears}" min="1" max="30" step="1">
           </div>
         </div>
@@ -1084,11 +1185,11 @@ const Calc = {
       <div class="mortgage-fields">
         <div class="two-col-fields">
           <div class="field-group" style="margin:0">
-            <label class="field-label">Ставка, %</label>
+            <label class="field-label" for="mort-rate-input">Ставка, %</label>
             <input type="number" id="mort-rate-input" value="${d.mortgageRate}" min="1" max="40" step="0.1">
           </div>
           <div class="field-group" style="margin:0">
-            <label class="field-label">Срок, лет</label>
+            <label class="field-label" for="mort-years-input">Срок, лет</label>
             <input type="number" id="mort-years-input" value="${d.mortgageYears}" min="1" max="30" step="1">
           </div>
         </div>
@@ -1102,6 +1203,10 @@ const Calc = {
       this._bindMortgageInputs();
     }
 
+    if (r.isAffordable && r.purchaseCosts > 0) {
+      ps.insertAdjacentHTML('beforeend', `<div class="hint-sm" style="margin-top:6px">Расходы покупки ${rub(r.purchaseCosts)} включены в требуемые собственные средства.</div>`);
+    }
+
     /* — Rent info display — */
     const ltNet  = r.monthlyRent * 11 * 0.88 / 12; // средн. в мес
     const gurNet = r.monthlyRent * 0.75;            // каждый месяц
@@ -1113,7 +1218,7 @@ const Calc = {
     ];
     const roomLabel = d.roomLabel === 'Студия' ? 'Студия' : d.roomLabel + '-комн.';
     document.getElementById('rent-info-display').innerHTML =
-      `<div class="rent-info-label">Доход собственника за 1 квартиру — ${proj.label}, ${roomLabel}</div>` +
+      `<div class="rent-info-label">Доход собственника за 1 квартиру — ${escapeHtml(proj.label)}, ${escapeHtml(roomLabel)}</div>` +
       `<table class="rent-info-table">` +
       rows.map(row =>
         `<tr>
@@ -1121,7 +1226,8 @@ const Calc = {
           <td>${row[1]}</td>
         </tr>`
       ).join('') +
-      `</table>`;
+      `</table>` +
+      (r.isEstimated ? `<div class="hint-sm">Доход рассчитан оценочно по доходности комнатности: подтвердите ставку у УК.</div>` : '');
 
     /* — Winner determination — */
     const candidates = {};
@@ -1147,11 +1253,18 @@ const Calc = {
 
     /* — Winner banner — */
     document.getElementById('wb-amount').textContent = rub(maxWealth);
+    document.getElementById('wb-label').innerHTML = `<svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 01-8 0V4z"/><path d="M8 5H5a1 1 0 00-1 1v1a3 3 0 003 3M16 5h3a1 1 0 011 1v1a3 3 0 01-3 3"/><path d="M12 13v3"/><path d="M9 20h6M10 17h4v3h-4z"/></svg>${r.isAffordable ? `Прогноз для выбранного объекта · ${H} ${pluralYr(H)}` : `Вклад вместо выбранного объекта · ${H} ${pluralYr(H)}`}`;
+    const winnerYearOneIncome = winner === 'deposit'
+      ? r.depositArr[1] - r.depositArr[0]
+      : r[winner].rentArr[1];
+    document.getElementById('wb-price').textContent = r.isAffordable ? rub(r.unitPrice) : 'Недоступно';
+    document.getElementById('wb-income').textContent = `+${rub(winnerYearOneIncome)}`;
+    document.getElementById('wb-scenario').textContent = modelLabels[winner];
     const deltaVsDeposit = maxWealth - r.depositArr[H];
     const trophyIcon = '<svg class="ic14" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 01-8 0V4z"/><path d="M8 5H5a1 1 0 00-1 1v1a3 3 0 003 3M16 5h3a1 1 0 011 1v1a3 3 0 01-3 3"/><path d="M12 13v3"/><path d="M9 20h6M10 17h4v3h-4z"/></svg>';
     if (winner === 'deposit') {
       document.getElementById('wb-delta').innerHTML =
-        `${trophyIcon}${modelLabels[winner]} — итоговый капитал через ${H} ${pluralYr(H)}`;
+        `${trophyIcon}${r.isAffordable ? modelLabels[winner] : 'Выбранный объект не проходит по бюджету; вклад'} — итоговый капитал через ${H} ${pluralYr(H)}`;
     } else {
       document.getElementById('wb-delta').textContent =
         `Обгоняет банковский вклад на ${rub(deltaVsDeposit)} (+${pct(deltaVsDeposit / r.depositArr[H] * 100)})`;
@@ -1159,6 +1272,8 @@ const Calc = {
     const noteEl = document.getElementById('wb-note');
     if (close) {
       noteEl.textContent = 'Разница незначительна. Учитывайте риски.';
+    } else if (!r.isAffordable) {
+      noteEl.textContent = 'Сравните альтернативу в регионе слева или увеличьте бюджет на выбранный объект.';
     } else if (winner === 'daily') {
       noteEl.textContent = '*Посуточная аренда требует активного управления или доверенного управляющего';
     } else if (winner === 'guaranteed') {
@@ -1171,7 +1286,7 @@ const Calc = {
     const tbody = document.getElementById('cmp-tbody');
     const tfoot = document.getElementById('cmp-tfoot');
     document.getElementById('cmp-note').textContent =
-      `Итоговый капитал = накопленная рента + капитал в квартире (стоимость минус остаток долга) на год ${H}. ` +
+      `Итоговый капитал = денежный поток + капитал в квартире (стоимость минус остаток долга и расходы продажи) на год ${H}. ` +
       `Вклад — ${d.depositMonthly ? 'ежемесячная' : 'годовая'} капитализация.`;
     tbody.innerHTML = '';
     tfoot.innerHTML = '';
@@ -1182,12 +1297,12 @@ const Calc = {
       if (isWin) tr.className = 'winner-row';
       const roiVal = r.roi(total);
       tr.innerHTML = `
-        <td>${label}</td>
-        <td>${yr1 !== null ? rub(yr1) : '—'}</td>
-        <td>${yr1 !== null ? rub(cumRent) : '—'}</td>
-        <td>${yr1 !== null ? rub(propVal) : '—'}</td>
-        <td><strong>${rub(total)}</strong></td>
-        <td>${pct(roiVal)}</td>
+        <td data-label="Модель">${label}</td>
+        <td data-label="Год 1 доход">${yr1 !== null ? rub(yr1) : '—'}</td>
+        <td data-label="Денежный поток">${yr1 !== null ? rub(cumRent) : '—'}</td>
+        <td data-label="Капитал в кв.">${yr1 !== null ? rub(propVal) : '—'}</td>
+        <td data-label="Итоговый капитал"><strong>${rub(total)}</strong></td>
+        <td data-label="ROI">${pct(roiVal)}</td>
       `;
       tbody.appendChild(tr);
     };
@@ -1205,7 +1320,10 @@ const Calc = {
       footHtml += `<tr class="note-row"><td colspan="6">Ипотека: платёж ${rub(r.monthlyMortgage)}/мес, переплата ${rub(r.mortgageOverpay)}, учтена в расчёте.</td></tr>`;
     }
     if (r.cashRemainder > 0) {
-      footHtml += `<tr class="note-row"><td colspan="6">Остаток ${rub(r.cashRemainder)} учтён как наличные без роста.</td></tr>`;
+      footHtml += `<tr class="note-row"><td colspan="6">Остаток ${rub(r.cashRemainder)} и денежные потоки ${r.cashReinvestRate > 0 ? `реинвестируются под ${pct(r.cashReinvestRate)}` : 'учтены без роста'}.</td></tr>`;
+    }
+    if (r.purchaseCosts > 0 || d.saleCostPct > 0 || r.annualPropertyCosts > 0) {
+      footHtml += `<tr class="note-row"><td colspan="6">Учтены дополнительные расходы: покупка ${pct(d.purchaseCostPct)}, продажа ${pct(d.saleCostPct)}, владение ${rub(r.annualPropertyCosts)}/год на квартиру.</td></tr>`;
     }
     tfoot.innerHTML = footHtml;
 
@@ -1281,7 +1399,7 @@ const Calc = {
         <th>Рента (брутто)</th>
         <th>Ипотека</th>
         <th>Чистый поток</th>
-        <th>Накоп. рента</th>
+        <th>Накоп. поток</th>
         <th>Стоимость кв.</th>
         <th>Остаток долга</th>
         <th>Капитал в кв.</th>
@@ -1295,7 +1413,7 @@ const Calc = {
           <td>${rub(winnerData.rentArr[i])}</td>
           <td>${mort}</td>
           <td>${rub(winnerData.flowArr[i])}</td>
-          <td>${rub(winnerData.cumArr[i])}</td>
+          <td>${rub(winnerData.cashArr[i])}</td>
           <td>${rub(winnerData.propArr[i])}</td>
           <td>${rub(r.mortgageBalanceArr[i])}</td>
           <td>${rub(winnerData.equityArr[i])}</td>
@@ -1322,11 +1440,27 @@ const Calc = {
     const mr = ps.querySelector('#mort-rate-input');
     const my = ps.querySelector('#mort-years-input');
     if (mr) mr.addEventListener('input', () => {
-      this.data.mortgageRate = parseFloat(mr.value) || 12;
+      const value = parseFloat(mr.value);
+      if (!isNumberInRange(value, 1, 40)) {
+        this._setValidationMessage('Ставка ипотеки должна быть от 1% до 40%.');
+        mr.setAttribute('aria-invalid', 'true');
+        return;
+      }
+      mr.removeAttribute('aria-invalid');
+      this._setValidationMessage('');
+      this.data.mortgageRate = value;
       this._saveLS(); this._recompute();
     });
     if (my) my.addEventListener('input', () => {
-      this.data.mortgageYears = parseInt(my.value) || 15;
+      const value = parseInt(my.value, 10);
+      if (!isNumberInRange(value, 1, 30)) {
+        this._setValidationMessage('Срок ипотеки должен быть от 1 до 30 лет.');
+        my.setAttribute('aria-invalid', 'true');
+        return;
+      }
+      my.removeAttribute('aria-invalid');
+      this._setValidationMessage('');
+      this.data.mortgageYears = value;
       this._saveLS(); this._recompute();
     });
   },
@@ -1346,6 +1480,7 @@ const Calc = {
 
     const propGrow = (c) => c * Math.pow(1 + d.appreciation / 100, H);
 
+    const cashGrow = value => value * Math.pow(1 + d.cashReinvestRate / 100, H);
     const cumRentFn = (monthlyRent, dailyAnnualIncome, model, mortAnnual) => {
       let yr1 = 0;
       if (model === 'longterm')   yr1 = monthlyRent * 11 * 0.88;
@@ -1355,7 +1490,7 @@ const Calc = {
       for (let i = 1; i <= H; i++) {
         const yr   = yr1 * Math.pow(1 + d.rentGrowth / 100, i - 1);
         const mort = (mortAnnual > 0 && i <= d.mortgageYears) ? mortAnnual : 0;
-        total += yr - mort;
+        total = total * (1 + d.cashReinvestRate / 100) + yr - mort - d.annualPropertyCosts;
       }
       return total;
     };
@@ -1376,9 +1511,11 @@ const Calc = {
     // разумная рекомендация, даже если по цифрам это выгоднее.
     const evalCombo = (project, room, budget) => {
       const cost = room.priceP50 ?? room.priceAvg;
+      const purchaseCost = cost * d.purchaseCostPct / 100;
+      const fullCashCost = cost + purchaseCost;
       const maxMortPrincipal = budget * MAX_MORTGAGE_SHARE;
 
-      const { monthlyRent, dailyAnnualIncome } = this.getRentFigures(project.slug, room.label, cost);
+      const { monthlyRent, dailyAnnualIncome, isEstimated } = this.getRentFigures(project.slug, room.label, cost);
       const mortgageBalanceAtHorizon = (principal, mortAnn) => {
         if (!principal) return 0;
         const totalMonths = d.mortgageYears * 12;
@@ -1392,9 +1529,12 @@ const Calc = {
         }
         return Math.max(0, principal - payment * paidMonths);
       };
-      const perUnitWealth = (m, principal = 0, mortAnn = 0) =>
-        propGrow(cost) - mortgageBalanceAtHorizon(principal, mortAnn) +
-        cumRentFn(monthlyRent, dailyAnnualIncome, m, mortAnn);
+      const perUnitWealth = (m, principal = 0, mortAnn = 0) => {
+        const finalPropertyValue = propGrow(cost);
+        return finalPropertyValue - mortgageBalanceAtHorizon(principal, mortAnn) +
+          cumRentFn(monthlyRent, dailyAnnualIncome, m, mortAnn) -
+          finalPropertyValue * d.saleCostPct / 100;
+      };
       const bestModelFor = (principal = 0, mortAnn = 0) => {
         let bestW = -Infinity, bestModel = 'daily';
         ['longterm', 'guaranteed', 'daily'].forEach(m => {
@@ -1404,8 +1544,8 @@ const Calc = {
         return { bestW, bestModel };
       };
 
-      const nFull    = Math.floor(budget / cost);
-      const cashLeft = budget - nFull * cost;
+      const nFull    = Math.floor(budget / fullCashCost);
+      const cashLeft = budget - nFull * fullCashCost;
 
       // Вариант A: nFull квартир за наличные, остаток — наличными без роста
       // (если бюджета не хватает даже на одну квартиру целиком — одна квартира в ипотеку,
@@ -1416,11 +1556,12 @@ const Calc = {
         options.push({
           units: nFull, mortgagedUnits: 0, remainder: cashLeft,
           model: cashModel.bestModel,
-          wealth: nFull * cashModel.bestW + cashLeft,
+          wealth: nFull * cashModel.bestW + cashGrow(cashLeft),
         });
       } else {
-        const principal = cost - budget;
-        if (principal > maxMortPrincipal) return null; // ипотека больше 45% суммы клиента — не рекомендуем
+        const downPayment = budget - purchaseCost;
+        const principal = cost - downPayment;
+        if (downPayment < 0 || principal > maxMortPrincipal) return null;
         const mortAnn = mortPayAnnual(principal);
         const m = bestModelFor(principal, mortAnn);
         options.push({ units: 1, mortgagedUnits: 1, remainder: 0, mortAnn, model: m.bestModel, wealth: m.bestW });
@@ -1428,8 +1569,9 @@ const Calc = {
 
       // Вариант B: ещё одна квартира сверху в ипотеку под остаток как первый взнос
       // (тоже только если тело кредита не превышает лимит)
-      if (nFull >= 1 && cashLeft >= cost * 0.20) {
-        const principal = cost - cashLeft;
+      if (nFull >= 1 && cashLeft - purchaseCost >= cost * 0.20) {
+        const downPayment = cashLeft - purchaseCost;
+        const principal = cost - downPayment;
         if (principal <= maxMortPrincipal) {
           const mortAnn = mortPayAnnual(principal);
           const cashModel = bestModelFor();
@@ -1453,6 +1595,7 @@ const Calc = {
         units: best.units,
         needsMortgage: best.mortgagedUnits > 0,
         mortMonthly: best.mortgagedUnits > 0 ? (best.mortAnn || 0) / 12 : 0,
+        isEstimated,
       };
     };
 
@@ -1488,8 +1631,8 @@ const Calc = {
     const cityIn = CITY_IN[d.cityCode] || (CITIES.find(c => c.code === d.cityCode) || {}).label || '';
 
     const reason = best.model === 'deposit'
-      ? `При текущих ставках (${d.depositRate}%) вклад опережает арендные стратегии за ${H} ${pluralYr(H)} в ${cityIn}.`
-      : `Лучшее соотношение цены и доходности среди квартир в ${cityIn} на вашу сумму инвестиций.`;
+      ? `Среди альтернатив в ${cityIn} вклад опережает арендные стратегии за ${H} ${pluralYr(H)}.`
+      : `Альтернатива выбранному объекту с лучшим соотношением цены и доходности в ${cityIn}.`;
 
     return {
       ...best,
@@ -1503,13 +1646,15 @@ const Calc = {
     const h   = this._computeHint();
     const el  = document.getElementById('strategy-hint');
     const H   = this.data.horizon;
+    const isSelectedObject = h.key === `${this.data.projectSlug}_${this.data.roomLabel}`;
 
     el.classList.remove('hidden');
+    document.getElementById('sh-title').innerHTML = `<svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 00-3.5 10.9c.5.4.8 1 .8 1.6V16h5.4v-.5c0-.6.3-1.2.8-1.6A6 6 0 0012 3z"/></svg>${isSelectedObject ? 'Прогноз для выбранного объекта' : 'Лучшая альтернатива в регионе'}`;
 
     const badge = document.getElementById('sh-badge');
     badge.textContent = h.label;
 
-    document.getElementById('sh-sublabel').textContent = h.sublabel;
+    document.getElementById('sh-sublabel').textContent = h.sublabel + (h.isEstimated ? ' · доход оценочный' : '');
 
     const wealthEl = document.getElementById('sh-wealth');
     wealthEl.textContent = fmtM(h.wealth);
@@ -1518,7 +1663,9 @@ const Calc = {
     roiEl.textContent = (h.roi >= 0 ? '+' : '') + h.roi.toFixed(1) + '%';
 
     document.getElementById('sh-years').textContent = H + ' ' + pluralYr(H);
-    document.getElementById('sh-reason').textContent = h.reason;
+    document.getElementById('sh-reason').textContent = isSelectedObject
+      ? 'Выбранный объект показывает лучший прогноз среди доступных вариантов в регионе.'
+      : h.reason;
 
     const mortEl = document.getElementById('sh-mort');
     if (h.needsMortgage && h.mortMonthly > 0) {
@@ -1542,6 +1689,25 @@ const Calc = {
   _saveLS() {
     try { localStorage.setItem('calc_v5', JSON.stringify(this.data)); } catch(e) {}
   },
+  _setValidationMessage(message) {
+    const el = document.getElementById('invest-help');
+    if (el) el.textContent = message;
+  },
+  _sanitizeData() {
+    const d = this.data;
+    d.investAmount = clamp(Number(d.investAmount) || 6000000, 1000000, 70000000);
+    d.rentGrowth = clamp(Number(d.rentGrowth) || 0, 0, 30);
+    d.appreciation = clamp(Number(d.appreciation) || 0, 0, 50);
+    d.horizon = clamp(Math.round(Number(d.horizon) || 5), 1, 15);
+    d.depositRate = clamp(Number(d.depositRate) || 1, 1, 40);
+    d.mortgageRate = clamp(Number(d.mortgageRate) || 12, 1, 40);
+    d.mortgageYears = clamp(Math.round(Number(d.mortgageYears) || 15), 1, 30);
+    d.purchaseCostPct = clamp(Number(d.purchaseCostPct) || 0, 0, 15);
+    d.saleCostPct = clamp(Number(d.saleCostPct) || 0, 0, 15);
+    d.annualPropertyCosts = clamp(Number(d.annualPropertyCosts) || 0, 0, 1000000);
+    d.cashReinvestRate = clamp(Number(d.cashReinvestRate) || 0, 0, 40);
+    d.depositMonthly = Boolean(d.depositMonthly);
+  },
   _loadLS() {
     try {
       const s = localStorage.getItem('calc_v5');
@@ -1551,12 +1717,12 @@ const Calc = {
     // Валидация каскада город → ЖК → комнатность на случай несовместимых
     // сохранённых данных (например, из старой версии калькулятора)
     const d = this.data;
+    this._sanitizeData();
     if (!CITIES.find(c => c.code === d.cityCode)) d.cityCode = CITIES[0].code;
     let projs = PROJECTS.filter(p => p.city === d.cityCode);
     if (!projs.find(p => p.slug === d.projectSlug)) d.projectSlug = projs[0].slug;
     const proj = this.getProject(d.projectSlug);
     if (!proj.rooms.find(r => r.label === d.roomLabel)) d.roomLabel = proj.rooms[0].label;
-    if (!['p25', 'p50', 'p75'].includes(d.priceTier)) d.priceTier = 'p50';
   },
 
   /* ── chart instance ── */
@@ -1585,16 +1751,6 @@ const Calc = {
     });
     sel.value = this.data.roomLabel;
   },
-  _updatePriceTierUI() {
-    const room = this.getRoom(this.getProject(this.data.projectSlug), this.data.roomLabel);
-    const hasQuantiles = this.hasQuantilePrices(room);
-    if (!hasQuantiles) this.data.priceTier = 'p50';
-    document.querySelectorAll('#price-tier-seg button').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.tier === this.data.priceTier);
-      btn.disabled = !hasQuantiles && btn.dataset.tier !== 'p50';
-    });
-  },
-
   /* ── init ── */
   init() {
     this._loadLS();
@@ -1603,7 +1759,6 @@ const Calc = {
     this._populateCitySelect();
     this._populateProjectSelect();
     this._populateRoomSelect();
-    this._updatePriceTierUI();
 
     /* Set field values */
     const invInput = document.getElementById('invest-input');
@@ -1619,10 +1774,11 @@ const Calc = {
     document.getElementById('deposit-monthly-cb').checked = this.data.depositMonthly;
 
     /* Create chart */
-    Chart.defaults.font.family = "'Montserrat', system-ui, sans-serif";
-    Chart.defaults.color = '#6b7a7a';
-    const ctx = document.getElementById('chart').getContext('2d');
-    this._chart = new Chart(ctx, {
+    if (window.Chart) {
+      Chart.defaults.font.family = "'Montserrat', system-ui, sans-serif";
+      Chart.defaults.color = '#526060';
+      const ctx = document.getElementById('chart').getContext('2d');
+      this._chart = new Chart(ctx, {
       type: 'line',
       data: { labels: [], datasets: [] },
       options: {
@@ -1630,7 +1786,7 @@ const Calc = {
         maintainAspectRatio: false,
         interaction: { mode: 'index', intersect: false },
         plugins: {
-          legend: { position: 'top', labels: { font: { size: 11, weight: 600 }, usePointStyle: true, padding: 14, color: '#262729' } },
+          legend: { position: 'top', labels: { font: { size: 11, weight: 600 }, usePointStyle: true, padding: 12, color: '#262729' } },
           tooltip: {
             backgroundColor: '#223030',
             titleColor: '#ffffff',
@@ -1650,20 +1806,31 @@ const Calc = {
           }
         }
       }
-    });
+      });
+    } else {
+      document.getElementById('chart').hidden = true;
+      document.getElementById('chart-fallback').hidden = false;
+    }
 
     /* ── Event listeners ── */
 
     invInput.addEventListener('input', () => {
       const raw = parseAmt(invInput.value);
-      if (raw > 0) {
+      if (isNumberInRange(raw, 1000000, 70000000)) {
         this.data.investAmount = raw;
-        invSlider.value = Math.min(Math.max(raw, 1000000), 70000000);
+        invSlider.value = raw;
+        invInput.removeAttribute('aria-invalid');
+        this._setValidationMessage('');
         this._saveLS(); this._recompute();
+      } else if (raw > 0) {
+        invInput.setAttribute('aria-invalid', 'true');
+        this._setValidationMessage('Введите сумму от 1 до 70 млн ₽. Расчёт пока не изменён.');
       }
     });
     invInput.addEventListener('blur', () => {
       invInput.value = fmtAmt(this.data.investAmount);
+      invInput.removeAttribute('aria-invalid');
+      this._setValidationMessage('');
     });
 
     invSlider.addEventListener('input', () => {
@@ -1696,24 +1863,29 @@ const Calc = {
       this._saveLS(); this._recompute();
     });
 
-    document.querySelectorAll('#price-tier-seg button').forEach(btn => {
-      btn.addEventListener('click', () => {
-        this.data.priceTier = btn.dataset.tier;
-        this._updatePriceTierUI();
+    const numBind = (id, key, min, max, parse = parseFloat) => {
+      document.getElementById(id).addEventListener('input', (e) => {
+        const value = parse(e.target.value);
+        if (!isNumberInRange(value, min, max)) {
+          e.target.setAttribute('aria-invalid', 'true');
+          this._setValidationMessage(`Значение «${e.target.previousElementSibling.textContent}» должно быть от ${min.toLocaleString('ru-RU')} до ${max.toLocaleString('ru-RU')}.`);
+          return;
+        }
+        e.target.removeAttribute('aria-invalid');
+        this._setValidationMessage('');
+        this.data[key] = value;
         this._saveLS(); this._recompute();
       });
-    });
-
-    const numBind = (id, key, parse) => {
-      document.getElementById(id).addEventListener('input', (e) => {
-        this.data[key] = parse(e.target.value);
-        this._saveLS(); this._recompute();
+      document.getElementById(id).addEventListener('blur', (e) => {
+        e.target.value = this.data[key];
+        e.target.removeAttribute('aria-invalid');
+        this._setValidationMessage('');
       });
     };
 
-    numBind('rent-growth-input',  'rentGrowth',   v => parseFloat(v) || 0);
-    numBind('appreciation-input', 'appreciation', v => parseFloat(v) || 0);
-    numBind('deposit-rate-input', 'depositRate',  v => parseFloat(v) || 0);
+    numBind('rent-growth-input',  'rentGrowth', 0, 30);
+    numBind('appreciation-input', 'appreciation', 0, 50);
+    numBind('deposit-rate-input', 'depositRate', 1, 40);
 
     document.getElementById('horizon-slider').addEventListener('input', (e) => {
       const v = parseInt(e.target.value);
@@ -1725,6 +1897,17 @@ const Calc = {
     document.getElementById('deposit-monthly-cb').addEventListener('change', (e) => {
       this.data.depositMonthly = e.target.checked;
       this._saveLS(); this._recompute();
+    });
+
+    document.getElementById('reset-calc').addEventListener('click', () => {
+      try { localStorage.removeItem('calc_v5'); } catch(e) {}
+      this.data = {
+        investAmount: 6000000, cityCode: 'mhc', projectSlug: 'grandbereg', roomLabel: '1',
+        rentGrowth: 5, appreciation: 10, horizon: 5, depositRate: 11, depositMonthly: true,
+        mortgageRate: 12, mortgageYears: 15, purchaseCostPct: 0, saleCostPct: 0,
+        annualPropertyCosts: 0, cashReinvestRate: 0,
+      };
+      window.location.reload();
     });
 
     /* Initial render */

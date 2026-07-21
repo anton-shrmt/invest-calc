@@ -248,6 +248,9 @@
     .wb-action-btn:hover { background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.42); }
     .wb-action-btn:focus-visible { outline: 3px solid rgba(165,255,0,.58); outline-offset: 2px; }
     @media (max-width: 600px) { .wb-actions { flex-wrap: wrap; } .wb-action-btn { flex: 1; justify-content: center; } }
+    .wb-qr { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line-dark); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .wb-qr img { width: 140px; height: 140px; border-radius: var(--r-sm); background: var(--white); padding: 8px; display: block; }
+    .wb-qr .hint-sm { color: rgba(255,255,255,.65); max-width: 220px; margin-top: 0; }
 
     /* ── COMPARISON TABLE ── */
     .table-wrap { overflow-x: auto; }
@@ -684,6 +687,11 @@
         <button type="button" class="wb-action-btn" id="share-link-btn"><svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.07 0l2.83-2.83a5 5 0 00-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 00-7.07 0L4.1 13.83a5 5 0 007.07 7.07l1.5-1.5"/></svg>Скопировать ссылку</button>
         <button type="button" class="wb-action-btn" id="print-btn"><svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"/><path d="M6 18H4a1 1 0 01-1-1v-6a1 1 0 011-1h16a1 1 0 011 1v6a1 1 0 01-1 1h-2"/><path d="M6 14h12v7H6z"/></svg>Сохранить PDF</button>
         <button type="button" class="wb-action-btn hidden" id="whatsapp-btn"><svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 01-12.36 7.57L3 20l1.07-5.4A8.5 8.5 0 1121 11.5z"/><path d="M8.5 10.5c0 3.5 2.5 6 6 6"/></svg>Написать в WhatsApp</button>
+        <button type="button" class="wb-action-btn" id="qr-toggle-btn"><svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM19 14h2v2h-2zM14 19h2v2h-2zM19 19h2v2h-2z"/></svg>QR-код</button>
+      </div>
+      <div class="wb-qr hidden" id="wb-qr">
+        <img id="wb-qr-img" width="140" height="140" alt="QR-код ссылки на расчёт">
+        <div class="hint-sm">Наведите камеру телефона на код — откроется этот расчёт.</div>
       </div>
     </div>
 
@@ -1596,6 +1604,7 @@ const Calc = {
     this._renderManagerCredit();
     this._updateWhatsAppButton();
     this._updatePresetHighlight();
+    this._updateQrImage();
   },
 
   /* ── bind mortgage inputs (dynamic) ── */
@@ -1672,6 +1681,14 @@ const Calc = {
   },
   _updateWhatsAppButton() {
     document.getElementById('whatsapp-btn').classList.toggle('hidden', this._whatsAppDigits().length < 10);
+  },
+  // QR грузится через внешний сервис (api.qrserver.com), только когда блок
+  // реально виден — чтобы не слать данные расчёта наружу при каждом вводе.
+  _updateQrImage() {
+    const wrap = document.getElementById('wb-qr');
+    if (wrap.classList.contains('hidden')) return;
+    const url = this.buildShareUrl();
+    document.getElementById('wb-qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=8&data=${encodeURIComponent(url)}`;
   },
   buildWhatsAppUrl() {
     const s = this._summary || {};
@@ -2209,11 +2226,22 @@ const Calc = {
     });
 
     document.getElementById('print-btn').addEventListener('click', () => {
+      // QR тоже полезен на распечатке — открываем блок перед печатью, даже
+      // если продажник его не разворачивал на экране.
+      document.getElementById('wb-qr').classList.remove('hidden');
+      this._updateQrImage();
       window.print();
     });
 
     document.getElementById('whatsapp-btn').addEventListener('click', () => {
       window.open(this.buildWhatsAppUrl(), '_blank', 'noopener');
+    });
+
+    document.getElementById('qr-toggle-btn').addEventListener('click', () => {
+      const wrap = document.getElementById('wb-qr');
+      const willShow = wrap.classList.contains('hidden');
+      wrap.classList.toggle('hidden');
+      if (willShow) this._updateQrImage();
     });
 
     /* Initial render */

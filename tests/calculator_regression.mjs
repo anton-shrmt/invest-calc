@@ -53,4 +53,24 @@ assert.equal(
   'Первоначальный взнос и остаток должны точно укладываться в бюджет',
 );
 
+// «Сдаю сам» — доход между 0 и посуточной моделью, отдельно от remainder-бюджета сделки.
+assert.ok(affordability.selfRent.wealthArr[5] > 0, 'Сдаю сам должен давать положительный итог в базовом сценарии');
+assert.ok(
+  affordability.selfRent.rentArr[1] < affordability.daily.rentArr[1],
+  'Сдаю сам (долгосрочная логика) не должен обгонять посуточную аренду по доходу 1-го года',
+);
+
+// Режим «уже есть квартира»: без ипотеки/остатка, ROI считается от стоимости квартиры.
+Calc.data.mode = 'owner';
+const owner = Calc.compute();
+assert.equal(owner.units, 1, 'В режиме владельца всегда одна квартира');
+assert.equal(owner.needsMortgage, false, 'В режиме владельца ипотека не нужна');
+assert.equal(owner.isAffordable, true, 'В режиме владельца квартира всегда «доступна»');
+assert.equal(
+  Math.round(owner.roi(owner.unitPrice * 2)),
+  100,
+  'ROI в режиме владельца должен считаться от стоимости квартиры, а не от бюджета',
+);
+Calc.data.mode = 'buy';
+
 console.log('calculator_regression: OK');

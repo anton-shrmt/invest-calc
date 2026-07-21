@@ -287,6 +287,26 @@
       mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M8 4h8v5a4 4 0 01-8 0V4z'/><path d='M8 5H5a1 1 0 00-1 1v1a3 3 0 003 3M16 5h3a1 1 0 011 1v1a3 3 0 01-3 3'/><path d='M12 13v3'/><path d='M9 20h6M10 17h4v3h-4z'/></svg>") no-repeat center / contain;
     }
     .cmp-table .note-row td { font-size: .75rem; color: var(--muted); background: var(--mint-2); }
+    .cmp-table tr.self-row td { color: var(--muted); font-style: italic; border-top: 1px dashed var(--border); }
+
+    /* ── MODE TOGGLE ── */
+    .mode-toggle { display: flex; background: var(--mint-2); border-radius: 999px; padding: 4px; gap: 4px; }
+    .mode-btn {
+      flex: 1; appearance: none; border: none; background: none; font: inherit;
+      font-size: .8rem; font-weight: 700; color: var(--muted);
+      padding: 9px 10px; border-radius: 999px; cursor: pointer;
+      transition: background-color .15s var(--ease), color .15s var(--ease);
+    }
+    .mode-btn[aria-pressed="true"] { background: var(--dark); color: var(--white); }
+
+    /* ── CONTACT DETAILS ── */
+    .contact-details { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+    .contact-details summary { cursor: pointer; font-size: .78rem; font-weight: 700; color: var(--dark); list-style: none; }
+    .contact-details summary::-webkit-details-marker { display: none; }
+    .contact-details[open] summary { margin-bottom: 8px; }
+
+    /* ── PAGE FOOTER ── */
+    .page-footer { max-width: 1200px; margin: 0 auto; padding: 0 20px 28px; font-size: .74rem; color: var(--muted); text-align: center; }
 
     /* ── CHART ── */
     .chart-wrap { position: relative; height: 280px; }
@@ -432,6 +452,8 @@
       .cmp-table tr.winner-row td:first-child::before { display: inline-block; content: ''; }
       .cmp-table tfoot, .cmp-table tfoot tr, .cmp-table tfoot td { display: block; width: 100%; }
       .cmp-table .note-row td { padding: 8px 10px; text-align: left; }
+      .cmp-table tr.self-row { border-top: 1px dashed var(--border); }
+      .cmp-table tr.self-row td { border-top: 0; }
       .chart-wrap { height: 250px; }
     }
     @media (min-width: 769px) {
@@ -449,7 +471,7 @@
       .card, .winner-banner, .strategy-hint { box-shadow: none !important; page-break-inside: avoid; }
       .winner-banner { position: static; background: var(--dark) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       input[type="range"], .form-actions, .wb-actions, .field-status,
-      .table-scroll-hint, select:disabled { display: none !important; }
+      .table-scroll-hint, select:disabled, #mode-card, .contact-details { display: none !important; }
       .table-wrap { overflow-x: visible; }
       .cmp-table thead, .cmp-table tfoot, .cmp-table tr, .cmp-table td { display: revert; width: auto; }
       .cmp-table td::before { content: none; }
@@ -478,8 +500,16 @@
   <!-- ═══════════════ LEFT PANEL ═══════════════ -->
   <div class="left-panel">
 
+    <!-- Режим расчёта -->
+    <div class="card" id="mode-card">
+      <div class="mode-toggle" role="group" aria-label="Режим расчёта">
+        <button type="button" class="mode-btn" id="mode-buy" aria-pressed="true">Хочу купить</button>
+        <button type="button" class="mode-btn" id="mode-owner" aria-pressed="false">Уже есть квартира</button>
+      </div>
+    </div>
+
     <!-- Сумма инвестиций -->
-    <div class="card">
+    <div class="card" id="invest-card">
       <div class="card-title">Сумма инвестиций</div>
       <div class="field-group">
         <label class="field-label" for="invest-input">Ваш бюджет, ₽</label>
@@ -582,15 +612,31 @@
         <input type="number" id="rent-growth-input" min="0" max="30" step="0.5">
       </div>
 
-      <div class="section-divider">Вклад</div>
-      <div class="field-group">
-        <label class="field-label" for="deposit-rate-input">Ставка вклада, % годовых</label>
-        <input type="number" id="deposit-rate-input" min="1" max="40" step="0.1">
+      <div id="deposit-params">
+        <div class="section-divider">Вклад</div>
+        <div class="field-group">
+          <label class="field-label" for="deposit-rate-input">Ставка вклада, % годовых</label>
+          <input type="number" id="deposit-rate-input" min="1" max="40" step="0.1">
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="deposit-monthly-cb">
+          <label for="deposit-monthly-cb">Ежемесячная капитализация</label>
+        </div>
       </div>
-      <div class="checkbox-row">
-        <input type="checkbox" id="deposit-monthly-cb">
-        <label for="deposit-monthly-cb">Ежемесячная капитализация</label>
-      </div>
+
+      <details class="contact-details" id="contact-details">
+        <summary>Ваши контакты для клиента</summary>
+        <div class="field-group" style="margin-top:8px">
+          <label class="field-label" for="manager-name-input">Имя</label>
+          <input type="text" id="manager-name-input" placeholder="Имя менеджера" maxlength="60">
+        </div>
+        <div class="field-group" style="margin-bottom:0">
+          <label class="field-label" for="manager-phone-input">Телефон (для WhatsApp)</label>
+          <input type="text" id="manager-phone-input" inputmode="tel" placeholder="+7 900 000-00-00" maxlength="20">
+        </div>
+        <div class="hint-sm">Показывается клиенту в расчёте, PDF и кнопке WhatsApp.</div>
+      </details>
+
       <div class="form-actions"><button type="button" class="link-button" id="reset-calc">Вернуть значения по умолчанию</button></div>
     </div>
 
@@ -606,13 +652,14 @@
       <div class="wb-delta" id="wb-delta"></div>
       <div class="wb-note" id="wb-note"></div>
       <div class="wb-kpis">
-        <div class="wb-kpi"><span>Типичная цена</span><strong id="wb-price">—</strong></div>
+        <div class="wb-kpi"><span id="wb-price-label">Типичная цена</span><strong id="wb-price">—</strong></div>
         <div class="wb-kpi"><span>Доход в 1-й год</span><strong id="wb-income">—</strong></div>
         <div class="wb-kpi"><span>Лучший сценарий</span><strong id="wb-scenario">—</strong></div>
       </div>
       <div class="wb-actions">
         <button type="button" class="wb-action-btn" id="share-link-btn"><svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.07 0l2.83-2.83a5 5 0 00-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 00-7.07 0L4.1 13.83a5 5 0 007.07 7.07l1.5-1.5"/></svg>Скопировать ссылку</button>
         <button type="button" class="wb-action-btn" id="print-btn"><svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"/><path d="M6 18H4a1 1 0 01-1-1v-6a1 1 0 011-1h16a1 1 0 011 1v6a1 1 0 01-1 1h-2"/><path d="M6 14h12v7H6z"/></svg>Сохранить PDF</button>
+        <button type="button" class="wb-action-btn hidden" id="whatsapp-btn"><svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 01-12.36 7.57L3 20l1.07-5.4A8.5 8.5 0 1121 11.5z"/><path d="M8.5 10.5c0 3.5 2.5 6 6 6"/></svg>Написать в WhatsApp</button>
       </div>
     </div>
 
@@ -664,6 +711,8 @@
   </div><!-- /right-panel -->
 
 </div><!-- /main-layout -->
+
+<div class="page-footer hidden" id="page-footer"></div>
 
 <script>
   // Цены обновляются каждые 12 часов; ключ не даёт браузеру использовать вчерашний прайс из кэша.
@@ -901,6 +950,7 @@ const escapeHtml = value => String(value).replace(/[&<>'"]/g, char => ({ '&': '&
 const Calc = {
   /* ── data ── */
   data: {
+    mode:               'buy',
     investAmount:       6000000,
     cityCode:           'mhc',
     projectSlug:        'grandbereg',
@@ -912,6 +962,8 @@ const Calc = {
     depositMonthly:     true,
     mortgageRate:       12,
     mortgageYears:      15,
+    managerName:        '',
+    managerPhone:       '',
   },
 
   /* ── helpers: project/room lookup ── */
@@ -968,31 +1020,37 @@ const Calc = {
     let isAffordable = true;
     const mortgageLimit = d.investAmount * MAX_MORTGAGE_SHARE;
 
-    const nFull    = Math.floor(d.investAmount / unitPrice);
-    const cashLeft = d.investAmount - nFull * unitPrice;
+    if (d.mode === 'owner') {
+      // Владелец уже купил ровно одну квартиру за наличные — вопрос
+      // «на что хватит бюджета» здесь не стоит.
+      units = 1;
+    } else {
+      const nFull    = Math.floor(d.investAmount / unitPrice);
+      const cashLeft = d.investAmount - nFull * unitPrice;
 
-    if (nFull >= 1 && cashLeft >= unitPrice * 0.20) {
-      const candidatePrincipal = unitPrice - cashLeft;
-      if (candidatePrincipal <= mortgageLimit) {
-        units = nFull + 1;
-        mortgagedUnits = 1;
-        principal = candidatePrincipal;
-      } else {
+      if (nFull >= 1 && cashLeft >= unitPrice * 0.20) {
+        const candidatePrincipal = unitPrice - cashLeft;
+        if (candidatePrincipal <= mortgageLimit) {
+          units = nFull + 1;
+          mortgagedUnits = 1;
+          principal = candidatePrincipal;
+        } else {
+          units = nFull;
+          cashRemainder = cashLeft;
+        }
+      } else if (nFull >= 1) {
         units = nFull;
         cashRemainder = cashLeft;
-      }
-    } else if (nFull >= 1) {
-      units = nFull;
-      cashRemainder = cashLeft;
-    } else {
-      const candidatePrincipal = unitPrice - d.investAmount;
-      if (candidatePrincipal <= mortgageLimit) {
-        units = 1;
-        mortgagedUnits = 1;
-        principal = candidatePrincipal;
       } else {
-        isAffordable = false;
-        cashRemainder = d.investAmount;
+        const candidatePrincipal = unitPrice - d.investAmount;
+        if (candidatePrincipal <= mortgageLimit) {
+          units = 1;
+          mortgagedUnits = 1;
+          principal = candidatePrincipal;
+        } else {
+          isAffordable = false;
+          cashRemainder = d.investAmount;
+        }
       }
     }
 
@@ -1059,6 +1117,8 @@ const Calc = {
         // Долгосрочная: 11 месяцев × (ставка − 12% УК)
         // Гарантированная: 12 месяцев × (ставка − 25% УК), гарантированно
         // Посуточная: чистый годовой доход, оценённый по доходности комнатности
+        // Сдаю сам: без комиссии УК, но дольше простой между жильцами —
+        // нет профессионального маркетинга и скрининга (для сравнения, не участвует в выборе победителя)
         // Рента считается по одной квартире и умножается на кол-во купленных квартир
         if (modelId === 'longterm') {
           yr = monthlyRent * 11 * 0.88 * g;
@@ -1066,6 +1126,8 @@ const Calc = {
           yr = monthlyRent * 12 * 0.75 * g;
         } else if (modelId === 'daily') {
           yr = dailyAnnualIncome * g;
+        } else if (modelId === 'selfRent') {
+          yr = monthlyRent * 10.5 * g;
         }
         yr *= units;
 
@@ -1090,9 +1152,13 @@ const Calc = {
     const longterm   = computeModel('longterm');
     const guaranteed = computeModel('guaranteed');
     const daily      = computeModel('daily');
+    const selfRent   = computeModel('selfRent');
 
-    // ROI всех стратегий считаем относительно исходной суммы клиента.
-    const roi = (final) => (final - d.investAmount) / d.investAmount * 100;
+    // ROI всех стратегий считаем относительно исходной суммы клиента —
+    // а в режиме «уже есть квартира» относительно стоимости этой квартиры,
+    // так как отдельного бюджета на покупку тут нет.
+    const roiBase = d.mode === 'owner' ? unitPrice : d.investAmount;
+    const roi = (final) => (final - roiBase) / roiBase * 100;
 
     return {
       project, room, area,
@@ -1102,7 +1168,7 @@ const Calc = {
       monthlyMortgage, annualMortgage, mortgageOverpay, mortgageTotalPaid,
       needsMortgage, isAffordable,
       depositArr,
-      longterm, guaranteed, daily,
+      longterm, guaranteed, daily, selfRent,
       roi,
     };
   },
@@ -1111,6 +1177,7 @@ const Calc = {
   render(r) {
     const d = this.data;
     const H = d.horizon;
+    this._applyModeVisibility();
 
     /* Project (ЖК) info display */
     const proj = r.project;
@@ -1129,13 +1196,16 @@ const Calc = {
     const shownPrice = r.isAffordable ? r.totalCost : r.unitPrice;
     const lotsText = r.units > 1 ? ` за ${r.units} ${pluralFlats(r.units)}` : '';
     const areaText = r.units > 1 ? `≈${r.area.toFixed(1)} м² каждая` : `≈${r.area.toFixed(1)} м²`;
+    const priceLabel = d.mode === 'owner' ? 'Оценочная стоимость' : 'Типичная цена';
     document.getElementById('apt-price-display').innerHTML =
-      `<span class="price-label">Типичная цена</span><br><strong>${rub(shownPrice)}</strong>${lotsText}, ${areaText}<br>` +
+      `<span class="price-label">${priceLabel}</span><br><strong>${rub(shownPrice)}</strong>${lotsText}, ${areaText}<br>` +
       `<span class="hint-sm">Диапазон по ${r.room.count} квартирам: ${rub(r.room.priceMin)}–${rub(r.room.priceMax)}.</span>`;
 
     /* Purchase status */
     const ps = document.getElementById('purchase-status');
-    if (!r.isAffordable) {
+    if (d.mode === 'owner') {
+      ps.innerHTML = `<span class="badge badge-green"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg>Ваша квартира</span>`;
+    } else if (!r.isAffordable) {
       ps.innerHTML = `<span class="badge badge-yellow">Для этой квартиры нужна сумма инвестиций от ${rub(r.requiredInvestAmount)}</span>`;
     } else if (r.mortgagedUnits === 0) {
       ps.innerHTML = `<span class="badge badge-green"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg>Полная оплата</span>` +
@@ -1216,13 +1286,22 @@ const Calc = {
       (r.isEstimated ? `<div class="hint-sm">Доход рассчитан оценочно по доходности комнатности: подтвердите ставку у УК.</div>` : '');
 
     /* — Winner determination — */
+    // «Сдаю сам» намеренно не участвует в выборе победителя: это справочная
+    // строка для сравнения, а не рекомендуемая стратегия.
+    const selfRowShown = d.mode === 'owner' || r.isAffordable;
     const candidates = {};
-    if (r.isAffordable) {
+    if (d.mode === 'owner') {
       candidates.longterm   = r.longterm.wealthArr[H];
       candidates.guaranteed = r.guaranteed.wealthArr[H];
       candidates.daily      = r.daily.wealthArr[H];
+    } else {
+      if (r.isAffordable) {
+        candidates.longterm   = r.longterm.wealthArr[H];
+        candidates.guaranteed = r.guaranteed.wealthArr[H];
+        candidates.daily      = r.daily.wealthArr[H];
+      }
+      candidates.deposit = r.depositArr[H];
     }
-    candidates.deposit = r.depositArr[H];
 
     const maxWealth = Math.max(...Object.values(candidates));
     const sorted    = Object.entries(candidates).sort((a, b) => b[1] - a[1]);
@@ -1239,21 +1318,33 @@ const Calc = {
 
     /* — Winner banner — */
     document.getElementById('wb-amount').textContent = rub(maxWealth);
-    document.getElementById('wb-label').innerHTML = `<svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 01-8 0V4z"/><path d="M8 5H5a1 1 0 00-1 1v1a3 3 0 003 3M16 5h3a1 1 0 011 1v1a3 3 0 01-3 3"/><path d="M12 13v3"/><path d="M9 20h6M10 17h4v3h-4z"/></svg>${r.isAffordable ? `Итог для выбранного объекта · ${H} ${pluralYr(H)}` : `Вклад вместо выбранного объекта · ${H} ${pluralYr(H)}`}`;
+    const wbLabelText = d.mode === 'owner'
+      ? `Доход с вашей квартиры · ${H} ${pluralYr(H)}`
+      : (r.isAffordable ? `Итог для выбранного объекта · ${H} ${pluralYr(H)}` : `Вклад вместо выбранного объекта · ${H} ${pluralYr(H)}`);
+    document.getElementById('wb-label').innerHTML = `<svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 01-8 0V4z"/><path d="M8 5H5a1 1 0 00-1 1v1a3 3 0 003 3M16 5h3a1 1 0 011 1v1a3 3 0 01-3 3"/><path d="M12 13v3"/><path d="M9 20h6M10 17h4v3h-4z"/></svg>${wbLabelText}`;
     const winnerYearOneIncome = winner === 'deposit'
       ? r.depositArr[1] - r.depositArr[0]
       : r[winner].rentArr[1];
+    document.getElementById('wb-price-label').textContent = d.mode === 'owner' ? 'Стоимость квартиры' : 'Типичная цена';
     document.getElementById('wb-price').textContent = r.isAffordable ? rub(r.unitPrice) : 'Недоступно';
     document.getElementById('wb-income').textContent = `+${rub(winnerYearOneIncome)}`;
     document.getElementById('wb-scenario').textContent = modelLabels[winner];
-    const deltaVsDeposit = maxWealth - r.depositArr[H];
     const trophyIcon = '<svg class="ic14" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 01-8 0V4z"/><path d="M8 5H5a1 1 0 00-1 1v1a3 3 0 003 3M16 5h3a1 1 0 011 1v1a3 3 0 01-3 3"/><path d="M12 13v3"/><path d="M9 20h6M10 17h4v3h-4z"/></svg>';
-    if (winner === 'deposit') {
-      document.getElementById('wb-delta').innerHTML =
-        `${trophyIcon}${r.isAffordable ? modelLabels[winner] : 'Выбранный объект не проходит по бюджету; вклад'} — итоговый капитал через ${H} ${pluralYr(H)}`;
+    if (d.mode === 'owner') {
+      const selfWealth = r.selfRent.wealthArr[H];
+      const deltaVsSelf = maxWealth - selfWealth;
+      document.getElementById('wb-delta').textContent = deltaVsSelf > 0
+        ? `Обгоняет самостоятельную сдачу на ${rub(deltaVsSelf)} (+${pct(deltaVsSelf / Math.max(1, selfWealth) * 100)})`
+        : 'Близко к самостоятельной сдаче по цифрам — разница в вашем времени и рисках';
     } else {
-      document.getElementById('wb-delta').textContent =
-        `Обгоняет банковский вклад на ${rub(deltaVsDeposit)} (+${pct(deltaVsDeposit / r.depositArr[H] * 100)})`;
+      const deltaVsDeposit = maxWealth - r.depositArr[H];
+      if (winner === 'deposit') {
+        document.getElementById('wb-delta').innerHTML =
+          `${trophyIcon}${r.isAffordable ? modelLabels[winner] : 'Выбранный объект не проходит по бюджету; вклад'} — итоговый капитал через ${H} ${pluralYr(H)}`;
+      } else {
+        document.getElementById('wb-delta').textContent =
+          `Обгоняет банковский вклад на ${rub(deltaVsDeposit)} (+${pct(deltaVsDeposit / r.depositArr[H] * 100)})`;
+      }
     }
     const noteEl = document.getElementById('wb-note');
     if (close) {
@@ -1268,19 +1359,31 @@ const Calc = {
       noteEl.textContent = '';
     }
 
+    // Снимок для кнопки WhatsApp — собран здесь, где winner/maxWealth уже посчитаны.
+    this._summary = {
+      amountText: rub(maxWealth),
+      scenarioLabel: modelLabels[winner] || '',
+      years: H,
+      yearsLabel: pluralYr(H),
+      projectLabel: proj.label,
+      roomLabel,
+    };
+
     /* — Comparison table — */
     const tbody = document.getElementById('cmp-tbody');
     const tfoot = document.getElementById('cmp-tfoot');
-    document.getElementById('cmp-note').textContent =
-      `Итоговый капитал = денежный поток + капитал в квартире (стоимость минус остаток долга) на год ${H}. ` +
-      `Вклад — ${d.depositMonthly ? 'ежемесячная' : 'годовая'} капитализация.`;
+    document.getElementById('cmp-note').textContent = d.mode === 'owner'
+      ? `Итоговый капитал = денежный поток + рост стоимости квартиры на год ${H}.`
+      : `Итоговый капитал = денежный поток + капитал в квартире (стоимость минус остаток долга) на год ${H}. ` +
+        `Вклад — ${d.depositMonthly ? 'ежемесячная' : 'годовая'} капитализация.`;
     tbody.innerHTML = '';
     tfoot.innerHTML = '';
 
-    const addRow = (id, label, yr1, cumRent, propVal, total) => {
+    const addRow = (id, label, yr1, cumRent, propVal, total, extraClass) => {
       const isWin = id === winner;
       const tr = document.createElement('tr');
       if (isWin) tr.className = 'winner-row';
+      else if (extraClass) tr.className = extraClass;
       const roiVal = r.roi(total);
       tr.innerHTML = `
         <td data-label="Модель">${label}</td>
@@ -1292,13 +1395,22 @@ const Calc = {
       `;
       tbody.appendChild(tr);
     };
+    const addSelfRow = () => addRow('selfRent', 'Сдаю сам', r.selfRent.rentArr[1], r.selfRent.cumArr[H], r.selfRent.equityArr[H], r.selfRent.wealthArr[H], 'self-row');
 
-    if (r.isAffordable) {
-      addRow('longterm',   'Долгосрочная аренда',   r.longterm.rentArr[1],   r.longterm.cumArr[H],   r.longterm.equityArr[H],   r.longterm.wealthArr[H]);
+    if (d.mode === 'owner') {
+      addRow('longterm',   'Долгосрочная аренда',    r.longterm.rentArr[1],   r.longterm.cumArr[H],   r.longterm.equityArr[H],   r.longterm.wealthArr[H]);
+      addSelfRow();
       addRow('guaranteed', 'Гарантированная аренда', r.guaranteed.rentArr[1], r.guaranteed.cumArr[H], r.guaranteed.equityArr[H], r.guaranteed.wealthArr[H]);
       addRow('daily',      'Посуточная аренда',      r.daily.rentArr[1],      r.daily.cumArr[H],      r.daily.equityArr[H],      r.daily.wealthArr[H]);
+    } else {
+      if (r.isAffordable) {
+        addRow('longterm',   'Долгосрочная аренда',    r.longterm.rentArr[1],   r.longterm.cumArr[H],   r.longterm.equityArr[H],   r.longterm.wealthArr[H]);
+        addSelfRow();
+        addRow('guaranteed', 'Гарантированная аренда', r.guaranteed.rentArr[1], r.guaranteed.cumArr[H], r.guaranteed.equityArr[H], r.guaranteed.wealthArr[H]);
+        addRow('daily',      'Посуточная аренда',      r.daily.rentArr[1],      r.daily.cumArr[H],      r.daily.equityArr[H],      r.daily.wealthArr[H]);
+      }
+      addRow('deposit', 'Банковский вклад', null, null, null, r.depositArr[H]);
     }
-    addRow('deposit', 'Банковский вклад', null, null, null, r.depositArr[H]);
 
     /* Footer notes */
     let footHtml = '';
@@ -1308,14 +1420,18 @@ const Calc = {
     if (r.cashRemainder > 0) {
       footHtml += `<tr class="note-row"><td colspan="6">Остаток ${rub(r.cashRemainder)} учтён как наличные без роста.</td></tr>`;
     }
+    if (selfRowShown) {
+      footHtml += `<tr class="note-row"><td colspan="6">«Сдаю сам» — без учёта вашего времени на поиск жильцов, показы и риска простоя между съездами.</td></tr>`;
+    }
     tfoot.innerHTML = footHtml;
 
     /* — Chart — */
     const years = Array.from({ length: H + 1 }, (_, i) => i);
     const labels = years.map(i => `Год ${i}`);
 
-    const chartDatasets = [
-      {
+    const chartDatasets = [];
+    if (d.mode !== 'owner') {
+      chartDatasets.push({
         label: 'Банковский вклад',
         data: r.depositArr,
         borderColor: '#8A8C8C',
@@ -1325,10 +1441,10 @@ const Calc = {
         fill: true,
         tension: 0.3,
         borderDash: [6, 4],
-      },
-    ];
+      });
+    }
 
-    if (r.isAffordable) {
+    if (selfRowShown) {
       chartDatasets.push({
         label: 'Долгосрочная аренда',
         data: r.longterm.wealthArr,
@@ -1377,6 +1493,7 @@ const Calc = {
     const det_tbody   = document.getElementById('det-tbody');
 
     if (winnerData) {
+      const depositTh = d.mode === 'owner' ? '' : '<th>Вклад</th>';
       det_thead.innerHTML = `<tr>
         <th>Год</th>
         <th>Рента (брутто)</th>
@@ -1386,11 +1503,12 @@ const Calc = {
         <th>Стоимость кв.</th>
         <th>Остаток долга</th>
         <th>Капитал в кв.</th>
-        <th>Вклад</th>
+        ${depositTh}
       </tr>`;
       let rows = '';
       for (let i = 1; i <= H; i++) {
         const mort = r.monthlyMortgage > 0 && i <= d.mortgageYears ? rub(r.annualMortgage) : '—';
+        const depositTd = d.mode === 'owner' ? '' : `<td>${rub(r.depositArr[i])}</td>`;
         rows += `<tr>
           <td>${i}</td>
           <td>${rub(winnerData.rentArr[i])}</td>
@@ -1400,7 +1518,7 @@ const Calc = {
           <td>${rub(winnerData.propArr[i])}</td>
           <td>${rub(r.mortgageBalanceArr[i])}</td>
           <td>${rub(winnerData.equityArr[i])}</td>
-          <td>${rub(r.depositArr[i])}</td>
+          ${depositTd}
         </tr>`;
       }
       det_tbody.innerHTML = rows;
@@ -1414,7 +1532,12 @@ const Calc = {
     }
 
     /* — Strategy hint — */
-    this._renderHint();
+    if (d.mode !== 'owner') {
+      this._renderHint();
+    }
+
+    this._renderManagerCredit();
+    this._updateWhatsAppButton();
   },
 
   /* ── bind mortgage inputs (dynamic) ── */
@@ -1446,6 +1569,42 @@ const Calc = {
       this.data.mortgageYears = value;
       this._saveLS(); this._recompute();
     });
+  },
+
+  /* ── mode toggle: показывает/скрывает блоки, специфичные для покупки vs владения ── */
+  _applyModeVisibility() {
+    const owner = this.data.mode === 'owner';
+    document.getElementById('invest-card').classList.toggle('hidden', owner);
+    document.getElementById('deposit-params').classList.toggle('hidden', owner);
+    document.getElementById('mode-buy').setAttribute('aria-pressed', String(!owner));
+    document.getElementById('mode-owner').setAttribute('aria-pressed', String(owner));
+    if (owner) document.getElementById('strategy-hint').classList.add('hidden');
+  },
+
+  /* ── контакты менеджера: подпись в подвале/PDF + доступность кнопки WhatsApp ── */
+  _renderManagerCredit() {
+    const el = document.getElementById('page-footer');
+    const name = (this.data.managerName || '').trim();
+    const phone = (this.data.managerPhone || '').trim();
+    if (!name && !phone) { el.classList.add('hidden'); el.innerHTML = ''; return; }
+    el.classList.remove('hidden');
+    const parts = [];
+    if (name) parts.push(`<strong>${escapeHtml(name)}</strong>`);
+    if (phone) parts.push(escapeHtml(phone));
+    el.innerHTML = `Расчёт подготовил: ${parts.join(', ')}`;
+  },
+  _whatsAppDigits() {
+    let digits = (this.data.managerPhone || '').replace(/\D/g, '');
+    if (digits.length === 11 && digits.startsWith('8')) digits = '7' + digits.slice(1);
+    return digits;
+  },
+  _updateWhatsAppButton() {
+    document.getElementById('whatsapp-btn').classList.toggle('hidden', this._whatsAppDigits().length < 10);
+  },
+  buildWhatsAppUrl() {
+    const s = this._summary || {};
+    const text = `Здравствуйте! Смотрю расчёт по калькулятору Унистрой.Аренда: ${s.projectLabel || ''}, ${s.roomLabel || ''} — итог ${s.amountText || ''} за ${s.years || ''} ${s.yearsLabel || 'лет'} (${s.scenarioLabel || ''}). Хочу обсудить: ${this.buildShareUrl()}`;
+    return `https://wa.me/${this._whatsAppDigits()}?text=${encodeURIComponent(text)}`;
   },
 
   /* ── strategy hint ──
@@ -1670,6 +1829,7 @@ const Calc = {
   },
   _sanitizeData() {
     const d = this.data;
+    d.mode = d.mode === 'owner' ? 'owner' : 'buy';
     d.investAmount = clamp(Number(d.investAmount) || 6000000, 1000000, 70000000);
     d.rentGrowth = clamp(Number(d.rentGrowth) || 0, 0, 30);
     d.appreciation = clamp(Number(d.appreciation) || 0, 0, 50);
@@ -1678,14 +1838,19 @@ const Calc = {
     d.mortgageRate = clamp(Number(d.mortgageRate) || 12, 1, 40);
     d.mortgageYears = clamp(Math.round(Number(d.mortgageYears) || 15), 1, 30);
     d.depositMonthly = Boolean(d.depositMonthly);
+    d.managerName = String(d.managerName || '').slice(0, 60);
+    d.managerPhone = String(d.managerPhone || '').slice(0, 20);
   },
+  // Строковые поля ссылки/localStorage — записываются как есть, без parseFloat.
+  _stringFields: new Set(['cityCode', 'projectSlug', 'roomLabel', 'mode', 'managerName', 'managerPhone']),
   // Параметры ссылки, которой продажник может поделиться с клиентом —
   // приоритетнее сохранённого localStorage, чтобы получатель ссылки видел
   // именно присланный сценарий, а не свою предыдущую сессию.
   _urlParamMap: {
-    amt: 'investAmount', city: 'cityCode', proj: 'projectSlug', room: 'roomLabel',
+    m: 'mode', amt: 'investAmount', city: 'cityCode', proj: 'projectSlug', room: 'roomLabel',
     rg: 'rentGrowth', ap: 'appreciation', h: 'horizon', dr: 'depositRate',
     dm: 'depositMonthly', mr: 'mortgageRate', my: 'mortgageYears',
+    mn: 'managerName', mp: 'managerPhone',
   },
   _applyUrlParams() {
     const params = new URLSearchParams(window.location.search);
@@ -1695,7 +1860,7 @@ const Calc = {
       if (!params.has(key)) continue;
       const raw = params.get(key);
       if (field === 'depositMonthly') { d[field] = raw === '1'; continue; }
-      if (field === 'cityCode' || field === 'projectSlug' || field === 'roomLabel') { d[field] = raw; continue; }
+      if (this._stringFields.has(field)) { d[field] = raw; continue; }
       const value = parseFloat(raw);
       if (Number.isFinite(value)) d[field] = value;
     }
@@ -1704,7 +1869,9 @@ const Calc = {
     const d = this.data;
     const params = new URLSearchParams();
     for (const [key, field] of Object.entries(this._urlParamMap)) {
-      params.set(key, field === 'depositMonthly' ? (d[field] ? '1' : '0') : d[field]);
+      const value = field === 'depositMonthly' ? (d[field] ? '1' : '0') : d[field];
+      if (value === '' || value == null) continue;
+      params.set(key, value);
     }
     return `${window.location.origin}${window.location.pathname}?${params.toString()}`;
   },
@@ -1773,6 +1940,11 @@ const Calc = {
     document.getElementById('horizon-pill').textContent = this.data.horizon + ' ' + pluralYr(this.data.horizon);
     document.getElementById('deposit-rate-input').value = this.data.depositRate;
     document.getElementById('deposit-monthly-cb').checked = this.data.depositMonthly;
+    document.getElementById('manager-name-input').value = this.data.managerName;
+    document.getElementById('manager-phone-input').value = this.data.managerPhone;
+    if (this.data.managerName || this.data.managerPhone) {
+      document.getElementById('contact-details').open = true;
+    }
 
     /* Create chart */
     if (window.Chart) {
@@ -1900,13 +2072,42 @@ const Calc = {
       this._saveLS(); this._recompute();
     });
 
+    /* Режим: покупка vs уже есть квартира */
+    const setMode = (mode) => {
+      this.data.mode = mode;
+      this._saveLS();
+      this._applyModeVisibility();
+      this._recompute();
+    };
+    document.getElementById('mode-buy').addEventListener('click', () => setMode('buy'));
+    document.getElementById('mode-owner').addEventListener('click', () => setMode('owner'));
+
+    /* Контакты менеджера — для клиента в PDF и кнопке WhatsApp */
+    document.getElementById('manager-name-input').addEventListener('input', (e) => {
+      this.data.managerName = e.target.value.slice(0, 60);
+      this._saveLS();
+      this._renderManagerCredit();
+      this._updateWhatsAppButton();
+    });
+    document.getElementById('manager-phone-input').addEventListener('input', (e) => {
+      this.data.managerPhone = e.target.value.slice(0, 20);
+      this._saveLS();
+      this._renderManagerCredit();
+      this._updateWhatsAppButton();
+    });
+
     document.getElementById('reset-calc').addEventListener('click', () => {
-      try { localStorage.removeItem('calc_v5'); } catch(e) {}
+      const keepName = this.data.managerName;
+      const keepPhone = this.data.managerPhone;
       this.data = {
-        investAmount: 6000000, cityCode: 'mhc', projectSlug: 'grandbereg', roomLabel: '1',
+        mode: 'buy', investAmount: 6000000, cityCode: 'mhc', projectSlug: 'grandbereg', roomLabel: '1',
         rentGrowth: 5, appreciation: 10, horizon: 5, depositRate: 11, depositMonthly: true,
         mortgageRate: 12, mortgageYears: 15,
+        managerName: keepName, managerPhone: keepPhone,
       };
+      // Контакты менеджера — это профиль продажника, а не параметр расчёта,
+      // поэтому сохраняем их и после сброса.
+      this._saveLS();
       // Полный путь без query-параметров — иначе после перехода по ссылке
       // «поделиться» сброс тут же снова подхватит те же параметры из URL.
       window.location.href = window.location.pathname;
@@ -1926,6 +2127,10 @@ const Calc = {
 
     document.getElementById('print-btn').addEventListener('click', () => {
       window.print();
+    });
+
+    document.getElementById('whatsapp-btn').addEventListener('click', () => {
+      window.open(this.buildWhatsAppUrl(), '_blank', 'noopener');
     });
 
     /* Initial render */

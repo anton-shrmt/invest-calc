@@ -364,26 +364,6 @@
     .apt-price-display strong { color: var(--text); }
     .price-label { color: var(--muted); font-size: .75rem; font-weight: 600; }
     .price-meta { color: var(--muted); font-size: .72rem; }
-    .data-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 9px; }
-    .data-actions .hint-sm { margin: 0; }
-    .update-prices-link {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 32px;
-      padding: 6px 10px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      color: var(--dark);
-      background: var(--white);
-      font-size: .74rem;
-      font-weight: 700;
-      text-decoration: none;
-      white-space: nowrap;
-      transition: background-color .15s var(--ease), border-color .15s var(--ease), transform .15s var(--ease);
-    }
-    .update-prices-link:hover { background: var(--mint); border-color: rgba(54,75,75,.28); transform: translateY(-1px); }
-    .update-prices-link:focus-visible { outline: 3px solid rgba(165,255,0,.58); outline-offset: 2px; }
 
     /* ── RENT INFO DISPLAY ── */
     .rent-info-table { width: 100%; border-collapse: collapse; margin-top: 4px; }
@@ -428,8 +408,6 @@
       .page-header h1 { font-size: 1.08rem; }
       .wb-kpis { grid-template-columns: 1fr 1fr; }
       .wb-kpi:last-child { grid-column: 1 / -1; }
-      .data-actions { align-items: flex-start; flex-direction: column; }
-      .update-prices-link { width: 100%; }
       .table-scroll-hint { display: block; font-size: .72rem; color: var(--muted); margin: -2px 0 7px; }
       .cmp-table { min-width: 0; }
       .cmp-table thead { display: none; }
@@ -550,10 +528,7 @@
 
       <div class="field-group">
         <div class="apt-price-display" id="apt-price-display"></div>
-        <div class="data-actions">
-          <span class="hint-sm">Типичная цена рассчитана по активным квартирам</span>
-          <a class="update-prices-link" href="https://github.com/anton-shrmt/invest-calc/actions/workflows/update-prices.yml" target="_blank" rel="noopener" title="Открыть ручное обновление в GitHub">↻ Обновить цены</a>
-        </div>
+        <span class="hint-sm">Типичная цена рассчитана по активным квартирам</span>
       </div>
 
       <!-- Статус / Ипотека -->

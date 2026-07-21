@@ -63,8 +63,9 @@ const CITY_NAMES = {
 };
 
 // В калькулятор попадают только ЖК, для которых утверждены ставки аренды.
-// art16, yes_gorki и upoint исключены по решению команды. Трёхкомнатные
-// квартиры также не выводятся: они не являются целевым продуктом инвестора.
+// art16, yes_gorki и upoint исключены по решению команды. Квартиры от
+// 3 комнат и больше также не выводятся: они не являются целевым продуктом
+// инвестора.
 const CALCULATOR_PROJECT_SLUGS = new Set([
   'grandbereg',
   'aqua', 'atmos', 'letokzn', 'statum', 'zalesnaia', 'tech',
@@ -230,17 +231,20 @@ function toProjectsJs(projects) {
   return out;
 }
 
+// Студия не участвует в сравнении «< 3» — сравниваем только числовые label'ы.
+const isThreePlusRoom = label => label !== 'Студия' && Number(label) >= 3;
+
 function toCalculatorProjectsJs(projects, fetchedAt) {
   const calculatorProjects = projects
     .filter(project => CALCULATOR_PROJECT_SLUGS.has(project.slug))
     .map(project => ({
       ...project,
-      rooms: project.rooms.filter(room => room.label !== '3'),
+      rooms: project.rooms.filter(room => !isThreePlusRoom(room.label)),
     }))
     .filter(project => project.rooms.length > 0);
 
   return `// Автосгенерировано fetch_unistroy_prices.mjs — ${fetchedAt.slice(0, 10)}\n` +
-    `// P25/P50/P75 рассчитаны по фактическим лотам; 3-комнатные исключены.\n` +
+    `// P25/P50/P75 рассчитаны по фактическим лотам; квартиры от 3 комнат исключены.\n` +
     `window.CALCULATOR_PROJECTS_META = ${JSON.stringify({ fetchedAt, source: 'unistroy.ru, публичный API /api/flats/' })};\n` +
     `window.CALCULATOR_PROJECTS = ${JSON.stringify(calculatorProjects, null, 2)};\n`;
 }

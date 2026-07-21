@@ -528,7 +528,7 @@
       <div class="card-title">Сумма инвестиций</div>
       <div class="field-group">
         <label class="field-label" for="invest-input">Ваш бюджет, ₽</label>
-        <input type="text" id="invest-input" class="amount-input" inputmode="numeric" aria-describedby="invest-help" placeholder="6 000 000 ₽">
+        <input type="text" id="invest-input" class="amount-input" inputmode="numeric" aria-describedby="invest-help" placeholder="8 000 000 ₽">
         <input type="range" id="invest-slider" min="1000000" max="70000000" step="100000" aria-label="Сумма инвестиций на слайдере">
         <div class="row-flex" style="margin-top:2px">
           <span class="hint-sm">1 млн ₽</span>
@@ -756,12 +756,13 @@
    Источник: unistroy.ru, публичный API /api/flats/,
    выгрузка активных квартир в продаже (без исторических цен).
 ══════════════════════════════════════════════ */
+// Казань — город по умолчанию, идёт первым; остальные далее по алфавиту.
 const CITIES = [
-  { code: 'mhc', label: 'Махачкала' },
   { code: 'kzn', label: 'Казань' },
   { code: 'ekb', label: 'Екатеринбург' },
-  { code: 'spb', label: 'Санкт-Петербург' },
+  { code: 'mhc', label: 'Махачкала' },
   { code: 'per', label: 'Пермь' },
+  { code: 'spb', label: 'Санкт-Петербург' },
   { code: 'tlt', label: 'Тольятти' },
 ];
 
@@ -805,7 +806,6 @@ const PROJECTS = window.CALCULATOR_PROJECTS || [
   { slug: 'statum', city: 'kzn', label: 'Статум', rooms: [
     { label: '1', count: 172, priceMin: 11000000, priceMax: 34510000, priceAvg: 14827674, areaMin: 31.11, areaMax: 138.9 },
     { label: '2', count: 197, priceMin: 14150000, priceMax: 23000000, priceAvg: 17925482, areaMin: 48.44, areaMax: 90 },
-    { label: '4', count: 1, priceMin: 33720000, priceMax: 33720000, priceAvg: 33720000, areaMin: 108.2, areaMax: 108.2 },
   ]},
   { slug: 'zalesnaia', city: 'kzn', label: 'Уникод на Залесной', rooms: [
     { label: 'Студия', count: 3, priceMin: 7230000, priceMax: 7430000, priceAvg: 7336667, areaMin: 36.48, areaMax: 36.48 },
@@ -835,7 +835,6 @@ const PROJECTS = window.CALCULATOR_PROJECTS || [
     { label: 'Студия', count: 4, priceMin: 8260000, priceMax: 9710000, priceAvg: 8977500, areaMin: 26.96, areaMax: 33.72 },
     { label: '1', count: 43, priceMin: 9700000, priceMax: 12910000, priceAvg: 10883488, areaMin: 33.96, areaMax: 58.07 },
     { label: '2', count: 171, priceMin: 12240000, priceMax: 16640000, priceAvg: 13920000, areaMin: 56.02, areaMax: 92.9 },
-    { label: '4', count: 2, priceMin: 18290000, priceMax: 24750000, priceAvg: 21520000, areaMin: 106.05, areaMax: 151.8 },
   ]},
   /* ── Екатеринбург ── */
   { slug: 'skies', city: 'ekb', label: 'Небосклоны', rooms: [
@@ -850,13 +849,11 @@ const PROJECTS = window.CALCULATOR_PROJECTS || [
     { label: 'Студия', count: 127, priceMin: 4680000, priceMax: 12181000, priceAvg: 5601118, areaMin: 23.87, areaMax: 79.95 },
     { label: '1', count: 281, priceMin: 5650000, priceMax: 14441000, priceAvg: 7097125, areaMin: 33.86, areaMax: 81.82 },
     { label: '2', count: 239, priceMin: 6930000, priceMax: 16198000, priceAvg: 9341339, areaMin: 47.09, areaMax: 82.26 },
-    { label: '4', count: 3, priceMin: 15532000, priceMax: 18062000, priceAvg: 16492667, areaMin: 107.14, areaMax: 126.2 },
   ]},
   { slug: 'stadium', city: 'ekb', label: 'Стадиум', rooms: [
     { label: 'Студия', count: 17, priceMin: 4966000, priceMax: 5967000, priceAvg: 5320294, areaMin: 27.8, areaMax: 30.1 },
     { label: '1', count: 100, priceMin: 6400000, priceMax: 10414000, priceAvg: 7353760, areaMin: 34.6, areaMax: 53.7 },
     { label: '2', count: 163, priceMin: 7728000, priceMax: 14780000, priceAvg: 9244067, areaMin: 47.9, areaMax: 85.2 },
-    { label: '4', count: 7, priceMin: 13736000, priceMax: 14593000, priceAvg: 14398000, areaMin: 113, areaMax: 116.3 },
   ]},
   /* ── Санкт-Петербург ── */
   { slug: 'lisino', city: 'spb', label: 'Лисино Город-парк', rooms: [
@@ -873,7 +870,6 @@ const PROJECTS = window.CALCULATOR_PROJECTS || [
   { slug: 'unicum_engels', city: 'per', label: 'Уникум на Энгельса', rooms: [
     { label: 'Студия', count: 100, priceMin: 5900000, priceMax: 8700000, priceAvg: 7356200, areaMin: 23.4, areaMax: 33.01 },
     { label: '2', count: 50, priceMin: 8250000, priceMax: 12750000, priceAvg: 10134400, areaMin: 35.8, areaMax: 54.96 },
-    { label: '4', count: 13, priceMin: 13710000, priceMax: 19560000, priceAvg: 16083846, areaMin: 63.61, areaMax: 90.82 },
   ]},
   /* ── Тольятти ── */
   { slug: 'unicum_lenin', city: 'tlt', label: 'Уникум на Ленинском', rooms: [
@@ -885,7 +881,6 @@ const PROJECTS = window.CALCULATOR_PROJECTS || [
     { label: 'Студия', count: 3, priceMin: 9909000, priceMax: 12297000, priceAvg: 10775000, areaMin: 86.3, areaMax: 104.1 },
     { label: '1', count: 48, priceMin: 5680000, priceMax: 8070000, priceAvg: 6590771, areaMin: 35.22, areaMax: 49.03 },
     { label: '2', count: 48, priceMin: 7840000, priceMax: 10066000, priceAvg: 8614729, areaMin: 51.6, areaMax: 68.92 },
-    { label: '4', count: 6, priceMin: 10895000, priceMax: 12214000, priceAvg: 11439333, areaMin: 94.84, areaMax: 101.9 },
   ]},
 ];
 
@@ -1004,9 +999,9 @@ const Calc = {
   /* ── data ── */
   data: {
     mode:               'buy',
-    investAmount:       6000000,
-    cityCode:           'mhc',
-    projectSlug:        'grandbereg',
+    investAmount:       8000000,
+    cityCode:           'kzn',
+    projectSlug:        'aqua',
     roomLabel:          '1',
     rentGrowth:         5,
     appreciation:       10,
@@ -1919,7 +1914,7 @@ const Calc = {
   _sanitizeData() {
     const d = this.data;
     d.mode = d.mode === 'owner' ? 'owner' : 'buy';
-    d.investAmount = clamp(Number(d.investAmount) || 6000000, 1000000, 70000000);
+    d.investAmount = clamp(Number(d.investAmount) || 8000000, 1000000, 70000000);
     d.rentGrowth = clamp(Number(d.rentGrowth) || 0, 0, 30);
     d.appreciation = clamp(Number(d.appreciation) || 0, 0, 50);
     d.horizon = clamp(Math.round(Number(d.horizon) || 5), 1, 15);
@@ -2200,7 +2195,7 @@ const Calc = {
       const keepName = this.data.managerName;
       const keepPhone = this.data.managerPhone;
       this.data = {
-        mode: 'buy', investAmount: 6000000, cityCode: 'mhc', projectSlug: 'grandbereg', roomLabel: '1',
+        mode: 'buy', investAmount: 8000000, cityCode: 'kzn', projectSlug: 'aqua', roomLabel: '1',
         rentGrowth: 5, appreciation: 10, horizon: 5, depositRate: 11, depositMonthly: true,
         mortgageRate: 12, mortgageYears: 15,
         managerName: keepName, managerPhone: keepPhone,

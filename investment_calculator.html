@@ -1253,7 +1253,7 @@ const Calc = {
 
     /* — Winner banner — */
     document.getElementById('wb-amount').textContent = rub(maxWealth);
-    document.getElementById('wb-label').innerHTML = `<svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 01-8 0V4z"/><path d="M8 5H5a1 1 0 00-1 1v1a3 3 0 003 3M16 5h3a1 1 0 011 1v1a3 3 0 01-3 3"/><path d="M12 13v3"/><path d="M9 20h6M10 17h4v3h-4z"/></svg>${r.isAffordable ? `Прогноз для выбранного объекта · ${H} ${pluralYr(H)}` : `Вклад вместо выбранного объекта · ${H} ${pluralYr(H)}`}`;
+    document.getElementById('wb-label').innerHTML = `<svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 01-8 0V4z"/><path d="M8 5H5a1 1 0 00-1 1v1a3 3 0 003 3M16 5h3a1 1 0 011 1v1a3 3 0 01-3 3"/><path d="M12 13v3"/><path d="M9 20h6M10 17h4v3h-4z"/></svg>${r.isAffordable ? `Итог для выбранного объекта · ${H} ${pluralYr(H)}` : `Вклад вместо выбранного объекта · ${H} ${pluralYr(H)}`}`;
     const winnerYearOneIncome = winner === 'deposit'
       ? r.depositArr[1] - r.depositArr[0]
       : r[winner].rentArr[1];

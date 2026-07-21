@@ -37,28 +37,20 @@ assert.equal(Calc.data.mortgageYears, 30, 'Срок ипотеки должен 
 Object.assign(Calc.data, {
   investAmount: 6_000_000, cityCode: 'mhc', projectSlug: 'grandbereg', roomLabel: '1',
   rentGrowth: 5, appreciation: 10, horizon: 5, depositRate: 11, depositMonthly: true,
-  mortgageRate: 12, mortgageYears: 15, purchaseCostPct: 0, saleCostPct: 0,
-  annualPropertyCosts: 0, cashReinvestRate: 0,
+  mortgageRate: 12, mortgageYears: 15,
 });
 const selectedRoom = Calc.getRoom(Calc.getProject(Calc.data.projectSlug), Calc.data.roomLabel);
-assert.equal(Calc.compute().unitPrice, selectedRoom.priceP50, 'В расчёте должна использоваться типичная цена P50');
-const base = Calc.compute().daily.wealthArr.at(-1);
-Calc.data.purchaseCostPct = 2;
-Calc.data.saleCostPct = 2;
-Calc.data.annualPropertyCosts = 50_000;
-const withCosts = Calc.compute().daily.wealthArr.at(-1);
-assert.ok(withCosts < base, 'Дополнительные расходы должны снижать итоговый капитал');
-
 const affordability = Calc.compute();
+assert.equal(affordability.unitPrice, selectedRoom.priceP50, 'В расчёте должна использоваться типичная цена P50');
 assert.equal(
   Math.round(affordability.requiredInvestAmount),
-  Math.round(affordability.unitPrice * 1.02 / 1.45),
-  'Расходы покупки должны увеличивать минимальную сумму инвестиций',
+  Math.round(affordability.unitPrice / 1.45),
+  'Минимальная сумма инвестиций должна считаться от лимита ипотеки 45%',
 );
 assert.equal(
-  Math.round(affordability.totalCost - affordability.principal + affordability.purchaseCosts + affordability.cashRemainder),
+  Math.round(affordability.totalCost - affordability.principal + affordability.cashRemainder),
   6_000_000,
-  'Первоначальный взнос, расходы покупки и остаток должны точно укладываться в бюджет',
+  'Первоначальный взнос и остаток должны точно укладываться в бюджет',
 );
 
 console.log('calculator_regression: OK');

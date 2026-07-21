@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Калькулятор доходности | Унистрой Аренда</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23A5FF00'/%3E%3Ctext x='16' y='23.5' font-family='Arial,Helvetica,sans-serif' font-size='19' font-weight='800' text-anchor='middle' fill='%2317161A'%3E%D0%A3%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Archivo:wght@600;700;800;900&display=swap" rel="stylesheet">
@@ -252,22 +253,22 @@
     table.cmp-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: .82rem;
+      font-size: .8rem;
     }
     .cmp-table th {
       background: var(--mint-2);
       color: var(--muted);
       font-weight: 700;
-      font-size: .72rem;
+      font-size: .7rem;
       text-transform: uppercase;
-      letter-spacing: .05em;
-      padding: 7px 10px;
+      letter-spacing: .04em;
+      padding: 7px 7px;
       text-align: right;
-      white-space: nowrap;
+      vertical-align: bottom;
     }
     .cmp-table th:first-child { text-align: left; }
     .cmp-table td {
-      padding: 8px 10px;
+      padding: 8px 7px;
       border-top: 1px solid var(--border);
       text-align: right;
       white-space: nowrap;
@@ -600,7 +601,7 @@
 
     <!-- Winner banner -->
     <div id="winner-banner" class="winner-banner" aria-live="polite">
-      <div class="wb-label" id="wb-label"><svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 01-8 0V4z"/><path d="M8 5H5a1 1 0 00-3 3M16 5h3a1 1 0 011 1v1a3 3 0 01-3 3"/><path d="M12 13v3"/><path d="M9 20h6M10 17h4v3h-4z"/></svg>Итог для выбранного объекта</div>
+      <div class="wb-label" id="wb-label"><svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 01-8 0V4z"/><path d="M8 5H5a1 1 0 00-1 1v1a3 3 0 003 3M16 5h3a1 1 0 011 1v1a3 3 0 01-3 3"/><path d="M12 13v3"/><path d="M9 20h6M10 17h4v3h-4z"/></svg>Итог для выбранного объекта</div>
       <div class="wb-amount" id="wb-amount">—</div>
       <div class="wb-delta" id="wb-delta"></div>
       <div class="wb-note" id="wb-note"></div>
@@ -1127,7 +1128,7 @@ const Calc = {
     /* Price display for selected room + tier */
     const shownPrice = r.isAffordable ? r.totalCost : r.unitPrice;
     const lotsText = r.units > 1 ? ` за ${r.units} ${pluralFlats(r.units)}` : '';
-    const areaText = r.units > 1 ? `≈${r.area.toFixed(1)} м² каждый` : `≈${r.area.toFixed(1)} м²`;
+    const areaText = r.units > 1 ? `≈${r.area.toFixed(1)} м² каждая` : `≈${r.area.toFixed(1)} м²`;
     document.getElementById('apt-price-display').innerHTML =
       `<span class="price-label">Типичная цена</span><br><strong>${rub(shownPrice)}</strong>${lotsText}, ${areaText}<br>` +
       `<span class="hint-sm">Диапазон по ${r.room.count} квартирам: ${rub(r.room.priceMin)}–${rub(r.room.priceMax)}.</span>`;

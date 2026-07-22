@@ -62,6 +62,20 @@ const CITY_NAMES = {
   ufa: 'Уфа',
 };
 
+// unistroy.ru не гарантирует стабильность city_code: в июле 2026 API стало
+// отдавать для части городов полное название вместо короткого кода без
+// предупреждения (mahachkala вместо mhc, perm вместо per) — из-за этого
+// PROJECTS.filter(p => p.city === 'mhc') тихо возвращал пустой массив, и
+// калькулятор падал при выборе города. Нормализуем на входе; при появлении
+// новых алиасов достаточно дополнить список ниже.
+const CITY_CODE_ALIASES = {
+  mahachkala: 'mhc',
+  perm: 'per',
+};
+function normalizeCityCode(code) {
+  return CITY_CODE_ALIASES[code] || code;
+}
+
 // В калькулятор попадают только ЖК, для которых утверждены ставки аренды.
 // art16, yes_gorki и upoint исключены по решению команды. Квартиры от
 // 3 комнат и больше также не выводятся: они не являются целевым продуктом
@@ -147,7 +161,7 @@ function aggregate(flats) {
   const projectMeta = new Map(); // slug -> {city, label}
 
   for (const f of flats) {
-    const city = f.city_code;
+    const city = normalizeCityCode(f.city_code);
     const slug = f.project.slug;
     const label = f.project.name;
     const room = roomLabel(f);

@@ -1875,14 +1875,20 @@ const Calc = {
     this._applyUrlParams();
 
     // Валидация каскада город → ЖК → комнатность на случай несовместимых
-    // сохранённых данных (например, из старой версии калькулятора)
+    // сохранённых данных (например, из старой версии калькулятора) или
+    // города, для которого прямо сейчас нет ни одного активного ЖК —
+    // источник (unistroy.ru) не гарантирует стабильность кода города,
+    // и город может временно остаться без лотов.
     const d = this.data;
     this._sanitizeData();
-    if (!CITIES.find(c => c.code === d.cityCode)) d.cityCode = CITIES[0].code;
+    const availableCities = CITIES.filter(c => PROJECTS.some(p => p.city === c.code));
+    if (!availableCities.find(c => c.code === d.cityCode)) {
+      d.cityCode = (availableCities[0] || CITIES[0]).code;
+    }
     let projs = PROJECTS.filter(p => p.city === d.cityCode);
-    if (!projs.find(p => p.slug === d.projectSlug)) d.projectSlug = projs[0].slug;
+    if (!projs.find(p => p.slug === d.projectSlug)) d.projectSlug = projs[0]?.slug;
     const proj = this.getProject(d.projectSlug);
-    if (!proj.rooms.find(r => r.label === d.roomLabel)) d.roomLabel = proj.rooms[0].label;
+    if (proj && !proj.rooms.find(r => r.label === d.roomLabel)) d.roomLabel = proj.rooms[0].label;
   },
 
   /* ── chart instance ── */
@@ -1892,7 +1898,8 @@ const Calc = {
   _populateCitySelect() {
     const sel = document.getElementById('city-select');
     sel.innerHTML = '';
-    CITIES.forEach(c => sel.add(new Option(c.label, c.code)));
+    // Город без активных ЖК не предлагаем — выбирать в нём всё равно нечего.
+    CITIES.filter(c => PROJECTS.some(p => p.city === c.code)).forEach(c => sel.add(new Option(c.label, c.code)));
     sel.value = this.data.cityCode;
   },
   _populateProjectSelect() {
@@ -1905,6 +1912,7 @@ const Calc = {
     const sel = document.getElementById('room-select');
     sel.innerHTML = '';
     const proj = this.getProject(this.data.projectSlug);
+    if (!proj) return;
     proj.rooms.forEach(rm => {
       const label = rm.label === 'Студия' ? 'Студия' : rm.label + '-комн.';
       sel.add(new Option(label, rm.label));
@@ -2008,6 +2016,7 @@ const Calc = {
     document.getElementById('city-select').addEventListener('change', (e) => {
       this.data.cityCode = e.target.value;
       const projs = PROJECTS.filter(p => p.city === this.data.cityCode);
+      if (!projs.length) return; // страховка: в списке городов и так только те, где есть ЖК
       this.data.projectSlug = projs[0].slug;
       this.data.roomLabel   = projs[0].rooms[0].label;
       this._populateProjectSelect();

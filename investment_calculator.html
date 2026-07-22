@@ -522,9 +522,10 @@
       </div>
     </div>
 
-    <!-- Strategy hint: всегда прогноз для того, что выбрано ниже в «Объект недвижимости» -->
+    <!-- Лучший вариант: всегда автоподбор под текущий бюджет и условия,
+         независимо от того, что стоит в «Объект недвижимости» ниже -->
     <div id="strategy-hint" class="strategy-hint hidden">
-      <div class="sh-head" id="sh-title"><svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 00-3.5 10.9c.5.4.8 1 .8 1.6V16h5.4v-.5c0-.6.3-1.2.8-1.6A6 6 0 0012 3z"/></svg>Прогноз для выбранного объекта</div>
+      <div class="sh-head" id="sh-title"><svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 00-3.5 10.9c.5.4.8 1 .8 1.6V16h5.4v-.5c0-.6.3-1.2.8-1.6A6 6 0 0012 3z"/></svg>Лучший вариант под ваш бюджет</div>
       <div class="sh-winner-row">
         <span class="sh-badge" id="sh-badge">—</span>
         <span class="sh-sublabel" id="sh-sublabel"></span>
@@ -543,10 +544,11 @@
       <div class="sh-reason" id="sh-reason"></div>
     </div>
 
-    <!-- Best alternative: отдельный блок, показывается только если в регионе
-         есть вариант доходнее выбранного — никогда не подменяет объект выше -->
+    <!-- Ваш выбор: появляется, только если пользователь вручную поменял
+         ЖК/комнатность ниже на вариант, отличный от лучшего выше — чтобы
+         сравнить желаемое с лучшим, а не подменять одно другим -->
     <div id="alt-hint" class="strategy-hint alt-hint hidden">
-      <div class="sh-head"><svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3l5 5-5 5M21 8H9M8 21l-5-5 5-5M3 16h12"/></svg>Лучшая альтернатива в регионе</div>
+      <div class="sh-head"><svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3l5 5-5 5M21 8H9M8 21l-5-5 5-5M3 16h12"/></svg>Ваш выбор</div>
       <div class="sh-winner-row">
         <span class="sh-badge" id="alt-badge">—</span>
         <span class="sh-sublabel" id="alt-sublabel"></span>
@@ -583,6 +585,7 @@
     <!-- Объект недвижимости -->
     <div class="card" id="property-card">
       <div class="card-title">Объект недвижимости</div>
+      <div class="hint-sm" id="property-auto-hint" style="margin-bottom:8px">ЖК и комнатность подставлены автоматически — лучший вариант под ваш бюджет. Можно выбрать вручную.</div>
 
       <!-- Регион -->
       <div class="field-group">
@@ -1009,6 +1012,10 @@ const Calc = {
     cityCode:           'kzn',
     projectSlug:        'aqua',
     roomLabel:          '1',
+    // Пока false — ЖК/комнатность подставляются автоматически (лучший
+    // вариант под бюджет). Становится true, как только пользователь сам
+    // выбрал ЖК или комнатность вручную, или пришёл по ссылке с проектом.
+    objectManualOverride: false,
     rentGrowth:         5,
     appreciation:       10,
     horizon:            5,
@@ -1748,6 +1755,8 @@ const Calc = {
       const roomLabel = room.label === 'Студия' ? 'Студия' : room.label + '-комн.';
       return {
         key: `${project.slug}_${room.label}`,
+        projectSlug: project.slug,
+        roomLabel: room.label,
         label: project.label + ', ' + roomLabel + (units > 1 ? ' × ' + units : ''),
         model: bestModel,
         wealth,
@@ -1796,12 +1805,12 @@ const Calc = {
     });
 
     const bestReason = best.model === 'deposit'
-      ? `Среди альтернатив в ${cityIn} вклад опережает арендные стратегии за ${H} ${pluralYr(H)}.`
-      : `Альтернатива выбранному объекту с лучшим соотношением цены и доходности в ${cityIn}.`;
+      ? `Среди вариантов в ${cityIn} вклад опережает арендные стратегии за ${H} ${pluralYr(H)}.`
+      : `Лучшее соотношение цены и доходности в ${cityIn} на этот бюджет.`;
 
-    // Отдельно считаем сам выбранный объект (тем же методом, что и
-    // альтернативы) — карточка «Прогноз для выбранного объекта» всегда
-    // показывает именно его, а не тайком подменяется лучшим вариантом.
+    // Отдельно считаем объект, который пользователь выбрал вручную (тем же
+    // методом, что и лучший вариант) — карточка «Ваш выбор» показывает
+    // именно его, когда он отличается от лучшего варианта.
     const selKey = `${d.projectSlug}_${d.roomLabel}`;
     let selectedRaw = strategies.find(s => s.key === selKey) || null;
     if (!selectedRaw) {
@@ -1819,46 +1828,62 @@ const Calc = {
 
     const selected = selectedRaw ? decorate(selectedRaw, selReason) : null;
     const bestDecorated = decorate(best, bestReason);
-    const hasAlt = !selected || (best.key !== selected.key && best.wealth > selected.wealth);
 
-    return { selected, best: bestDecorated, hasAlt };
+    return { selected, best: bestDecorated };
   },
 
   _renderHint() {
     const h  = this._computeHint();
     const H  = this.data.horizon;
 
-    const mainEl = document.getElementById('strategy-hint');
-    if (h.selected) {
-      mainEl.classList.remove('hidden');
-      document.getElementById('sh-badge').textContent = h.selected.label;
-      document.getElementById('sh-sublabel').textContent = h.selected.sublabel + (h.selected.isEstimated ? ' · доход оценочный' : '');
-      document.getElementById('sh-wealth').textContent = fmtM(h.selected.wealth);
-      document.getElementById('sh-roi').textContent = (h.selected.roi >= 0 ? '+' : '') + h.selected.roi.toFixed(1) + '%';
-      document.getElementById('sh-years').textContent = H + ' ' + pluralYr(H);
-      document.getElementById('sh-reason').textContent = h.selected.reason;
-      document.getElementById('sh-mort').innerHTML = (h.selected.needsMortgage && h.selected.mortMonthly > 0)
-        ? `<span class="sh-mort"><svg class="ic14" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v9M9 10v9M15 10v9M19 10v9"/><path d="M3 19h18"/></svg>Ипотека: ${rub(h.selected.mortMonthly)}/мес</span>`
-        : '';
-    } else {
-      mainEl.classList.add('hidden');
-    }
+    const bestEl = document.getElementById('strategy-hint');
+    bestEl.classList.remove('hidden');
+    document.getElementById('sh-badge').textContent = h.best.label;
+    document.getElementById('sh-sublabel').textContent = h.best.sublabel + (h.best.isEstimated ? ' · доход оценочный' : '');
+    document.getElementById('sh-wealth').textContent = fmtM(h.best.wealth);
+    document.getElementById('sh-roi').textContent = (h.best.roi >= 0 ? '+' : '') + h.best.roi.toFixed(1) + '%';
+    document.getElementById('sh-years').textContent = H + ' ' + pluralYr(H);
+    document.getElementById('sh-reason').textContent = h.best.reason;
+    document.getElementById('sh-mort').innerHTML = (h.best.needsMortgage && h.best.mortMonthly > 0)
+      ? `<span class="sh-mort"><svg class="ic14" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v9M9 10v9M15 10v9M19 10v9"/><path d="M3 19h18"/></svg>Ипотека: ${rub(h.best.mortMonthly)}/мес</span>`
+      : '';
 
+    // «Ваш выбор» — только когда пользователь сам вручную поменял ЖК/комнатность
+    // (не авто-подставленные) и его выбор отличается от лучшего варианта выше.
+    const showSelected = this.data.objectManualOverride && h.selected && h.selected.key !== h.best.key;
     const altEl = document.getElementById('alt-hint');
-    if (h.hasAlt) {
+    if (showSelected) {
       altEl.classList.remove('hidden');
-      document.getElementById('alt-badge').textContent = h.best.label;
-      document.getElementById('alt-sublabel').textContent = h.best.sublabel + (h.best.isEstimated ? ' · доход оценочный' : '');
-      document.getElementById('alt-wealth').textContent = fmtM(h.best.wealth);
-      document.getElementById('alt-roi').textContent = (h.best.roi >= 0 ? '+' : '') + h.best.roi.toFixed(1) + '%';
+      document.getElementById('alt-badge').textContent = h.selected.label;
+      document.getElementById('alt-sublabel').textContent = h.selected.sublabel + (h.selected.isEstimated ? ' · доход оценочный' : '');
+      document.getElementById('alt-wealth').textContent = fmtM(h.selected.wealth);
+      document.getElementById('alt-roi').textContent = (h.selected.roi >= 0 ? '+' : '') + h.selected.roi.toFixed(1) + '%';
       document.getElementById('alt-years').textContent = H + ' ' + pluralYr(H);
-      document.getElementById('alt-reason').textContent = h.best.reason;
-      document.getElementById('alt-mort').innerHTML = (h.best.needsMortgage && h.best.mortMonthly > 0)
-        ? `<span class="sh-mort"><svg class="ic14" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v9M9 10v9M15 10v9M19 10v9"/><path d="M3 19h18"/></svg>Ипотека: ${rub(h.best.mortMonthly)}/мес</span>`
+      document.getElementById('alt-reason').textContent = h.selected.reason;
+      document.getElementById('alt-mort').innerHTML = (h.selected.needsMortgage && h.selected.mortMonthly > 0)
+        ? `<span class="sh-mort"><svg class="ic14" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v9M9 10v9M15 10v9M19 10v9"/><path d="M3 19h18"/></svg>Ипотека: ${rub(h.selected.mortMonthly)}/мес</span>`
         : '';
     } else {
       altEl.classList.add('hidden');
     }
+
+    document.getElementById('property-auto-hint').classList.toggle('hidden', this.data.objectManualOverride);
+  },
+
+  // Пока пользователь не выбрал ЖК/комнатность вручную — «Объект
+  // недвижимости» всегда следует за лучшим вариантом под текущий бюджет
+  // и условия. Возвращает true, если селекторы были переключены.
+  _syncSelectionToBest() {
+    const d = this.data;
+    if (d.objectManualOverride) return false;
+    const h = this._computeHint();
+    if (!h.best || !h.best.projectSlug) return false;
+    if (d.projectSlug === h.best.projectSlug && d.roomLabel === h.best.roomLabel) return false;
+    d.projectSlug = h.best.projectSlug;
+    d.roomLabel = h.best.roomLabel;
+    this._populateProjectSelect();
+    this._populateRoomSelect();
+    return true;
   },
 
   /* ── debounced recompute ── */
@@ -1866,6 +1891,7 @@ const Calc = {
   _recompute() {
     clearTimeout(this._timer);
     this._timer = setTimeout(() => {
+      this._syncSelectionToBest();
       const r = this.compute();
       this.render(r);
     }, 300);
@@ -1889,6 +1915,7 @@ const Calc = {
     d.mortgageRate = clamp(Number(d.mortgageRate) || 12, 1, 40);
     d.mortgageYears = clamp(Math.round(Number(d.mortgageYears) || 15), 1, 30);
     d.depositMonthly = Boolean(d.depositMonthly);
+    d.objectManualOverride = Boolean(d.objectManualOverride);
     d.managerName = String(d.managerName || '').slice(0, 60);
     d.managerPhone = String(d.managerPhone || '').slice(0, 20);
   },
@@ -1915,6 +1942,9 @@ const Calc = {
       const value = parseFloat(raw);
       if (Number.isFinite(value)) d[field] = value;
     }
+    // Ссылка с явным ЖК/комнатностью — это конкретный присланный сценарий,
+    // его не должен тихо подменить автоподбор лучшего варианта.
+    if (params.has('proj') || params.has('room')) d.objectManualOverride = true;
   },
   buildShareUrl() {
     const d = this.data;
@@ -2076,6 +2106,10 @@ const Calc = {
       this.data.cityCode = e.target.value;
       const projs = PROJECTS.filter(p => p.city === this.data.cityCode);
       if (!projs.length) return; // страховка: в списке городов и так только те, где есть ЖК
+      // Смена региона — старт заново: подставляем первый ЖК как временную
+      // заглушку, а _syncSelectionToBest() в _recompute() тут же заменит
+      // её на лучший вариант в новом регионе.
+      this.data.objectManualOverride = false;
       this.data.projectSlug = projs[0].slug;
       this.data.roomLabel   = projs[0].rooms[0].label;
       this._populateProjectSelect();
@@ -2084,6 +2118,7 @@ const Calc = {
     });
 
     document.getElementById('project-select').addEventListener('change', (e) => {
+      this.data.objectManualOverride = true;
       this.data.projectSlug = e.target.value;
       const proj = this.getProject(this.data.projectSlug);
       this.data.roomLabel = proj.rooms[0].label;
@@ -2092,6 +2127,7 @@ const Calc = {
     });
 
     document.getElementById('room-select').addEventListener('change', (e) => {
+      this.data.objectManualOverride = true;
       this.data.roomLabel = e.target.value;
       this._saveLS(); this._recompute();
     });
@@ -2162,6 +2198,7 @@ const Calc = {
       const keepPhone = this.data.managerPhone;
       this.data = {
         investAmount: 8000000, cityCode: 'kzn', projectSlug: 'aqua', roomLabel: '1',
+        objectManualOverride: false,
         rentGrowth: 5, appreciation: 10, horizon: 5, depositRate: 11, depositMonthly: true,
         mortgageRate: 12, mortgageYears: 15,
         managerName: keepName, managerPhone: keepPhone,
@@ -2206,6 +2243,7 @@ const Calc = {
     });
 
     /* Initial render */
+    this._syncSelectionToBest();
     const r = this.compute();
     this.render(r);
   },

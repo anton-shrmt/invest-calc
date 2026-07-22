@@ -435,6 +435,8 @@
     .sh-reason { font-size: .75rem; color: var(--muted); margin-top: 8px; line-height: 1.5; }
     .sh-mort { font-size: .74rem; color: var(--warn-ink); background: var(--warn-bg);
                border-radius: var(--r-sm); padding: 4px 8px; margin-top: 6px; display: inline-block; }
+    .alt-hint { background: var(--mint-2); border-color: var(--border); box-shadow: none; margin-top: 10px; }
+    .alt-hint .sh-badge { background: var(--white); }
     .field-status { min-height: 1.2em; margin-top: 5px; font-size: .74rem; color: var(--warn-ink); line-height: 1.35; }
     .form-actions { display: flex; justify-content: flex-end; margin-top: 10px; }
     .link-button { appearance: none; border: none; background: none; font: inherit; font-size: .78rem; font-weight: 700; color: var(--dark); text-decoration: underline; cursor: pointer; }
@@ -520,7 +522,7 @@
       </div>
     </div>
 
-    <!-- Strategy hint -->
+    <!-- Strategy hint: всегда прогноз для того, что выбрано ниже в «Объект недвижимости» -->
     <div id="strategy-hint" class="strategy-hint hidden">
       <div class="sh-head" id="sh-title"><svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 00-3.5 10.9c.5.4.8 1 .8 1.6V16h5.4v-.5c0-.6.3-1.2.8-1.6A6 6 0 0012 3z"/></svg>Прогноз для выбранного объекта</div>
       <div class="sh-winner-row">
@@ -539,6 +541,28 @@
       </div>
       <div id="sh-mort"></div>
       <div class="sh-reason" id="sh-reason"></div>
+    </div>
+
+    <!-- Best alternative: отдельный блок, показывается только если в регионе
+         есть вариант доходнее выбранного — никогда не подменяет объект выше -->
+    <div id="alt-hint" class="strategy-hint alt-hint hidden">
+      <div class="sh-head"><svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3l5 5-5 5M21 8H9M8 21l-5-5 5-5M3 16h12"/></svg>Лучшая альтернатива в регионе</div>
+      <div class="sh-winner-row">
+        <span class="sh-badge" id="alt-badge">—</span>
+        <span class="sh-sublabel" id="alt-sublabel"></span>
+      </div>
+      <div class="sh-numbers">
+        <div class="sh-num">
+          <div class="sh-num-val" id="alt-wealth">—</div>
+          <div class="sh-num-lbl">итог за <span id="alt-years">—</span></div>
+        </div>
+        <div class="sh-num">
+          <div class="sh-num-val" id="alt-roi">—</div>
+          <div class="sh-num-lbl">ROI</div>
+        </div>
+      </div>
+      <div id="alt-mort"></div>
+      <div class="sh-reason" id="alt-reason"></div>
     </div>
 
     <!-- Горизонт планирования -->
@@ -1754,51 +1778,77 @@ const Calc = {
     strategies.sort((a, b) => b.wealth - a.wealth);
 
     const best = strategies[0];
-    const roi  = (best.wealth - invest) / invest * 100;
     const cityIn = CITY_IN[d.cityCode] || (CITIES.find(c => c.code === d.cityCode) || {}).label || '';
+    const decorate = (s, reason) => ({
+      ...s,
+      sublabel: s.model === 'deposit' ? `${d.depositRate}% годовых` : modelName[s.model] + ' аренда',
+      roi: (s.wealth - invest) / invest * 100,
+      reason,
+    });
 
-    const reason = best.model === 'deposit'
+    const bestReason = best.model === 'deposit'
       ? `Среди альтернатив в ${cityIn} вклад опережает арендные стратегии за ${H} ${pluralYr(H)}.`
       : `Альтернатива выбранному объекту с лучшим соотношением цены и доходности в ${cityIn}.`;
 
-    return {
-      ...best,
-      sublabel: best.model === 'deposit' ? `${d.depositRate}% годовых` : modelName[best.model] + ' аренда',
-      roi,
-      reason,
-    };
+    // Отдельно считаем сам выбранный объект (тем же методом, что и
+    // альтернативы) — карточка «Прогноз для выбранного объекта» всегда
+    // показывает именно его, а не тайком подменяется лучшим вариантом.
+    const selKey = `${d.projectSlug}_${d.roomLabel}`;
+    let selectedRaw = strategies.find(s => s.key === selKey) || null;
+    if (!selectedRaw) {
+      const selProject = this.getProject(d.projectSlug);
+      const selRoom = selProject ? this.getRoom(selProject, d.roomLabel) : null;
+      if (selRoom) selectedRaw = evalCombo(selProject, selRoom, invest);
+    }
+
+    const depositStrategy = strategies.find(s => s.key === 'deposit');
+    const selReason = selectedRaw && depositStrategy
+      ? (selectedRaw.wealth >= depositStrategy.wealth
+          ? `Обгоняет банковский вклад на ${rub(selectedRaw.wealth - depositStrategy.wealth)} за ${H} ${pluralYr(H)}.`
+          : `Банковский вклад на этом горизонте даёт больше на ${rub(depositStrategy.wealth - selectedRaw.wealth)}.`)
+      : '';
+
+    const selected = selectedRaw ? decorate(selectedRaw, selReason) : null;
+    const bestDecorated = decorate(best, bestReason);
+    const hasAlt = !selected || (best.key !== selected.key && best.wealth > selected.wealth);
+
+    return { selected, best: bestDecorated, hasAlt };
   },
 
   _renderHint() {
-    const h   = this._computeHint();
-    const el  = document.getElementById('strategy-hint');
-    const H   = this.data.horizon;
-    const isSelectedObject = h.key === `${this.data.projectSlug}_${this.data.roomLabel}`;
+    const h  = this._computeHint();
+    const H  = this.data.horizon;
 
-    el.classList.remove('hidden');
-    document.getElementById('sh-title').innerHTML = `<svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 00-3.5 10.9c.5.4.8 1 .8 1.6V16h5.4v-.5c0-.6.3-1.2.8-1.6A6 6 0 0012 3z"/></svg>${isSelectedObject ? 'Прогноз для выбранного объекта' : 'Лучшая альтернатива в регионе'}`;
-
-    const badge = document.getElementById('sh-badge');
-    badge.textContent = h.label;
-
-    document.getElementById('sh-sublabel').textContent = h.sublabel + (h.isEstimated ? ' · доход оценочный' : '');
-
-    const wealthEl = document.getElementById('sh-wealth');
-    wealthEl.textContent = fmtM(h.wealth);
-
-    const roiEl = document.getElementById('sh-roi');
-    roiEl.textContent = (h.roi >= 0 ? '+' : '') + h.roi.toFixed(1) + '%';
-
-    document.getElementById('sh-years').textContent = H + ' ' + pluralYr(H);
-    document.getElementById('sh-reason').textContent = isSelectedObject
-      ? 'Выбранный объект показывает лучший прогноз среди доступных вариантов в регионе.'
-      : h.reason;
-
-    const mortEl = document.getElementById('sh-mort');
-    if (h.needsMortgage && h.mortMonthly > 0) {
-      mortEl.innerHTML = `<span class="sh-mort"><svg class="ic14" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v9M9 10v9M15 10v9M19 10v9"/><path d="M3 19h18"/></svg>Ипотека: ${rub(h.mortMonthly)}/мес</span>`;
+    const mainEl = document.getElementById('strategy-hint');
+    if (h.selected) {
+      mainEl.classList.remove('hidden');
+      document.getElementById('sh-badge').textContent = h.selected.label;
+      document.getElementById('sh-sublabel').textContent = h.selected.sublabel + (h.selected.isEstimated ? ' · доход оценочный' : '');
+      document.getElementById('sh-wealth').textContent = fmtM(h.selected.wealth);
+      document.getElementById('sh-roi').textContent = (h.selected.roi >= 0 ? '+' : '') + h.selected.roi.toFixed(1) + '%';
+      document.getElementById('sh-years').textContent = H + ' ' + pluralYr(H);
+      document.getElementById('sh-reason').textContent = h.selected.reason;
+      document.getElementById('sh-mort').innerHTML = (h.selected.needsMortgage && h.selected.mortMonthly > 0)
+        ? `<span class="sh-mort"><svg class="ic14" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v9M9 10v9M15 10v9M19 10v9"/><path d="M3 19h18"/></svg>Ипотека: ${rub(h.selected.mortMonthly)}/мес</span>`
+        : '';
     } else {
-      mortEl.innerHTML = '';
+      mainEl.classList.add('hidden');
+    }
+
+    const altEl = document.getElementById('alt-hint');
+    if (h.hasAlt) {
+      altEl.classList.remove('hidden');
+      document.getElementById('alt-badge').textContent = h.best.label;
+      document.getElementById('alt-sublabel').textContent = h.best.sublabel + (h.best.isEstimated ? ' · доход оценочный' : '');
+      document.getElementById('alt-wealth').textContent = fmtM(h.best.wealth);
+      document.getElementById('alt-roi').textContent = (h.best.roi >= 0 ? '+' : '') + h.best.roi.toFixed(1) + '%';
+      document.getElementById('alt-years').textContent = H + ' ' + pluralYr(H);
+      document.getElementById('alt-reason').textContent = h.best.reason;
+      document.getElementById('alt-mort').innerHTML = (h.best.needsMortgage && h.best.mortMonthly > 0)
+        ? `<span class="sh-mort"><svg class="ic14" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v9M9 10v9M15 10v9M19 10v9"/><path d="M3 19h18"/></svg>Ипотека: ${rub(h.best.mortMonthly)}/мес</span>`
+        : '';
+    } else {
+      altEl.classList.add('hidden');
     }
   },
 

@@ -1653,14 +1653,17 @@ const Calc = {
 
     const propGrow = (c) => c * Math.pow(1 + d.appreciation / 100, H);
 
-    const cumRentFn = (monthlyRent, dailyAnnualIncome, model, mortAnnual) => {
+    // mortAnnual — суммарный годовой платёж по ВСЕМ ипотечным квартирам
+    // сразу (не за одну), поэтому вычитается один раз за год, а не на
+    // каждую квартиру отдельно — units масштабирует только ренту.
+    const cumRentFn = (monthlyRent, dailyAnnualIncome, model, units, mortAnnual) => {
       let yr1 = 0;
       if (model === 'longterm')   yr1 = monthlyRent * 11 * 0.88;
       if (model === 'guaranteed') yr1 = monthlyRent * 12 * 0.75;
       if (model === 'daily')      yr1 = dailyAnnualIncome;
       let total = 0;
       for (let i = 1; i <= H; i++) {
-        const yr   = yr1 * Math.pow(1 + d.rentGrowth / 100, i - 1);
+        const yr   = yr1 * units * Math.pow(1 + d.rentGrowth / 100, i - 1);
         const mort = (mortAnnual > 0 && i <= d.mortgageYears) ? mortAnnual : 0;
         total += yr - mort;
       }
@@ -1697,13 +1700,19 @@ const Calc = {
         }
         return Math.max(0, principal - payment * paidMonths);
       };
-      const perUnitWealth = (m, principal = 0, mortAnn = 0) =>
-        propGrow(cost) - mortgageBalanceAtHorizon(principal, mortAnn) +
-        cumRentFn(monthlyRent, dailyAnnualIncome, m, mortAnn);
-      const bestModelFor = (principal = 0, mortAnn = 0) => {
+      // groupWealth считает суммарное богатство ГРУППЫ квартир (units штук)
+      // целиком — рост стоимости и рента масштабируются на units, ипотечный
+      // остаток долга/платёж (если есть) уже суммарные и не умножаются
+      // повторно. Раньше principal/mortAnn (суммарные на все ипотечные
+      // квартиры) считались как для одной квартиры, а затем результат ещё
+      // раз умножался на mortgagedUnits — ипотека задваивалась.
+      const groupWealth = (m, units, principal = 0, mortAnn = 0) =>
+        propGrow(cost * units) - mortgageBalanceAtHorizon(principal, mortAnn) +
+        cumRentFn(monthlyRent, dailyAnnualIncome, m, units, mortAnn);
+      const bestModelFor = (units, principal = 0, mortAnn = 0) => {
         let bestW = -Infinity, bestModel = 'daily';
         ['longterm', 'guaranteed', 'daily'].forEach(m => {
-          const w = perUnitWealth(m, principal, mortAnn);
+          const w = groupWealth(m, units, principal, mortAnn);
           if (w > bestW) { bestW = w; bestModel = m; }
         });
         return { bestW, bestModel };
@@ -1722,14 +1731,14 @@ const Calc = {
       const principal = mortgagedUnits > 0 ? mortgagedUnits * cost - cashLeft : 0;
 
       if (nFull > 0) {
-        const cashModel = bestModelFor();
-        wealth += nFull * cashModel.bestW;
+        const cashModel = bestModelFor(nFull);
+        wealth += cashModel.bestW;
         bestModel = cashModel.bestModel;
       }
       if (mortgagedUnits > 0) {
         mortAnn = mortPayAnnual(principal);
-        const mortModel = bestModelFor(principal, mortAnn);
-        wealth += mortgagedUnits * mortModel.bestW;
+        const mortModel = bestModelFor(mortgagedUnits, principal, mortAnn);
+        wealth += mortModel.bestW;
         if (!bestModel) bestModel = mortModel.bestModel;
       } else {
         wealth += cashLeft;

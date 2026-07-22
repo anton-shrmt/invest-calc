@@ -432,6 +432,25 @@
     .model-disclaimer { margin-top: 8px; font-size: .72rem; color: var(--muted); line-height: 1.45; }
     .chart-fallback { display: grid; place-items: center; height: 100%; padding: 20px; text-align: center; color: var(--muted); background: var(--mint-2); border-radius: var(--r-sm); font-size: .84rem; }
     .chart-fallback[hidden] { display: none; }
+
+    /* ── CLIENT SELECTION PDF ── */
+    .client-selection-print { display: none; }
+    .selection-print-head { border-bottom: 2px solid var(--dark); padding-bottom: 14px; margin-bottom: 18px; }
+    .selection-print-brand { color: var(--dark); font: 800 1.15rem/1 var(--font-display); }
+    .selection-print-title { margin: 8px 0 4px; font: 800 1.75rem/1.15 var(--font-display); color: var(--ink); }
+    .selection-print-meta { color: var(--muted); font-size: .82rem; line-height: 1.45; }
+    .selection-print-lead { margin: 0 0 16px; font-size: .92rem; line-height: 1.5; color: var(--ink); }
+    .selection-print-list { display: grid; gap: 10px; }
+    .selection-print-card { border: 1px solid var(--border); border-radius: var(--r-sm); padding: 13px 14px; break-inside: avoid; }
+    .selection-print-card.is-best { border: 2px solid var(--accent-deep); background: var(--mint-2); }
+    .selection-print-rank { color: var(--muted); font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+    .selection-print-name { margin-top: 3px; font: 800 1.05rem/1.2 var(--font-display); color: var(--dark); }
+    .selection-print-sub { margin-top: 3px; color: var(--muted); font-size: .8rem; }
+    .selection-print-kpis { display: flex; flex-wrap: wrap; gap: 12px 24px; margin-top: 9px; }
+    .selection-print-kpi { font-size: .76rem; color: var(--muted); }
+    .selection-print-kpi strong { display: block; color: var(--ink); font-size: .92rem; }
+    .selection-print-deposit { margin-top: 16px; padding: 12px 14px; background: var(--mint-2); border-radius: var(--r-sm); font-size: .85rem; }
+    .selection-print-foot { margin-top: 18px; padding-top: 10px; border-top: 1px solid var(--border); color: var(--muted); font-size: .72rem; line-height: 1.45; }
     @media (max-width: 600px) {
       .page-header h1 { font-size: 1.08rem; }
       .wb-kpis { grid-template-columns: 1fr 1fr; }
@@ -469,6 +488,10 @@
       .table-wrap { overflow-x: visible; }
       .cmp-table thead, .cmp-table tfoot, .cmp-table tr, .cmp-table td { display: revert; width: auto; }
       .cmp-table td::before { content: none; }
+      body.client-selection-mode .page-header,
+      body.client-selection-mode .main-layout,
+      body.client-selection-mode .page-footer { display: none !important; }
+      body.client-selection-mode .client-selection-print { display: block !important; padding: 0 16px; }
     }
   </style>
 </head>
@@ -578,6 +601,11 @@
       <div class="field-group">
         <label class="field-label" for="city-select">Регион</label>
         <select id="city-select"></select>
+        <div class="checkbox-row" style="margin-top:8px">
+          <input type="checkbox" id="all-cities-cb">
+          <label for="all-cities-cb">Искать среди всех городов</label>
+        </div>
+        <div class="hint-sm" id="all-cities-help">Подбор остаётся в выбранном регионе.</div>
       </div>
 
       <!-- ЖК -->
@@ -679,6 +707,7 @@
       <div class="wb-actions">
         <button type="button" class="wb-action-btn" id="share-link-btn"><svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.07 0l2.83-2.83a5 5 0 00-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 00-7.07 0L4.1 13.83a5 5 0 007.07 7.07l1.5-1.5"/></svg>Скопировать ссылку</button>
         <button type="button" class="wb-action-btn" id="print-btn"><svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"/><path d="M6 18H4a1 1 0 01-1-1v-6a1 1 0 011-1h16a1 1 0 011 1v6a1 1 0 01-1 1h-2"/><path d="M6 14h12v7H6z"/></svg>Сохранить PDF</button>
+        <button type="button" class="wb-action-btn" id="selection-pdf-btn"><svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>Сформировать подборку</button>
         <button type="button" class="wb-action-btn hidden" id="whatsapp-btn"><svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 01-12.36 7.57L3 20l1.07-5.4A8.5 8.5 0 1121 11.5z"/><path d="M8.5 10.5c0 3.5 2.5 6 6 6"/></svg>Написать в WhatsApp</button>
         <button type="button" class="wb-action-btn" id="qr-toggle-btn"><svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM19 14h2v2h-2zM14 19h2v2h-2zM19 19h2v2h-2z"/></svg>QR-код</button>
       </div>
@@ -738,6 +767,7 @@
 </div><!-- /main-layout -->
 
 <div class="page-footer" id="page-footer"></div>
+<section class="client-selection-print" id="client-selection-print" aria-live="polite"></section>
 
 <script>
   // Цены обновляются каждые 12 часов; ключ не даёт браузеру использовать вчерашний прайс из кэша.
@@ -1066,6 +1096,7 @@ const Calc = {
     cityCode:           'kzn',
     projectSlug:        'aqua',
     roomLabel:          '1',
+    searchAllCities:     false,
     // Пока false — ЖК/комнатность подставляются автоматически (лучший
     // вариант под бюджет). Становится true, как только пользователь сам
     // выбрал ЖК или комнатность вручную, или пришёл по ссылке с проектом.
@@ -1708,8 +1739,8 @@ const Calc = {
   },
 
   /* ── strategy hint ──
-     Ищет лучшую комбинацию ЖК × комнатность в выбранном регионе (по средней
-     цене квартиры) для введённой суммы — сравнивает с банковским вкладом. */
+     Ищет лучшую комбинацию ЖК × комнатность в выбранном регионе или сразу
+     во всех городах — сравнивает с банковским вкладом. */
   _computeHint() {
     const d = this.data;
     const H = d.horizon;
@@ -1720,7 +1751,10 @@ const Calc = {
       ? p * Math.pow(1 + depRate / 12, H * 12)
       : p * Math.pow(1 + depRate, H);
 
-    const propGrow = (c) => c * Math.pow(1 + d.appreciation / 100, H);
+    // В глобальном поиске рост стоимости берётся из ставки города кандидата,
+    // иначе сравнение регионов оказалось бы завязано на город в селекторе.
+    const propGrow = (c, cityCode) =>
+      c * Math.pow(1 + (APPRECIATION_BY_CITY[cityCode] ?? d.appreciation) / 100, H);
 
     // mortAnnual — суммарный годовой платёж по ВСЕМ ипотечным квартирам
     // сразу (не за одну), поэтому вычитается один раз за год, а не на
@@ -1779,7 +1813,7 @@ const Calc = {
       // квартиры) считались как для одной квартиры, а затем результат ещё
       // раз умножался на mortgagedUnits — ипотека задваивалась.
       const groupWealth = (m, units, principal = 0, mortAnn = 0) =>
-        propGrow(cost * units) - mortgageBalanceAtHorizon(principal, mortAnn) +
+        propGrow(cost * units, project.city) - mortgageBalanceAtHorizon(principal, mortAnn) +
         cumRentFn(monthlyRent, dailyAnnualIncome, m, units, mortAnn);
       const bestModelFor = (units, principal = 0, mortAnn = 0) => {
         let bestW = -Infinity, bestModel = availableModels[0];
@@ -1818,6 +1852,8 @@ const Calc = {
       const roomLabel = room.label === 'Студия' ? 'Студия' : room.label + '-комн.';
       return {
         key: `${project.slug}_${room.label}`,
+        cityCode: project.city,
+        cityLabel: (CITIES.find(city => city.code === project.city) || {}).label || project.city,
         projectSlug: project.slug,
         roomLabel: room.label,
         label: project.label + ', ' + roomLabel + (units > 1 ? ' × ' + units : ''),
@@ -1849,9 +1885,9 @@ const Calc = {
       mortMonthly: 0,
     });
 
-    // Every project/room combo in the selected city (пропускаем единичные
-    // квартиры — они не показательны как «типовая» рекомендация)
-    PROJECTS.filter(p => p.city === d.cityCode).forEach(project => {
+    // Для глобального режима перебираем все города; иначе — только выбранный.
+    // Единичные квартиры пропускаем: они не показательны как типовой вариант.
+    PROJECTS.filter(project => d.searchAllCities || project.city === d.cityCode).forEach(project => {
       project.rooms.filter(room => room.count >= 3).forEach(room => {
         const s = evalCombo(project, room, invest);
         if (s) strategies.push(s);
@@ -1863,6 +1899,7 @@ const Calc = {
 
     const best = strategies[0];
     const cityIn = CITY_IN[d.cityCode] || (CITIES.find(c => c.code === d.cityCode) || {}).label || '';
+    const searchScope = d.searchAllCities ? 'среди всех доступных городов' : `в ${cityIn}`;
     const decorate = (s, reason) => ({
       ...s,
       sublabel: s.model === 'deposit' ? `${d.depositRate}% годовых` : modelName[s.model] + ' аренда',
@@ -1871,8 +1908,8 @@ const Calc = {
     });
 
     const bestReason = best.model === 'deposit'
-      ? `Среди вариантов в ${cityIn} вклад опережает арендные стратегии за ${H} ${pluralYr(H)}.`
-      : `Лучшее соотношение цены и доходности в ${cityIn} на этот бюджет.`;
+      ? `Среди вариантов ${searchScope} вклад опережает арендные стратегии за ${H} ${pluralYr(H)}.`
+      : `Лучшее соотношение цены и доходности ${searchScope} на этот бюджет.`;
 
     // Отдельно считаем объект, который пользователь выбрал вручную (тем же
     // методом, что и лучший вариант) — карточка «Ваш выбор» показывает
@@ -1894,15 +1931,17 @@ const Calc = {
     const selected = selectedRaw ? decorate(selectedRaw, selReason) : null;
     const bestDecorated = decorate(best, bestReason);
 
-    return { selected, best: bestDecorated };
+    return { selected, best: bestDecorated, ranked: strategies };
   },
 
   _renderHint() {
     const h  = this._computeHint();
     const H  = this.data.horizon;
+    const d  = this.data;
 
     const bestEl = document.getElementById('strategy-hint');
     bestEl.classList.remove('hidden');
+    document.getElementById('sh-title').innerHTML = `<svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 00-3.5 10.9c.5.4.8 1 .8 1.6V16h5.4v-.5c0-.6.3-1.2.8-1.6A6 6 0 0012 3z"/></svg>${d.searchAllCities ? 'Лучший вариант среди всех городов' : 'Лучший вариант под ваш бюджет'}`;
     document.getElementById('sh-badge').textContent = h.best.label;
     document.getElementById('sh-sublabel').textContent = h.best.sublabel + (h.best.isEstimated ? ' · доход оценочный' : '');
     document.getElementById('sh-wealth').textContent = fmtM(h.best.wealth);
@@ -1935,7 +1974,90 @@ const Calc = {
       altEl.classList.add('hidden');
     }
 
-    document.getElementById('property-auto-hint').classList.toggle('hidden', this.data.objectManualOverride);
+    const autoHint = document.getElementById('property-auto-hint');
+    autoHint.classList.toggle('hidden', d.objectManualOverride);
+    autoHint.textContent = d.searchAllCities
+      ? 'Город, ЖК и комнатность подставлены автоматически — лучший вариант среди всех городов. Можно выбрать вручную.'
+      : 'ЖК и комнатность подставлены автоматически — лучший вариант под ваш бюджет. Можно выбрать вручную.';
+    this._renderSearchScope();
+  },
+
+  _renderSearchScope() {
+    const allCities = this.data.searchAllCities;
+    document.getElementById('all-cities-cb').checked = allCities;
+    document.getElementById('all-cities-help').textContent = allCities
+      ? 'Сравниваем актуальные объекты во всех доступных городах.'
+      : 'Подбор остаётся в выбранном регионе.';
+  },
+
+  _getClientSelection() {
+    const h = this._computeHint();
+    const deposit = h.ranked.find(strategy => strategy.model === 'deposit');
+    const properties = h.ranked.filter(strategy => strategy.model !== 'deposit');
+    const cards = [];
+    const add = strategy => {
+      if (!strategy || strategy.model === 'deposit') return;
+      const id = `${strategy.key}|${strategy.units}`;
+      if (!cards.some(item => `${item.key}|${item.units}` === id)) cards.push(strategy);
+    };
+
+    // Сначала лучший и выбор клиента, затем ближайшие альтернативы. Так PDF
+    // остаётся короткой подборкой, а не превращается в перечень всего рынка.
+    add(h.best);
+    add(h.selected);
+    properties.forEach(add);
+
+    return { best: h.best, deposit, cards: cards.slice(0, 5) };
+  },
+
+  _printClientSelection() {
+    const d = this.data;
+    const { best, deposit, cards } = this._getClientSelection();
+    const H = d.horizon;
+    const modelNames = { longterm: 'Долгосрочная аренда', guaranteed: 'Гарантированная аренда', daily: 'Посуточная аренда' };
+    const scope = d.searchAllCities
+      ? 'среди всех доступных городов'
+      : `в ${CITY_IN[d.cityCode] || (CITIES.find(city => city.code === d.cityCode) || {}).label || d.cityCode}`;
+    let alternativeNumber = 0;
+    const cardHtml = cards.length
+      ? cards.map(item => {
+          const isBest = best.model !== 'deposit' && item.key === best.key && item.units === best.units;
+          const isSelected = d.objectManualOverride && item.projectSlug === d.projectSlug && item.roomLabel === d.roomLabel;
+          const marker = isBest ? 'Лучший вариант' : (isSelected ? 'Ваш выбор' : `Альтернатива ${++alternativeNumber}`);
+          const roi = (item.wealth - d.investAmount) / d.investAmount * 100;
+          const unitsText = item.units > 1 ? `${item.units} ${pluralFlats(item.units)}` : '1 квартира';
+          return `<article class="selection-print-card${isBest ? ' is-best' : ''}">
+            <div class="selection-print-rank">${marker}</div>
+            <div class="selection-print-name">${escapeHtml(item.cityLabel)} · ${escapeHtml(item.label)}</div>
+            <div class="selection-print-sub">${modelNames[item.model]}${item.isEstimated ? ' · доход оценочный' : ''}</div>
+            <div class="selection-print-kpis">
+              <div class="selection-print-kpi">Итоговый капитал<strong>${fmtM(item.wealth)}</strong></div>
+              <div class="selection-print-kpi">ROI за ${H} ${pluralYr(H)}<strong>${roi >= 0 ? '+' : ''}${roi.toFixed(1)}%</strong></div>
+              <div class="selection-print-kpi">Покупка<strong>${unitsText}</strong></div>
+              <div class="selection-print-kpi">Стоимость покупки<strong>${rub(item.cost)}</strong></div>
+            </div>
+          </article>`;
+        }).join('')
+      : '<p class="selection-print-meta">Подходящих объектов в расчёте не найдено. Сравните сценарий с банковским вкладом.</p>';
+    const depositRoi = deposit ? (deposit.wealth - d.investAmount) / d.investAmount * 100 : 0;
+    const manager = [d.managerName, d.managerPhone].filter(Boolean).map(escapeHtml).join(' · ');
+
+    document.getElementById('client-selection-print').innerHTML = `
+      <header class="selection-print-head">
+        <div class="selection-print-brand">Унистрой.Аренда</div>
+        <h1 class="selection-print-title">Инвестиционная подборка</h1>
+        <div class="selection-print-meta">Расчёт ${scope} · горизонт ${H} ${pluralYr(H)} · цены актуальны на ${formatDataDate(PRICE_DATA_META.fetchedAt)}</div>
+        <div class="selection-print-meta">Допущения: рост аренды ${d.rentGrowth}%/год · рост стоимости ${d.searchAllCities ? 'по ставке города' : `${d.appreciation}%/год`} · вклад ${d.depositRate}% годовых</div>
+      </header>
+      <p class="selection-print-lead">Варианты ранжированы по итоговому капиталу: стоимость недвижимости за вычетом остатка долга плюс накопленный денежный поток.</p>
+      <div class="selection-print-list">${cardHtml}</div>
+      ${deposit ? `<section class="selection-print-deposit"><strong>Контрольное сравнение — банковский вклад:</strong> ${fmtM(deposit.wealth)} за ${H} ${pluralYr(H)} · ROI ${depositRoi >= 0 ? '+' : ''}${depositRoi.toFixed(1)}%.</section>` : ''}
+      <footer class="selection-print-foot">${manager ? `Расчёт подготовил: ${manager}. ` : ''}Расчёт оценочный и не является публичной офертой. Доступность квартир и условия аренды требуют подтверждения перед сделкой.</footer>`;
+
+    document.body.classList.add('client-selection-mode');
+    const cleanup = () => document.body.classList.remove('client-selection-mode');
+    window.addEventListener('afterprint', cleanup, { once: true });
+    window.print();
   },
 
   // Пока пользователь не выбрал ЖК/комнатность вручную — «Объект
@@ -1946,9 +2068,12 @@ const Calc = {
     if (d.objectManualOverride) return false;
     const h = this._computeHint();
     if (!h.best || !h.best.projectSlug) return false;
-    if (d.projectSlug === h.best.projectSlug && d.roomLabel === h.best.roomLabel) return false;
+    if (d.cityCode === h.best.cityCode && d.projectSlug === h.best.projectSlug && d.roomLabel === h.best.roomLabel) return false;
+    d.cityCode = h.best.cityCode;
     d.projectSlug = h.best.projectSlug;
     d.roomLabel = h.best.roomLabel;
+    this._syncAppreciationToCity();
+    this._populateCitySelect();
     this._populateProjectSelect();
     this._populateRoomSelect();
     return true;
@@ -1983,6 +2108,7 @@ const Calc = {
     d.mortgageRate = clamp(Number(d.mortgageRate) || 17, 1, 40);
     d.mortgageYears = clamp(Math.round(Number(d.mortgageYears) || 30), 1, 30);
     d.depositMonthly = Boolean(d.depositMonthly);
+    d.searchAllCities = Boolean(d.searchAllCities);
     d.objectManualOverride = Boolean(d.objectManualOverride);
     d.unitsOverride = clamp(Math.round(Number(d.unitsOverride) || 0), 0, 20);
     d.managerName = String(d.managerName || '').slice(0, 60);
@@ -1994,7 +2120,7 @@ const Calc = {
   // приоритетнее сохранённого localStorage, чтобы получатель ссылки видел
   // именно присланный сценарий, а не свою предыдущую сессию.
   _urlParamMap: {
-    amt: 'investAmount', city: 'cityCode', proj: 'projectSlug', room: 'roomLabel',
+    amt: 'investAmount', city: 'cityCode', all: 'searchAllCities', proj: 'projectSlug', room: 'roomLabel',
     qty: 'unitsOverride',
     rg: 'rentGrowth', h: 'horizon', dr: 'depositRate',
     dm: 'depositMonthly', mr: 'mortgageRate', my: 'mortgageYears',
@@ -2007,7 +2133,7 @@ const Calc = {
     for (const [key, field] of Object.entries(this._urlParamMap)) {
       if (!params.has(key)) continue;
       const raw = params.get(key);
-      if (field === 'depositMonthly') { d[field] = raw === '1'; continue; }
+      if (field === 'depositMonthly' || field === 'searchAllCities') { d[field] = raw === '1'; continue; }
       if (this._stringFields.has(field)) { d[field] = raw; continue; }
       const value = parseFloat(raw);
       if (Number.isFinite(value)) d[field] = value;
@@ -2020,7 +2146,7 @@ const Calc = {
     const d = this.data;
     const params = new URLSearchParams();
     for (const [key, field] of Object.entries(this._urlParamMap)) {
-      const value = field === 'depositMonthly' ? (d[field] ? '1' : '0') : d[field];
+      const value = field === 'depositMonthly' || field === 'searchAllCities' ? (d[field] ? '1' : '0') : d[field];
       if (value === '' || value == null) continue;
       params.set(key, value);
     }
@@ -2100,6 +2226,7 @@ const Calc = {
     document.getElementById('horizon-pill').textContent = this.data.horizon + ' ' + pluralYr(this.data.horizon);
     document.getElementById('deposit-rate-input').value = this.data.depositRate;
     document.getElementById('deposit-monthly-cb').checked = this.data.depositMonthly;
+    this._renderSearchScope();
     document.getElementById('manager-name-input').value = this.data.managerName;
     document.getElementById('manager-phone-input').value = this.data.managerPhone;
     if (this.data.managerName || this.data.managerPhone) {
@@ -2175,6 +2302,7 @@ const Calc = {
 
     document.getElementById('city-select').addEventListener('change', (e) => {
       this.data.cityCode = e.target.value;
+      this.data.searchAllCities = false;
       const projs = PROJECTS.filter(p => p.city === this.data.cityCode);
       if (!projs.length) return; // страховка: в списке городов и так только те, где есть ЖК
       // Смена региона — старт заново: подставляем первый ЖК как временную
@@ -2187,6 +2315,13 @@ const Calc = {
       this._syncAppreciationToCity();
       this._populateProjectSelect();
       this._populateRoomSelect();
+      this._saveLS(); this._recompute();
+    });
+
+    document.getElementById('all-cities-cb').addEventListener('change', (e) => {
+      this.data.searchAllCities = e.target.checked;
+      this.data.objectManualOverride = false;
+      this.data.unitsOverride = 0;
       this._saveLS(); this._recompute();
     });
 
@@ -2279,7 +2414,7 @@ const Calc = {
       const keepName = this.data.managerName;
       const keepPhone = this.data.managerPhone;
       this.data = {
-        investAmount: 8000000, cityCode: 'kzn', projectSlug: 'aqua', roomLabel: '1',
+        investAmount: 8000000, cityCode: 'kzn', projectSlug: 'aqua', roomLabel: '1', searchAllCities: false,
         objectManualOverride: false, unitsOverride: 0,
         rentGrowth: 5, appreciation: 13, horizon: 5, depositRate: 11, depositMonthly: true,
         mortgageRate: 17, mortgageYears: 30,
@@ -2311,6 +2446,10 @@ const Calc = {
       document.getElementById('wb-qr').classList.remove('hidden');
       this._updateQrImage();
       window.print();
+    });
+
+    document.getElementById('selection-pdf-btn').addEventListener('click', () => {
+      this._printClientSelection();
     });
 
     document.getElementById('whatsapp-btn').addEventListener('click', () => {

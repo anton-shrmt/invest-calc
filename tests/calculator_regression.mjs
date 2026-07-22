@@ -41,6 +41,25 @@ assert.equal(isRentalModelAvailable('daily', 'aqua', '1'), true, 'STR должн
 assert.equal(isRentalModelAvailable('daily', 'aqua', '2'), false, 'STR не должна быть доступна для 2-комнатной квартиры');
 
 Object.assign(Calc.data, {
+  investAmount: 8_000_000, cityCode: 'kzn', searchAllCities: false,
+  rentGrowth: 5, appreciation: 13, horizon: 5, depositRate: 11, depositMonthly: true,
+  mortgageRate: 17, mortgageYears: 30,
+});
+const cityOnlyHint = Calc._computeHint();
+assert.ok(
+  cityOnlyHint.ranked.filter(strategy => strategy.model !== 'deposit').every(strategy => strategy.cityCode === 'kzn'),
+  'Обычный поиск должен ограничиваться выбранным городом',
+);
+Calc.data.searchAllCities = true;
+const globalHint = Calc._computeHint();
+assert.ok(
+  globalHint.ranked.some(strategy => strategy.model !== 'deposit' && strategy.cityCode !== 'kzn'),
+  'Глобальный поиск должен включать объекты из других городов',
+);
+assert.ok(globalHint.ranked.length > cityOnlyHint.ranked.length, 'Глобальный поиск должен расширять список кандидатов');
+Calc.data.searchAllCities = false;
+
+Object.assign(Calc.data, {
   investAmount: 8_000_000, cityCode: 'kzn', projectSlug: 'aqua', roomLabel: '2',
   rentGrowth: 5, appreciation: 13, horizon: 5, depositRate: 11, depositMonthly: true,
   mortgageRate: 17, mortgageYears: 30,

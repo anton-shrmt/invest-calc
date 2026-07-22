@@ -44,8 +44,8 @@ const affordability = Calc.compute();
 assert.equal(affordability.unitPrice, selectedRoom.priceP50, 'В расчёте должна использоваться типичная цена P50');
 assert.equal(
   Math.round(affordability.requiredInvestAmount),
-  Math.round(affordability.unitPrice / 1.45),
-  'Минимальная сумма инвестиций должна считаться от лимита ипотеки 45%',
+  Math.round(affordability.unitPrice * 0.30),
+  'Минимальная сумма инвестиций должна считаться от 30% первоначального взноса',
 );
 assert.equal(
   Math.round(affordability.totalCost - affordability.principal + affordability.cashRemainder),
@@ -60,17 +60,23 @@ assert.ok(
   'Сдаю сам (долгосрочная логика) не должен обгонять посуточную аренду по доходу 1-го года',
 );
 
-// Режим «уже есть квартира»: без ипотеки/остатка, ROI считается от стоимости квартиры.
-Calc.data.mode = 'owner';
-const owner = Calc.compute();
-assert.equal(owner.units, 1, 'В режиме владельца всегда одна квартира');
-assert.equal(owner.needsMortgage, false, 'В режиме владельца ипотека не нужна');
-assert.equal(owner.isAffordable, true, 'В режиме владельца квартира всегда «доступна»');
-assert.equal(
-  Math.round(owner.roi(owner.unitPrice * 2)),
-  100,
-  'ROI в режиме владельца должен считаться от стоимости квартиры, а не от бюджета',
-);
-Calc.data.mode = 'buy';
+// Единое правило 30% первоначального взноса: минимум на одну ипотечную
+// квартиру — ровно 30% её стоимости, меньше — уже недоступно.
+const price = affordability.unitPrice;
+Calc.data.investAmount = Math.round(price * 0.30);
+const minimalCase = Calc.compute();
+assert.equal(minimalCase.units, 1, 'На 30% от цены квартиры должна открываться ровно одна ипотечная квартира');
+assert.equal(minimalCase.isAffordable, true, '30% от цены квартиры — проходной порог');
+
+Calc.data.investAmount = Math.round(price * 0.30) - 1000;
+const belowMinimal = Calc.compute();
+assert.equal(belowMinimal.isAffordable, false, 'Меньше 30% от цены квартиры — уже недоступно');
+
+// Потолок в 2 квартиры в ипотеку одновременно, даже если кэша хватает на
+// больше: 4 полностью за нал + 2 в ипотеку, третья ипотечная не предлагается.
+Calc.data.investAmount = Math.round(4.9 * price);
+const cappedCase = Calc.compute();
+assert.equal(cappedCase.mortgagedUnits, 2, 'Не больше 2 квартир в ипотеку одновременно');
+assert.equal(cappedCase.units, 6, '4 квартиры за нал + 2 в ипотеку, третья ипотечная не предлагается');
 
 console.log('calculator_regression: OK');

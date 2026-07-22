@@ -292,7 +292,6 @@
       mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M8 4h8v5a4 4 0 01-8 0V4z'/><path d='M8 5H5a1 1 0 00-1 1v1a3 3 0 003 3M16 5h3a1 1 0 011 1v1a3 3 0 01-3 3'/><path d='M12 13v3'/><path d='M9 20h6M10 17h4v3h-4z'/></svg>") no-repeat center / contain;
     }
     .cmp-table .note-row td { font-size: .75rem; color: var(--muted); background: var(--mint-2); }
-    .cmp-table tr.self-row td { color: var(--muted); font-style: italic; border-top: 1px dashed var(--border); }
 
     /* ── ASSUMPTION PRESETS ── */
     .preset-toggle { display: flex; background: var(--mint-2); border-radius: var(--r-sm); padding: 4px; gap: 4px; }
@@ -459,8 +458,6 @@
       .cmp-table tr.winner-row td:first-child::before { display: inline-block; content: ''; }
       .cmp-table tfoot, .cmp-table tfoot tr, .cmp-table tfoot td { display: block; width: 100%; }
       .cmp-table .note-row td { padding: 8px 10px; text-align: left; }
-      .cmp-table tr.self-row { border-top: 1px dashed var(--border); }
-      .cmp-table tr.self-row td { border-top: 0; }
       .chart-wrap { height: 250px; }
     }
     @media (min-width: 769px) {
@@ -604,6 +601,13 @@
       <div class="field-group">
         <label class="field-label" for="room-select">Комнатность</label>
         <select id="room-select"></select>
+      </div>
+
+      <!-- Количество квартир -->
+      <div class="field-group">
+        <label class="field-label" for="units-input">Количество квартир</label>
+        <input type="number" id="units-input" min="1" max="20" step="1">
+        <div id="units-shortfall" class="field-status hidden"></div>
       </div>
 
       <div class="field-group">
@@ -958,6 +962,49 @@ const RENT_YIELD = {
 const MIN_DOWN_PAYMENT_SHARE = 0.30;
 const MAX_MORTGAGED_UNITS = 2;
 
+// Общая политика для основного расчёта и карточек-подсказок: максимум
+// квартир за наличные, остаток — в ипотеку (не больше MAX_MORTGAGED_UNITS),
+// пока хватает минимум 30% взноса. targetUnits — желаемое количество
+// квартир (из поля «Количество» в «Объект недвижимости»): если бюджет его
+// не тянет, возвращаем то, что реально доступно (naturalUnits), плюс
+// shortfall — сколько бюджета не хватает, чтобы добрать именно до targetUnits.
+function allocateUnits(budget, price, targetUnits) {
+  const nFullMax = Math.floor(budget / price);
+  const cashLeftMax = budget - nFullMax * price;
+  const mortgageCapacityMax = Math.floor(cashLeftMax / (price * MIN_DOWN_PAYMENT_SHARE));
+  const mortgagedUnitsMax = Math.min(mortgageCapacityMax, MAX_MORTGAGED_UNITS);
+  const naturalUnits = nFullMax + mortgagedUnitsMax;
+
+  const hasTarget = targetUnits > 0;
+  const targetAffordable = !hasTarget || targetUnits <= naturalUnits;
+
+  if (!hasTarget || !targetAffordable) {
+    let shortfall = 0;
+    if (hasTarget && !targetAffordable) {
+      const neededBeyond = targetUnits - naturalUnits;
+      const availableMortgageSlots = MAX_MORTGAGED_UNITS - mortgagedUnitsMax;
+      const viaMortgage = Math.min(neededBeyond, availableMortgageSlots);
+      const viaCash = neededBeyond - viaMortgage;
+      const extraForMortgage = viaMortgage > 0
+        ? Math.max(0, (mortgagedUnitsMax + viaMortgage) * price * MIN_DOWN_PAYMENT_SHARE - cashLeftMax)
+        : 0;
+      shortfall = extraForMortgage + viaCash * price;
+    }
+    return {
+      units: naturalUnits, nFull: nFullMax, mortgagedUnits: mortgagedUnitsMax, cashLeft: cashLeftMax,
+      naturalUnits, targetUnits: hasTarget ? targetUnits : naturalUnits, targetAffordable, shortfall,
+    };
+  }
+
+  const nFull = Math.min(nFullMax, targetUnits);
+  const mortgagedUnits = Math.min(targetUnits - nFull, MAX_MORTGAGED_UNITS);
+  const cashLeft = budget - nFull * price;
+  return {
+    units: targetUnits, nFull, mortgagedUnits, cashLeft,
+    naturalUnits, targetUnits, targetAffordable: true, shortfall: 0,
+  };
+}
+
 // Готовые сценарии допущений — быстрый выбор вместо ручного ввода на встрече.
 const ASSUMPTION_PRESETS = {
   conservative: { label: 'Консервативный', rentGrowth: 3, appreciation: 5 },
@@ -1016,6 +1063,9 @@ const Calc = {
     // вариант под бюджет). Становится true, как только пользователь сам
     // выбрал ЖК или комнатность вручную, или пришёл по ссылке с проектом.
     objectManualOverride: false,
+    // 0 — количество квартир считается автоматически (максимум под бюджет).
+    // Положительное число — пользователь сам задал количество вручную.
+    unitsOverride:      0,
     rentGrowth:         5,
     appreciation:       10,
     horizon:            5,
@@ -1074,30 +1124,26 @@ const Calc = {
     // а на остаток — ещё квартиры в ипотеку (не больше MAX_MORTGAGED_UNITS
     // одновременно), пока на каждую хватает минимум 30% первоначального
     // взноса от её стоимости. Весь остаток кэша идёт в первоначальный
-    // взнос по ипотечным квартирам — так меньше тело кредита и переплата;
-    // если он всё равно превышает их суммарную стоимость, вопрос не
-    // возникает: столько ипотечных квартир мы и не предложим.
-    let units = 0, mortgagedUnits = 0, principal = 0, cashRemainder = 0;
+    // взнос по ипотечным квартирам — так меньше тело кредита и переплата.
+    // Если в «Объект недвижимости» задано конкретное количество квартир
+    // (d.unitsOverride) — используем его вместо автомакс, пока бюджет
+    // позволяет; иначе показываем максимум и отдельно нехватку бюджета.
+    const alloc = allocateUnits(d.investAmount, unitPrice, d.unitsOverride);
+    let units = alloc.units, mortgagedUnits = alloc.mortgagedUnits;
+    let principal = 0, cashRemainder = 0;
     let monthlyMortgage = 0, annualMortgage = 0;
     let mortgageTotalPaid = 0, mortgageOverpay = 0;
     let needsMortgage = false;
-    let isAffordable = true;
+    const isAffordable = units > 0;
 
-    const nFull    = Math.floor(d.investAmount / unitPrice);
-    const cashLeft = d.investAmount - nFull * unitPrice;
-    const mortgageCapacity = Math.floor(cashLeft / (unitPrice * MIN_DOWN_PAYMENT_SHARE));
-    mortgagedUnits = Math.min(mortgageCapacity, MAX_MORTGAGED_UNITS);
-
-    if (nFull === 0 && mortgagedUnits === 0) {
-      isAffordable = false;
-      cashRemainder = d.investAmount;
-    } else {
-      units = nFull + mortgagedUnits;
+    if (isAffordable) {
       if (mortgagedUnits > 0) {
-        principal = mortgagedUnits * unitPrice - cashLeft;
+        principal = mortgagedUnits * unitPrice - alloc.cashLeft;
       } else {
-        cashRemainder = cashLeft;
+        cashRemainder = alloc.cashLeft;
       }
+    } else {
+      cashRemainder = d.investAmount;
     }
 
     needsMortgage = mortgagedUnits > 0;
@@ -1163,8 +1209,6 @@ const Calc = {
         // Долгосрочная: 11 месяцев × (ставка − 12% УК)
         // Гарантированная: 12 месяцев × (ставка − 25% УК), гарантированно
         // Посуточная: чистый годовой доход, оценённый по доходности комнатности
-        // Сдаю сам: без комиссии УК, но дольше простой между жильцами —
-        // нет профессионального маркетинга и скрининга (для сравнения, не участвует в выборе победителя)
         // Рента считается по одной квартире и умножается на кол-во купленных квартир
         if (modelId === 'longterm') {
           yr = monthlyRent * 11 * 0.88 * g;
@@ -1172,8 +1216,6 @@ const Calc = {
           yr = monthlyRent * 12 * 0.75 * g;
         } else if (modelId === 'daily') {
           yr = dailyAnnualIncome * g;
-        } else if (modelId === 'selfRent') {
-          yr = monthlyRent * 10.5 * g;
         }
         yr *= units;
 
@@ -1198,7 +1240,6 @@ const Calc = {
     const longterm   = computeModel('longterm');
     const guaranteed = computeModel('guaranteed');
     const daily      = computeModel('daily');
-    const selfRent   = computeModel('selfRent');
 
     // ROI всех стратегий считаем относительно исходной суммы клиента.
     const roi = (final) => (final - d.investAmount) / d.investAmount * 100;
@@ -1210,8 +1251,9 @@ const Calc = {
       cashRemainder, principal, mortgageBalanceArr, requiredInvestAmount,
       monthlyMortgage, annualMortgage, mortgageOverpay, mortgageTotalPaid,
       needsMortgage, isAffordable,
+      naturalUnits: alloc.naturalUnits, targetAffordable: alloc.targetAffordable, unitsShortfall: alloc.shortfall,
       depositArr,
-      longterm, guaranteed, daily, selfRent,
+      longterm, guaranteed, daily,
       roi,
     };
   },
@@ -1220,6 +1262,22 @@ const Calc = {
   render(r) {
     const d = this.data;
     const H = d.horizon;
+
+    /* Количество квартир: в авто-режиме поле следует за фактически
+       посчитанным количеством, в ручном — эхом показывает введённое число
+       (даже если бюджета на него не хватает — предупреждение ниже поля). */
+    this._lastComputedUnits = r.units || r.naturalUnits || 1;
+    const unitsInput = document.getElementById('units-input');
+    if (document.activeElement !== unitsInput) {
+      unitsInput.value = d.unitsOverride || r.units || r.naturalUnits || 1;
+    }
+    const shortfallEl = document.getElementById('units-shortfall');
+    if (!r.targetAffordable && r.unitsShortfall > 0) {
+      shortfallEl.textContent = `Не хватает ≈${rub(r.unitsShortfall)} на ${d.unitsOverride} ${pluralFlats(d.unitsOverride)}. Доступно сейчас: ${r.naturalUnits}.`;
+      shortfallEl.classList.remove('hidden');
+    } else {
+      shortfallEl.classList.add('hidden');
+    }
 
     /* Project (ЖК) info display */
     const proj = r.project;
@@ -1328,9 +1386,7 @@ const Calc = {
       (r.isEstimated ? `<div class="hint-sm">Доход рассчитан оценочно по доходности комнатности: подтвердите ставку у УК.</div>` : '');
 
     /* — Winner determination — */
-    // «Сдаю сам» намеренно не участвует в выборе победителя: это справочная
-    // строка для сравнения, а не рекомендуемая стратегия.
-    const selfRowShown = r.isAffordable;
+    const hasRentalModels = r.isAffordable;
     const candidates = {};
     if (r.isAffordable) {
       candidates.longterm   = r.longterm.wealthArr[H];
@@ -1342,8 +1398,6 @@ const Calc = {
     const maxWealth = Math.max(...Object.values(candidates));
     const sorted    = Object.entries(candidates).sort((a, b) => b[1] - a[1]);
     const winner    = sorted[0][0];
-    const second    = sorted[1];
-    const close     = second && (maxWealth - second[1]) / maxWealth < 0.05;
 
     const modelLabels = {
       longterm:   'Долгосрочная аренда',
@@ -1384,9 +1438,7 @@ const Calc = {
         `Обгоняет банковский вклад на ${rub(deltaVsDeposit)} (+${pct(deltaVsDeposit / r.depositArr[H] * 100)})`;
     }
     const noteEl = document.getElementById('wb-note');
-    if (close) {
-      noteEl.textContent = 'Разница незначительна. Учитывайте риски.';
-    } else if (!r.isAffordable) {
+    if (!r.isAffordable) {
       noteEl.textContent = 'Сравните альтернативу в регионе слева или увеличьте бюджет на выбранный объект.';
     } else if (winner === 'daily') {
       noteEl.textContent = '*Посуточная аренда требует активного управления или доверенного управляющего';
@@ -1431,11 +1483,8 @@ const Calc = {
       `;
       tbody.appendChild(tr);
     };
-    const addSelfRow = () => addRow('selfRent', 'Сдаю сам', r.selfRent.rentArr[1], r.selfRent.cumArr[H], r.selfRent.equityArr[H], r.selfRent.wealthArr[H], 'self-row');
-
     if (r.isAffordable) {
       addRow('longterm',   'Долгосрочная аренда',    r.longterm.rentArr[1],   r.longterm.cumArr[H],   r.longterm.equityArr[H],   r.longterm.wealthArr[H]);
-      addSelfRow();
       addRow('guaranteed', 'Гарантированная аренда', r.guaranteed.rentArr[1], r.guaranteed.cumArr[H], r.guaranteed.equityArr[H], r.guaranteed.wealthArr[H]);
       addRow('daily',      'Посуточная аренда',      r.daily.rentArr[1],      r.daily.cumArr[H],      r.daily.equityArr[H],      r.daily.wealthArr[H]);
     }
@@ -1448,9 +1497,6 @@ const Calc = {
     }
     if (r.cashRemainder > 0) {
       footHtml += `<tr class="note-row"><td colspan="6">Остаток ${rub(r.cashRemainder)} учтён как наличные без роста.</td></tr>`;
-    }
-    if (selfRowShown) {
-      footHtml += `<tr class="note-row"><td colspan="6">«Сдаю сам» — без учёта вашего времени на поиск жильцов, показы и риска простоя между съездами.</td></tr>`;
     }
     tfoot.innerHTML = footHtml;
 
@@ -1472,7 +1518,7 @@ const Calc = {
       },
     ];
 
-    if (selfRowShown) {
+    if (hasRentalModels) {
       chartDatasets.push({
         label: 'Долгосрочная аренда',
         data: r.longterm.wealthArr,
@@ -1690,7 +1736,7 @@ const Calc = {
     // (не больше MAX_MORTGAGED_UNITS одновременно), пока на каждую хватает
     // минимум 30% первоначального взноса — то же правило, что и в основном
     // расчёте для выбранного объекта.
-    const evalCombo = (project, room, budget) => {
+    const evalCombo = (project, room, budget, targetUnits = 0) => {
       const cost = room.priceP50 ?? room.priceAvg;
 
       const { monthlyRent, dailyAnnualIncome, isEstimated } = this.getRentFigures(project.slug, room.label, cost);
@@ -1725,12 +1771,10 @@ const Calc = {
         return { bestW, bestModel };
       };
 
-      const nFull    = Math.floor(budget / cost);
-      const cashLeft = budget - nFull * cost;
-      const mortgageCapacity = Math.floor(cashLeft / (cost * MIN_DOWN_PAYMENT_SHARE));
-      const mortgagedUnits = Math.min(mortgageCapacity, MAX_MORTGAGED_UNITS);
+      const alloc = allocateUnits(budget, cost, targetUnits);
+      const { nFull, mortgagedUnits, cashLeft } = alloc;
 
-      if (nFull === 0 && mortgagedUnits === 0) return null;
+      if (alloc.units === 0) return null;
 
       let wealth = 0;
       let bestModel = null;
@@ -1765,6 +1809,9 @@ const Calc = {
         needsMortgage: mortgagedUnits > 0,
         mortMonthly: mortgagedUnits > 0 ? mortAnn / 12 : 0,
         isEstimated,
+        naturalUnits: alloc.naturalUnits,
+        targetAffordable: alloc.targetAffordable,
+        unitsShortfall: alloc.shortfall,
       };
     };
 
@@ -1810,14 +1857,13 @@ const Calc = {
 
     // Отдельно считаем объект, который пользователь выбрал вручную (тем же
     // методом, что и лучший вариант) — карточка «Ваш выбор» показывает
-    // именно его, когда он отличается от лучшего варианта.
-    const selKey = `${d.projectSlug}_${d.roomLabel}`;
-    let selectedRaw = strategies.find(s => s.key === selKey) || null;
-    if (!selectedRaw) {
-      const selProject = this.getProject(d.projectSlug);
-      const selRoom = selProject ? this.getRoom(selProject, d.roomLabel) : null;
-      if (selRoom) selectedRaw = evalCombo(selProject, selRoom, invest);
-    }
+    // именно его, когда он отличается от лучшего варианта. Пересчитываем
+    // напрямую (не берём из strategies), даже если такая же связка ЖК/
+    // комнатность уже встречалась там — у неё могло быть другое, авто-
+    // количество квартир, а тут нужно именно unitsOverride пользователя.
+    const selProject = this.getProject(d.projectSlug);
+    const selRoom = selProject ? this.getRoom(selProject, d.roomLabel) : null;
+    const selectedRaw = selRoom ? evalCombo(selProject, selRoom, invest, d.unitsOverride) : null;
 
     const depositStrategy = strategies.find(s => s.key === 'deposit');
     const selReason = selectedRaw && depositStrategy
@@ -1850,7 +1896,10 @@ const Calc = {
 
     // «Ваш выбор» — только когда пользователь сам вручную поменял ЖК/комнатность
     // (не авто-подставленные) и его выбор отличается от лучшего варианта выше.
-    const showSelected = this.data.objectManualOverride && h.selected && h.selected.key !== h.best.key;
+    // Разные ЖК/комнатность — точно другой вариант; тот же ЖК, но другое
+    // количество квартир (unitsOverride) — тоже другой вариант для сравнения.
+    const showSelected = this.data.objectManualOverride && h.selected &&
+      (h.selected.key !== h.best.key || h.selected.units !== h.best.units);
     const altEl = document.getElementById('alt-hint');
     if (showSelected) {
       altEl.classList.remove('hidden');
@@ -1916,6 +1965,7 @@ const Calc = {
     d.mortgageYears = clamp(Math.round(Number(d.mortgageYears) || 15), 1, 30);
     d.depositMonthly = Boolean(d.depositMonthly);
     d.objectManualOverride = Boolean(d.objectManualOverride);
+    d.unitsOverride = clamp(Math.round(Number(d.unitsOverride) || 0), 0, 20);
     d.managerName = String(d.managerName || '').slice(0, 60);
     d.managerPhone = String(d.managerPhone || '').slice(0, 20);
   },
@@ -1926,6 +1976,7 @@ const Calc = {
   // именно присланный сценарий, а не свою предыдущую сессию.
   _urlParamMap: {
     amt: 'investAmount', city: 'cityCode', proj: 'projectSlug', room: 'roomLabel',
+    qty: 'unitsOverride',
     rg: 'rentGrowth', ap: 'appreciation', h: 'horizon', dr: 'depositRate',
     dm: 'depositMonthly', mr: 'mortgageRate', my: 'mortgageYears',
     mn: 'managerName', mp: 'managerPhone',
@@ -1944,7 +1995,7 @@ const Calc = {
     }
     // Ссылка с явным ЖК/комнатностью — это конкретный присланный сценарий,
     // его не должен тихо подменить автоподбор лучшего варианта.
-    if (params.has('proj') || params.has('room')) d.objectManualOverride = true;
+    if (params.has('proj') || params.has('room') || params.has('qty')) d.objectManualOverride = true;
   },
   buildShareUrl() {
     const d = this.data;
@@ -2110,6 +2161,7 @@ const Calc = {
       // заглушку, а _syncSelectionToBest() в _recompute() тут же заменит
       // её на лучший вариант в новом регионе.
       this.data.objectManualOverride = false;
+      this.data.unitsOverride = 0;
       this.data.projectSlug = projs[0].slug;
       this.data.roomLabel   = projs[0].rooms[0].label;
       this._populateProjectSelect();
@@ -2119,6 +2171,7 @@ const Calc = {
 
     document.getElementById('project-select').addEventListener('change', (e) => {
       this.data.objectManualOverride = true;
+      this.data.unitsOverride = 0; // другой ЖК — другая цена, старое количество не переносим
       this.data.projectSlug = e.target.value;
       const proj = this.getProject(this.data.projectSlug);
       this.data.roomLabel = proj.rooms[0].label;
@@ -2128,8 +2181,28 @@ const Calc = {
 
     document.getElementById('room-select').addEventListener('change', (e) => {
       this.data.objectManualOverride = true;
+      this.data.unitsOverride = 0;
       this.data.roomLabel = e.target.value;
       this._saveLS(); this._recompute();
+    });
+
+    document.getElementById('units-input').addEventListener('input', (e) => {
+      const raw = parseInt(e.target.value, 10);
+      if (!isNumberInRange(raw, 1, 20)) {
+        e.target.setAttribute('aria-invalid', 'true');
+        this._setValidationMessage('Количество квартир — от 1 до 20.');
+        return;
+      }
+      e.target.removeAttribute('aria-invalid');
+      this._setValidationMessage('');
+      this.data.objectManualOverride = true;
+      this.data.unitsOverride = raw;
+      this._saveLS(); this._recompute();
+    });
+    document.getElementById('units-input').addEventListener('blur', (e) => {
+      e.target.value = this.data.unitsOverride || this._lastComputedUnits || 1;
+      e.target.removeAttribute('aria-invalid');
+      this._setValidationMessage('');
     });
 
     const numBind = (id, key, min, max, parse = parseFloat) => {
@@ -2198,7 +2271,7 @@ const Calc = {
       const keepPhone = this.data.managerPhone;
       this.data = {
         investAmount: 8000000, cityCode: 'kzn', projectSlug: 'aqua', roomLabel: '1',
-        objectManualOverride: false,
+        objectManualOverride: false, unitsOverride: 0,
         rentGrowth: 5, appreciation: 10, horizon: 5, depositRate: 11, depositMonthly: true,
         mortgageRate: 12, mortgageYears: 15,
         managerName: keepName, managerPhone: keepPhone,

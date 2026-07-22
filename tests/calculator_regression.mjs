@@ -53,13 +53,6 @@ assert.equal(
   'Первоначальный взнос и остаток должны точно укладываться в бюджет',
 );
 
-// «Сдаю сам» — доход между 0 и посуточной моделью, отдельно от remainder-бюджета сделки.
-assert.ok(affordability.selfRent.wealthArr[5] > 0, 'Сдаю сам должен давать положительный итог в базовом сценарии');
-assert.ok(
-  affordability.selfRent.rentArr[1] < affordability.daily.rentArr[1],
-  'Сдаю сам (долгосрочная логика) не должен обгонять посуточную аренду по доходу 1-го года',
-);
-
 // Единое правило 30% первоначального взноса: минимум на одну ипотечную
 // квартиру — ровно 30% её стоимости, меньше — уже недоступно.
 const price = affordability.unitPrice;
@@ -78,5 +71,24 @@ Calc.data.investAmount = Math.round(4.9 * price);
 const cappedCase = Calc.compute();
 assert.equal(cappedCase.mortgagedUnits, 2, 'Не больше 2 квартир в ипотеку одновременно');
 assert.equal(cappedCase.units, 6, '4 квартиры за нал + 2 в ипотеку, третья ипотечная не предлагается');
+
+// Ручное количество квартир (unitsOverride): меньше натурального —
+// ровно запрошенное, остаток бюджета не теряется.
+Calc.data.unitsOverride = 2;
+const targetLess = Calc.compute();
+assert.equal(targetLess.units, 2, 'unitsOverride меньше натурального максимума — ровно запрошенное количество');
+assert.equal(targetLess.mortgagedUnits, 0, '2 квартиры укладываются в нал без ипотеки на этом бюджете');
+assert.ok(targetLess.cashRemainder > 0, 'Неиспользованный остаток должен быть учтён как наличные');
+assert.equal(targetLess.targetAffordable, true, '2 квартиры при бюджете на 6 — доступно');
+
+// Больше натурального максимума — не блокируем, а показываем максимум
+// доступного и нехватку бюджета для запрошенного количества.
+Calc.data.unitsOverride = 10;
+const targetMore = Calc.compute();
+assert.equal(targetMore.targetAffordable, false, '10 квартир при бюджете на 6 — недоступно');
+assert.equal(targetMore.units, 6, 'При недоступном количестве показываем максимум доступного, а не 0');
+assert.ok(targetMore.unitsShortfall > 0, 'Нехватка бюджета для запрошенного количества должна быть посчитана');
+
+Calc.data.unitsOverride = 0;
 
 console.log('calculator_regression: OK');

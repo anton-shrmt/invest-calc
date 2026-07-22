@@ -22,9 +22,33 @@ vm.runInContext(inlineScript.replace(/Calc\.init\(\);\s*$/, 'globalThis.Calc = C
 const { Calc } = context;
 assert.ok(Calc, 'Расчётный модуль не экспортирован в тестовый контекст');
 
+assert.equal(Calc.data.mortgageRate, 17, 'Ставка ипотеки по умолчанию должна быть 17%');
+assert.equal(Calc.data.mortgageYears, 30, 'Срок ипотеки по умолчанию должен быть 30 лет');
+const appreciationByCity = vm.runInContext('APPRECIATION_BY_CITY', context);
+assert.deepEqual(
+  JSON.parse(JSON.stringify(appreciationByCity)),
+  { kzn: 13, mhc: 18, ekb: 13, spb: 11, per: 12, tlt: 14 },
+  'Ставки роста стоимости жилья по городам расходятся с согласованными',
+);
+
 // Пример из документа: 5 000 ₽/сутки и 265 дней должны дать около 624 500 ₽ владельцу.
 const daily = Calc.getRentFigures('aqua', '1', 9_000_000).dailyAnnualIncome;
 assert.ok(daily >= 624_000 && daily <= 625_000, `Посуточный доход расходится с базовым сценарием: ${daily}`);
+
+const isRentalModelAvailable = vm.runInContext('isRentalModelAvailable', context);
+assert.equal(isRentalModelAvailable('daily', 'aqua', 'Студия'), true, 'STR должна быть доступна для студии');
+assert.equal(isRentalModelAvailable('daily', 'aqua', '1'), true, 'STR должна быть доступна для 1-комнатной квартиры');
+assert.equal(isRentalModelAvailable('daily', 'aqua', '2'), false, 'STR не должна быть доступна для 2-комнатной квартиры');
+
+Object.assign(Calc.data, {
+  investAmount: 8_000_000, cityCode: 'kzn', projectSlug: 'aqua', roomLabel: '2',
+  rentGrowth: 5, appreciation: 13, horizon: 5, depositRate: 11, depositMonthly: true,
+  mortgageRate: 17, mortgageYears: 30,
+});
+const twoRoom = Calc.compute();
+assert.deepEqual([...twoRoom.availableModels], ['longterm', 'guaranteed'], 'Для 2-комнатной квартиры должны остаться только LTR и гарантированная аренда');
+assert.equal(twoRoom.daily, null, 'Посуточная модель не должна рассчитываться для 2-комнатной квартиры');
+assert.notEqual(Calc._computeHint().selected.model, 'daily', 'Карточка выбора не должна рекомендовать STR для 2-комнатной квартиры');
 
 Calc.data.investAmount = 999;
 Calc.data.mortgageRate = -1;

@@ -1,13 +1,13 @@
 {
-  "fetchedAt": "2026-07-24T13:51:20.064Z",
-  "totalFlats": 5552,
+  "fetchedAt": "2026-07-25T02:53:27.700Z",
+  "totalFlats": 5550,
   "cityTotals": {
     "ekb (Екатеринбург)": {
       "count": 1666,
       "projects": 4
     },
     "kzn (Казань)": {
-      "count": 2679,
+      "count": 2678,
       "projects": 12
     },
     "mhc (Махачкала)": {
@@ -19,7 +19,7 @@
       "projects": 2
     },
     "spb (Санкт-Петербург)": {
-      "count": 446,
+      "count": 445,
       "projects": 1
     },
     "tlt (Тольятти)": {
@@ -490,10 +490,10 @@
       "rooms": [
         {
           "label": "1",
-          "count": 340,
+          "count": 341,
           "priceMin": 8120000,
           "priceMax": 13140000,
-          "priceAvg": 9425029,
+          "priceAvg": 9422023,
           "priceP25": 8480000,
           "areaP25": 21.75,
           "priceP50": 9160000,
@@ -603,7 +603,7 @@
           "priceP50": 17930000,
           "areaP50": 63.68,
           "priceP75": 18580000,
-          "areaP75": 65.96,
+          "areaP75": 69.61,
           "areaMin": 48.44,
           "areaMax": 89.5
         },
@@ -929,10 +929,10 @@
         },
         {
           "label": "2",
-          "count": 150,
+          "count": 149,
           "priceMin": 7670000,
           "priceMax": 11590000,
-          "priceAvg": 9104467,
+          "priceAvg": 9105705,
           "priceP25": 8640000,
           "areaP25": 50.16,
           "priceP50": 9180000,
@@ -951,7 +951,7 @@
           "priceP25": 9850000,
           "areaP25": 62.41,
           "priceP50": 10350000,
-          "areaP50": 71.34,
+          "areaP50": 71.38,
           "priceP75": 10580000,
           "areaP75": 75.9,
           "areaMin": 60.9,
@@ -981,16 +981,16 @@
         },
         {
           "label": "1",
-          "count": 41,
+          "count": 40,
           "priceMin": 9800000,
           "priceMax": 13020000,
-          "priceAvg": 11040244,
+          "priceAvg": 11000750,
           "priceP25": 10680000,
           "areaP25": 41.18,
           "priceP50": 11060000,
           "areaP50": 43.48,
           "priceP75": 11190000,
-          "areaP75": 43.48,
+          "areaP75": 36.24,
           "areaMin": 33.96,
           "areaMax": 58.07
         },
@@ -1279,13 +1279,13 @@
         },
         {
           "label": "2",
-          "count": 177,
+          "count": 176,
           "priceMin": 15270000,
           "priceMax": 26861000,
-          "priceAvg": 20379261,
-          "priceP25": 18571000,
+          "priceAvg": 20396103,
+          "priceP25": 18594000,
           "areaP25": 57.77,
-          "priceP50": 19750000,
+          "priceP50": 19910000,
           "areaP50": 62.1,
           "priceP75": 21990000,
           "areaP75": 68.35,

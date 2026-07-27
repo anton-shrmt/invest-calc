@@ -9,7 +9,7 @@ const root = path.resolve(here, '..');
 const dataFile = path.join(root, 'scripts/output/calculator_projects_data.js');
 const htmlFile = path.join(root, 'investment_calculator.html');
 
-const context = { window: {}, console, setTimeout, clearTimeout, Date, Math, Number, JSON };
+const context = { window: {}, console, setTimeout, clearTimeout, Date, Math, Number, JSON, URLSearchParams };
 vm.createContext(context);
 vm.runInContext(fs.readFileSync(dataFile, 'utf8'), context);
 
@@ -18,6 +18,19 @@ const inlineScripts = [...html.matchAll(/<script>\s*([\s\S]*?)\s*<\/script>/g)].
 const inlineScript = inlineScripts.at(-1);
 assert.ok(inlineScript, 'В HTML не найден основной скрипт калькулятора');
 vm.runInContext(inlineScript.replace(/Calc\.init\(\);\s*$/, 'globalThis.Calc = Calc;'), context);
+
+// Внешний файл с данными может загрузиться без ошибок, но содержать пустой
+// массив. В этом случае встроенный снимок должен оставаться рабочим.
+const fallbackContext = {
+  window: { CALCULATOR_PROJECTS: [] }, console, setTimeout, clearTimeout,
+  Date, Math, Number, JSON, URLSearchParams,
+};
+vm.createContext(fallbackContext);
+vm.runInContext(inlineScript.replace(/Calc\.init\(\);\s*$/, 'globalThis.Calc = Calc;'), fallbackContext);
+assert.ok(
+  fallbackContext.Calc.getProject('aqua'),
+  'Пустой CALCULATOR_PROJECTS должен переключать калькулятор на встроенный снимок',
+);
 
 const { Calc } = context;
 assert.ok(Calc, 'Расчётный модуль не экспортирован в тестовый контекст');
@@ -36,9 +49,23 @@ const daily = Calc.getRentFigures('aqua', '1', 9_000_000).dailyAnnualIncome;
 assert.ok(daily >= 624_000 && daily <= 625_000, `Посуточный доход расходится с базовым сценарием: ${daily}`);
 
 const isRentalModelAvailable = vm.runInContext('isRentalModelAvailable', context);
+const allocateUnits = vm.runInContext('allocateUnits', context);
+const isIntegerInRange = vm.runInContext('isIntegerInRange', context);
 assert.equal(isRentalModelAvailable('daily', 'aqua', 'Студия'), true, 'STR должна быть доступна для студии');
 assert.equal(isRentalModelAvailable('daily', 'aqua', '1'), true, 'STR должна быть доступна для 1-комнатной квартиры');
 assert.equal(isRentalModelAvailable('daily', 'aqua', '2'), false, 'STR не должна быть доступна для 2-комнатной квартиры');
+assert.equal(isIntegerInRange(12.5, 1, 30), false, 'Дробный срок ипотеки не должен быть допустим');
+assert.equal(isIntegerInRange(12, 1, 30), true, 'Целый срок ипотеки должен быть допустим');
+assert.deepEqual(
+  JSON.parse(JSON.stringify(allocateUnits(8_000_000, 0, 0))),
+  { units: 0, nFull: 0, mortgagedUnits: 0, cashLeft: 8_000_000, naturalUnits: 0, targetUnits: 0, targetAffordable: false, shortfall: 0 },
+  'Некорректная цена не должна порождать Infinity/NaN в распределении квартир',
+);
+assert.deepEqual(
+  JSON.parse(JSON.stringify(Calc.getRentFigures('aqua', '1', 0))),
+  { monthlyRent: 0, dailyAnnualIncome: 0, isEstimated: true },
+  'Некорректная цена не должна порождать доходность с некорректными значениями',
+);
 
 Object.assign(Calc.data, {
   investAmount: 8_000_000, cityCode: 'kzn', searchAllCities: false,
@@ -76,6 +103,13 @@ Calc._sanitizeData();
 assert.equal(Calc.data.investAmount, 1_000_000, 'Сумма инвестиций должна ограничиваться минимумом');
 assert.equal(Calc.data.mortgageRate, 1, 'Ставка ипотеки должна ограничиваться минимумом');
 assert.equal(Calc.data.mortgageYears, 30, 'Срок ипотеки должен ограничиваться максимумом');
+Calc.data.horizon = 5.5;
+Calc.data.mortgageYears = 12.5;
+Calc.data.unitsOverride = 2.5;
+Calc._sanitizeData();
+assert.equal(Calc.data.horizon, 5, 'Дробный горизонт не должен округляться');
+assert.equal(Calc.data.mortgageYears, 30, 'Дробный срок ипотеки не должен округляться');
+assert.equal(Calc.data.unitsOverride, 0, 'Дробное количество квартир не должно округляться');
 
 Object.assign(Calc.data, {
   investAmount: 6_000_000, cityCode: 'mhc', projectSlug: 'grandbereg', roomLabel: '1',
@@ -133,5 +167,52 @@ assert.equal(targetMore.units, 6, 'При недоступном количес�
 assert.ok(targetMore.unitsShortfall > 0, 'Нехватка бюджета для запрошенного количества должна быть посчитана');
 
 Calc.data.unitsOverride = 0;
+
+// Автоматическая ссылка не должна превращать объект в ручной выбор у
+// получателя, включая случай с сохранённой предыдущей ручной сессией.
+context.window.location = { origin: 'https://example.test', pathname: '/calculator' };
+Calc.data.objectManualOverride = false;
+const autoShareUrl = Calc.buildShareUrl();
+const autoShareParams = new URL(autoShareUrl).searchParams;
+assert.equal(autoShareParams.has('proj'), false, 'Автоматическая ссылка не должна фиксировать ЖК');
+assert.equal(autoShareParams.has('room'), false, 'Автоматическая ссылка не должна фиксировать комнатность');
+assert.equal(autoShareParams.has('qty'), false, 'Автоматическая ссылка не должна передавать qty=0');
+Calc.data.objectManualOverride = true;
+Calc.data.unitsOverride = 7;
+context.window.location.search = `?${autoShareParams.toString()}`;
+Calc._applyUrlParams();
+assert.equal(Calc.data.objectManualOverride, false, 'Автоматическая ссылка должна сбрасывать старый ручной режим');
+assert.equal(Calc.data.unitsOverride, 0, 'Автоматическая ссылка должна сбрасывать старое ручное количество');
+Calc.data.objectManualOverride = true;
+Calc.data.unitsOverride = 1;
+const manualShareParams = new URL(Calc.buildShareUrl()).searchParams;
+assert.equal(manualShareParams.has('proj'), true, 'Ручная ссылка должна фиксировать ЖК');
+assert.equal(manualShareParams.has('room'), true, 'Ручная ссылка должна фиксировать комнатность');
+assert.equal(manualShareParams.get('qty'), '1', 'Ручная ссылка должна передавать количество квартир');
+Calc.data.managerPhone = '9261234567';
+assert.equal(Calc._whatsAppDigits(), '79261234567', '10-значный номер должен дополняться кодом России');
+
+// В PDF метка «Ваш выбор» должна относиться к той же комбинации, включая
+// количество квартир, а не ко всем карточкам того же ЖК и комнатности.
+Object.assign(Calc.data, {
+  investAmount: 37_890_000, cityCode: 'tlt', searchAllCities: false,
+  projectSlug: 'bulvar', roomLabel: '2', unitsOverride: 1,
+  objectManualOverride: true, rentGrowth: 5, appreciation: 14,
+  horizon: 5, depositRate: 11, depositMonthly: true,
+  mortgageRate: 17, mortgageYears: 30,
+});
+const printTarget = { innerHTML: '' };
+context.document = {
+  getElementById: id => id === 'client-selection-print' ? printTarget : null,
+  body: { classList: { add() {}, remove() {} } },
+};
+context.window.addEventListener = () => {};
+context.window.print = () => {};
+Calc._printClientSelection();
+assert.equal(
+  (printTarget.innerHTML.match(/>Ваш выбор</g) || []).length,
+  1,
+  'В PDF должна быть ровно одна карточка «Ваш выбор»',
+);
 
 console.log('calculator_regression: OK');

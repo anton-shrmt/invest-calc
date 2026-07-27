@@ -6,6 +6,8 @@
 
 **Подробная логика расчёта, все формулы и нюансы:** [CALCULATOR.md](CALCULATOR.md).
 
+**Памятка для экспертов отдела продаж:** [USER_GUIDE.md](USER_GUIDE.md).
+
 ## Структура
 
 - `investment_calculator.html` — калькулятор, standalone-файл (без сборки)

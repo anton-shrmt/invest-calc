@@ -803,7 +803,11 @@ const CITY_IN = {
 // priceP25 / priceP50 / priceP75 — цены фактических квартир в 25-м,
 // 50-м (медиана) и 75-м перцентилях. areaP* — площадь той же квартиры.
 // priceMin / priceMax оставлены для отображения полного диапазона витрины.
-const PROJECTS = window.CALCULATOR_PROJECTS || [
+// Пустой массив так же бесполезен для расчёта, как и не загруженный файл.
+// В обоих случаях используем снимок, встроенный в HTML.
+const PROJECTS = Array.isArray(window.CALCULATOR_PROJECTS) && window.CALCULATOR_PROJECTS.length > 0
+  ? window.CALCULATOR_PROJECTS
+  : [
   /* ── Махачкала ── */
   { slug: 'grandbereg', city: 'mhc', label: 'Гранд Берег', rooms: [
     { label: 'Студия', count: 58, priceMin: 5614000, priceMax: 7614000, priceAvg: 6243759, areaMin: 28.11, areaMax: 35.24 },
@@ -912,8 +916,6 @@ const PRICE_DATA_META = window.CALCULATOR_PROJECTS_META || {
   source: 'unistroy.ru, публичный API /api/flats/',
 };
 
-const ROOM_ORDER = ['Студия', '1', '2', '3', '4', '5'];
-
 // Ставки аренды по ЖК — источник: цены_для_калк.xlsx (юнит-экономика УК).
 // daily  — суточная ставка объявления, ₽/сутки (до вычета агрегатора/уборки/комиссии).
 // monthly — базовая месячная ставка гросс для долгосрочной/гарантированной аренды, ₽/мес.
@@ -1003,6 +1005,13 @@ const MAX_MORTGAGED_UNITS = 2;
 // не тянет, возвращаем то, что реально доступно (naturalUnits), плюс
 // shortfall — сколько бюджета не хватает, чтобы добрать именно до targetUnits.
 function allocateUnits(budget, price, targetUnits) {
+  if (!Number.isFinite(price) || price <= 0) {
+    return {
+      units: 0, nFull: 0, mortgagedUnits: 0, cashLeft: budget,
+      naturalUnits: 0, targetUnits: targetUnits > 0 ? targetUnits : 0,
+      targetAffordable: false, shortfall: 0,
+    };
+  }
   const nFullMax = Math.floor(budget / price);
   const cashLeftMax = budget - nFullMax * price;
   const mortgageCapacityMax = Math.floor(cashLeftMax / (price * MIN_DOWN_PAYMENT_SHARE));
@@ -1062,6 +1071,12 @@ const parseAmt = s => parseInt(String(s).replace(/\D/g, '')) || 0;
 const fmtAmt  = n => Math.round(n).toLocaleString('ru-RU');
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 const isNumberInRange = (value, min, max) => Number.isFinite(value) && value >= min && value <= max;
+const isIntegerInRange = (value, min, max) => Number.isInteger(value) && value >= min && value <= max;
+const integerOr = (value, fallback) => {
+  if (value == null || value === '') return fallback;
+  const number = Number(value);
+  return Number.isInteger(number) ? number : fallback;
+};
 const formatDataDate = value => {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? 'дата неизвестна' : date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -1127,6 +1142,9 @@ const Calc = {
   // Ставки аренды по прайс-листу ЖК, с фолбэком на % от цены (RENT_YIELD),
   // когда для проекта/комнатности нет данных в прайс-листе.
   getRentFigures(projectSlug, roomLabel, price) {
+    if (!Number.isFinite(price) || price <= 0) {
+      return { monthlyRent: 0, dailyAnnualIncome: 0, isEstimated: true };
+    }
     const rate = RENT_RATES[projectSlug] && RENT_RATES[projectSlug][roomLabel];
     if (rate) {
       const grossRevenue = rate.daily * STR_RENTED_DAYS;
@@ -1303,12 +1321,23 @@ const Calc = {
   render(r) {
     const d = this.data;
     const H = d.horizon;
+    const activeMortgageInput = ['mort-rate-input', 'mort-years-input'].includes(document.activeElement?.id)
+      ? {
+          id: document.activeElement.id,
+          selectionStart: document.activeElement.selectionStart,
+          selectionEnd: document.activeElement.selectionEnd,
+        }
+      : null;
 
     /* Количество квартир: в авто-режиме поле следует за фактически
        посчитанным количеством, в ручном — эхом показывает введённое число
        (даже если бюджета на него не хватает — предупреждение ниже поля). */
     this._lastComputedUnits = r.units || r.naturalUnits || 1;
     const unitsInput = document.getElementById('units-input');
+    // Автоматический подбор может найти больше 20 квартир. Пользователь
+    // вручную по-прежнему ограничен 20, но отображаемое значение не должно
+    // противоречить HTML-ограничению поля.
+    unitsInput.max = String(Math.max(20, r.naturalUnits || 1));
     if (document.activeElement !== unitsInput) {
       unitsInput.value = d.unitsOverride || r.units || r.naturalUnits || 1;
     }
@@ -1375,6 +1404,7 @@ const Calc = {
 
       ps.innerHTML = html;
       this._bindMortgageInputs();
+      this._restoreMortgageFocus(activeMortgageInput);
     } else {
       const introText = r.mortgagedUnits > 1
         ? `Бюджета хватает на первоначальный взнос сразу по <strong>${r.mortgagedUnits} ${pluralFlats(r.mortgagedUnits)}</strong> — все оформляются в ипотеку (доплата <strong>${rub(r.principal)}</strong>)`
@@ -1402,6 +1432,7 @@ const Calc = {
 
       ps.innerHTML = html;
       this._bindMortgageInputs();
+      this._restoreMortgageFocus(activeMortgageInput);
     }
 
     /* — Rent info display — */
@@ -1663,30 +1694,42 @@ const Calc = {
     const ps = document.getElementById('purchase-status');
     const mr = ps.querySelector('#mort-rate-input');
     const my = ps.querySelector('#mort-years-input');
-    if (mr) mr.addEventListener('input', () => {
-      const value = parseFloat(mr.value);
-      if (!isNumberInRange(value, 1, 40)) {
-        this._setValidationMessage('Ставка ипотеки должна быть от 1% до 40%.');
-        mr.setAttribute('aria-invalid', 'true');
-        return;
-      }
-      mr.removeAttribute('aria-invalid');
-      this._setValidationMessage('');
-      this.data.mortgageRate = value;
-      this._saveLS(); this._recompute();
-    });
-    if (my) my.addEventListener('input', () => {
-      const value = parseInt(my.value, 10);
-      if (!isNumberInRange(value, 1, 30)) {
-        this._setValidationMessage('Срок ипотеки должен быть от 1 до 30 лет.');
-        my.setAttribute('aria-invalid', 'true');
-        return;
-      }
-      my.removeAttribute('aria-invalid');
-      this._setValidationMessage('');
-      this.data.mortgageYears = value;
-      this._saveLS(); this._recompute();
-    });
+    const bind = (input, key, min, max, parse, message, validate = isNumberInRange) => {
+      if (!input) return;
+      input.addEventListener('input', () => {
+        const value = parse(input.value);
+        if (!validate(value, min, max)) {
+          this._setValidationMessage(message);
+          input.setAttribute('aria-invalid', 'true');
+          return;
+        }
+        input.removeAttribute('aria-invalid');
+        this._setValidationMessage('');
+        this.data[key] = value;
+        this._saveLS();
+      });
+      // На мобильных браузерах пересоздание DOM во время набора может
+      // скрыть клавиатуру и сбросить курсор. Пересчитываем после завершения
+      // редактирования, когда фокус уже снят с поля.
+      input.addEventListener('blur', () => {
+        const value = parse(input.value);
+        if (!validate(value, min, max)) input.value = this.data[key];
+        input.removeAttribute('aria-invalid');
+        this._setValidationMessage('');
+        this._recompute();
+      });
+    };
+    bind(mr, 'mortgageRate', 1, 40, Number, 'Ставка ипотеки должна быть от 1% до 40%.');
+    bind(my, 'mortgageYears', 1, 30, Number, 'Срок ипотеки должен быть целым числом от 1 до 30 лет.', isIntegerInRange);
+  },
+  _restoreMortgageFocus(focus) {
+    if (!focus) return;
+    const input = document.getElementById(focus.id);
+    if (!input) return;
+    input.focus();
+    if (typeof input.setSelectionRange === 'function' && focus.selectionStart != null) {
+      input.setSelectionRange(focus.selectionStart, focus.selectionEnd);
+    }
   },
 
   // Для города без явной ставки сохраняем текущее значение: так добавление
@@ -1719,6 +1762,7 @@ const Calc = {
   _whatsAppDigits() {
     let digits = (this.data.managerPhone || '').replace(/\D/g, '');
     if (digits.length === 11 && digits.startsWith('8')) digits = '7' + digits.slice(1);
+    if (digits.length === 10) digits = '7' + digits;
     return digits;
   },
   _updateWhatsAppButton() {
@@ -2007,12 +2051,12 @@ const Calc = {
     add(h.selected);
     properties.forEach(add);
 
-    return { best: h.best, deposit, cards: cards.slice(0, 5) };
+    return { best: h.best, selected: h.selected, deposit, cards: cards.slice(0, 5) };
   },
 
   _printClientSelection() {
     const d = this.data;
-    const { best, deposit, cards } = this._getClientSelection();
+    const { best, selected, deposit, cards } = this._getClientSelection();
     const H = d.horizon;
     const modelNames = { longterm: 'Долгосрочная аренда', guaranteed: 'Гарантированная аренда', daily: 'Посуточная аренда' };
     const scope = d.searchAllCities
@@ -2022,7 +2066,8 @@ const Calc = {
     const cardHtml = cards.length
       ? cards.map(item => {
           const isBest = best.model !== 'deposit' && item.key === best.key && item.units === best.units;
-          const isSelected = d.objectManualOverride && item.projectSlug === d.projectSlug && item.roomLabel === d.roomLabel;
+          const isSelected = d.objectManualOverride && selected &&
+            item.key === selected.key && item.units === selected.units;
           const marker = isBest ? 'Лучший вариант' : (isSelected ? 'Ваш выбор' : `Альтернатива ${++alternativeNumber}`);
           const roi = (item.wealth - d.investAmount) / d.investAmount * 100;
           const unitsText = item.units > 1 ? `${item.units} ${pluralFlats(item.units)}` : '1 квартира';
@@ -2103,14 +2148,14 @@ const Calc = {
     d.investAmount = clamp(Number(d.investAmount) || 8000000, 1000000, 70000000);
     d.rentGrowth = clamp(Number(d.rentGrowth) || 0, 0, 30);
     d.appreciation = clamp(Number(d.appreciation) || 0, 0, 50);
-    d.horizon = clamp(Math.round(Number(d.horizon) || 5), 1, 15);
+    d.horizon = clamp(integerOr(d.horizon, 5), 1, 15);
     d.depositRate = clamp(Number(d.depositRate) || 1, 1, 40);
     d.mortgageRate = clamp(Number(d.mortgageRate) || 17, 1, 40);
-    d.mortgageYears = clamp(Math.round(Number(d.mortgageYears) || 30), 1, 30);
+    d.mortgageYears = clamp(integerOr(d.mortgageYears, 30), 1, 30);
     d.depositMonthly = Boolean(d.depositMonthly);
     d.searchAllCities = Boolean(d.searchAllCities);
     d.objectManualOverride = Boolean(d.objectManualOverride);
-    d.unitsOverride = clamp(Math.round(Number(d.unitsOverride) || 0), 0, 20);
+    d.unitsOverride = clamp(integerOr(d.unitsOverride, 0), 0, 20);
     d.managerName = String(d.managerName || '').slice(0, 60);
     d.managerPhone = String(d.managerPhone || '').slice(0, 20);
   },
@@ -2139,13 +2184,20 @@ const Calc = {
       if (Number.isFinite(value)) d[field] = value;
     }
     // Ссылка с явным ЖК/комнатностью — это конкретный присланный сценарий,
-    // его не должен тихо подменить автоподбор лучшего варианта.
-    if (params.has('proj') || params.has('room') || params.has('qty')) d.objectManualOverride = true;
+    // его не должен тихо подменить автоподбор лучшего варианта. Если этих
+    // параметров нет, ссылка передаёт авто-режим и перекрывает старый ручной
+    // выбор получателя из localStorage.
+    const hasManualSelection = ['proj', 'room', 'qty'].some(key => params.has(key));
+    d.objectManualOverride = hasManualSelection;
+    if (!hasManualSelection) d.unitsOverride = 0;
   },
   buildShareUrl() {
     const d = this.data;
     const params = new URLSearchParams();
     for (const [key, field] of Object.entries(this._urlParamMap)) {
+      // В авто-режиме ЖК, комнатность и количество должны продолжать
+      // следовать за лучшим вариантом у получателя, а не фиксироваться URL.
+      if (!d.objectManualOverride && ['proj', 'room', 'qty'].includes(key)) continue;
       const value = field === 'depositMonthly' || field === 'searchAllCities' ? (d[field] ? '1' : '0') : d[field];
       if (value === '' || value == null) continue;
       params.set(key, value);
@@ -2343,22 +2395,23 @@ const Calc = {
     });
 
     document.getElementById('units-input').addEventListener('input', (e) => {
-      const raw = parseInt(e.target.value, 10);
-      if (!isNumberInRange(raw, 1, 20)) {
+      const raw = Number(e.target.value);
+      if (!isIntegerInRange(raw, 1, 20)) {
         e.target.setAttribute('aria-invalid', 'true');
-        this._setValidationMessage('Количество квартир — от 1 до 20.');
+        this._setValidationMessage('Количество квартир — целое число от 1 до 20.');
         return;
       }
       e.target.removeAttribute('aria-invalid');
       this._setValidationMessage('');
       this.data.objectManualOverride = true;
       this.data.unitsOverride = raw;
-      this._saveLS(); this._recompute();
+      this._saveLS();
     });
     document.getElementById('units-input').addEventListener('blur', (e) => {
       e.target.value = this.data.unitsOverride || this._lastComputedUnits || 1;
       e.target.removeAttribute('aria-invalid');
       this._setValidationMessage('');
+      this._recompute();
     });
 
     const numBind = (id, key, min, max, parse = parseFloat) => {

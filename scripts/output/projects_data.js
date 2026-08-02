@@ -50,18 +50,18 @@ const PROJECTS = [
   { slug: 'letokzn', city: 'kzn', label: 'Лето', rooms: [
     { label: 'Студия', count: 16, priceMin: 9850000, priceMax: 11530000, priceAvg: 10252500, priceP25: 9910000, areaP25: 33.73, priceP50: 10150000, areaP50: 32.7, priceP75: 10200000, areaP75: 33.8, areaMin: 32.66, areaMax: 33.8 },
     { label: '1', count: 31, priceMin: 10150000, priceMax: 15000000, priceAvg: 11202226, priceP25: 10610000, areaP25: 36.86, priceP50: 10700000, areaP50: 36.59, priceP75: 11850000, areaP75: 43.42, areaMin: 32.95, areaMax: 52.62 },
-    { label: '2', count: 61, priceMin: 10710000, priceMax: 18470000, priceAvg: 15198754, priceP25: 14780000, areaP25: 60.28, priceP50: 15400000, areaP50: 61.16, priceP75: 16530000, areaP75: 70.3, areaMin: 38.28, areaMax: 76.1 },
+    { label: '2', count: 60, priceMin: 10710000, priceMax: 18470000, priceAvg: 15207400, priceP25: 14850000, areaP25: 61.16, priceP50: 15400000, areaP50: 60.11, priceP75: 16530000, areaP75: 70.3, areaMin: 38.28, areaMax: 76.1 },
     { label: '3', count: 20, priceMin: 17840000, priceMax: 26300000, priceAvg: 19364500, priceP25: 18130000, areaP25: 73.67, priceP50: 18940000, areaP50: 85.92, priceP75: 19080000, areaP75: 87.43, areaMin: 71.84, areaMax: 109.28 },
   ]},
   { slug: 'statum', city: 'kzn', label: 'Статум', rooms: [
     { label: '1', count: 162, priceMin: 11960000, priceMax: 34860000, priceAvg: 15018086, priceP25: 12620000, areaP25: 37.65, priceP50: 13430000, areaP50: 41.52, priceP75: 14040000, areaP75: 44.68, areaMin: 31.11, areaMax: 138.9 },
-    { label: '2', count: 190, priceMin: 14290000, priceMax: 22760000, priceAvg: 18071316, priceP25: 17470000, areaP25: 63.73, priceP50: 17930000, areaP50: 63.68, priceP75: 18580000, areaP75: 70.13, areaMin: 48.44, areaMax: 90 },
+    { label: '2', count: 190, priceMin: 14290000, priceMax: 22760000, priceAvg: 18071316, priceP25: 17470000, areaP25: 63.05, priceP50: 17930000, areaP50: 63.68, priceP75: 18580000, areaP75: 70.13, areaMin: 48.44, areaMax: 90 },
     { label: '3', count: 43, priceMin: 18400000, priceMax: 24800000, priceAvg: 21950465, priceP25: 21000000, areaP25: 89.74, priceP50: 21750000, areaP50: 90.87, priceP75: 23050000, areaP75: 104.01, areaMin: 72.69, areaMax: 106.84 },
     { label: '4', count: 1, priceMin: 33890000, priceMax: 33890000, priceAvg: 33890000, priceP25: 33890000, areaP25: 108.2, priceP50: 33890000, areaP50: 108.2, priceP75: 33890000, areaP75: 108.2, areaMin: 108.2, areaMax: 108.2 },
   ]},
   { slug: 'zalesnaia', city: 'kzn', label: 'Уникод на Залесной', rooms: [
     { label: 'Студия', count: 8, priceMin: 7230000, priceMax: 8200000, priceAvg: 7817500, priceP25: 7700000, areaP25: 36.48, priceP50: 7900000, areaP50: 33.56, priceP75: 8000000, areaP75: 33.56, areaMin: 33.56, areaMax: 36.48 },
-    { label: '1', count: 93, priceMin: 7260000, priceMax: 9440000, priceAvg: 8572688, priceP25: 8310000, areaP25: 40.69, priceP50: 8610000, areaP50: 44.05, priceP75: 8840000, areaP75: 43.85, areaMin: 29.51, areaMax: 44.05 },
+    { label: '1', count: 92, priceMin: 7260000, priceMax: 9440000, priceAvg: 8577065, priceP25: 8320000, areaP25: 38.77, priceP50: 8620000, areaP50: 39.65, priceP75: 8840000, areaP75: 43.85, areaMin: 29.51, areaMax: 44.05 },
     { label: '2', count: 105, priceMin: 9000000, priceMax: 12000000, priceAvg: 10808000, priceP25: 10400000, areaP25: 60.83, priceP50: 10840000, areaP50: 64.98, priceP75: 11350000, areaP75: 62.68, areaMin: 44.01, areaMax: 67.44 },
     { label: '3', count: 51, priceMin: 12860000, priceMax: 15490000, priceAvg: 14013529, priceP25: 13670000, areaP25: 83.61, priceP50: 13900000, areaP50: 83.61, priceP75: 14300000, areaP75: 79.73, areaMin: 78.47, areaMax: 91.13 },
   ]},
@@ -72,7 +72,7 @@ const PROJECTS = [
     { label: '3', count: 29, priceMin: 15250000, priceMax: 20420000, priceAvg: 17343448, priceP25: 15680000, areaP25: 75.4, priceP50: 16290000, areaP50: 78.31, priceP75: 19100000, areaP75: 92.8, areaMin: 72.4, areaMax: 98.82 },
   ]},
   { slug: 'unicum_amir', city: 'kzn', label: 'Уникум на Амирхана', rooms: [
-    { label: '1', count: 39, priceMin: 11260000, priceMax: 39510000, priceAvg: 14240513, priceP25: 12300000, areaP25: 35.23, priceP50: 13150000, areaP50: 41.13, priceP75: 15010000, areaP75: 45.18, areaMin: 31.18, areaMax: 154.2 },
+    { label: '1', count: 38, priceMin: 11260000, priceMax: 39510000, priceAvg: 14280789, priceP25: 12250000, areaP25: 35.23, priceP50: 13160000, areaP50: 41.13, priceP75: 15010000, areaP75: 45.18, areaMin: 31.18, areaMax: 154.2 },
     { label: '2', count: 80, priceMin: 16010000, priceMax: 19600000, priceAvg: 17503125, priceP25: 16470000, areaP25: 56.72, priceP50: 17170000, areaP50: 60.45, priceP75: 18460000, areaP75: 65.38, areaMin: 55.05, areaMax: 67.31 },
     { label: '3', count: 34, priceMin: 20000000, priceMax: 27440000, priceAvg: 24565882, priceP25: 22420000, areaP25: 83.41, priceP50: 25120000, areaP50: 83.48, priceP75: 27160000, areaP75: 107.02, areaMin: 73.23, areaMax: 107.02 },
   ]},
@@ -80,7 +80,7 @@ const PROJECTS = [
     { label: 'Студия', count: 8, priceMin: 9540000, priceMax: 10470000, priceAvg: 9968750, priceP25: 9690000, areaP25: 27.91, priceP50: 9800000, areaP50: 27.91, priceP75: 10400000, areaP75: 31.47, areaMin: 27.91, areaMax: 31.47 },
     { label: '1', count: 9, priceMin: 11830000, priceMax: 12480000, priceAvg: 12208889, priceP25: 12100000, areaP25: 40.6, priceP50: 12180000, areaP50: 40.6, priceP75: 12430000, areaP75: 39.83, areaMin: 39.83, areaMax: 46.01 },
     { label: '2', count: 20, priceMin: 14570000, priceMax: 18640000, priceAvg: 16425500, priceP25: 15630000, areaP25: 70.23, priceP50: 16030000, areaP50: 70.23, priceP75: 17050000, areaP75: 71.36, areaMin: 57.42, areaMax: 88.71 },
-    { label: '3', count: 28, priceMin: 17500000, priceMax: 22860000, priceAvg: 20955714, priceP25: 19590000, areaP25: 81.43, priceP50: 21750000, areaP50: 113.16, priceP75: 22010000, areaP75: 113.16, areaMin: 81.43, areaMax: 113.16 },
+    { label: '3', count: 27, priceMin: 17500000, priceMax: 22860000, priceAvg: 21044074, priceP25: 19640000, areaP25: 81.43, priceP50: 21750000, areaP50: 113.16, priceP75: 22050000, areaP75: 113.16, areaMin: 81.43, areaMax: 113.16 },
   ]},
   { slug: 'tsarciti', city: 'kzn', label: 'Царево Сити', rooms: [
     { label: 'Студия', count: 57, priceMin: 5800000, priceMax: 8080000, priceAvg: 6435614, priceP25: 6010000, areaP25: 24.17, priceP50: 6350000, areaP50: 25.84, priceP75: 6600000, areaP75: 29.7, areaMin: 23.49, areaMax: 34.54 },
@@ -111,15 +111,15 @@ const PROJECTS = [
   ]},
   { slug: 'unicum_engels', city: 'per', label: 'Уникум на Энгельса', rooms: [
     { label: 'Студия', count: 98, priceMin: 5970000, priceMax: 8700000, priceAvg: 7376939, priceP25: 6940000, areaP25: 29.1, priceP50: 7350000, areaP50: 30.45, priceP75: 7930000, areaP75: 29.09, areaMin: 23.4, areaMax: 33.01 },
-    { label: '2', count: 75, priceMin: 8250000, priceMax: 12750000, priceAvg: 9785733, priceP25: 9020000, areaP25: 42.07, priceP50: 9830000, areaP50: 47.74, priceP75: 10440000, areaP75: 43.89, areaMin: 35.8, areaMax: 54.96 },
+    { label: '2', count: 76, priceMin: 8250000, priceMax: 12750000, priceAvg: 9770789, priceP25: 8980000, areaP25: 42.01, priceP50: 9830000, areaP50: 47.74, priceP75: 10420000, areaP75: 38.35, areaMin: 35.8, areaMax: 54.96 },
     { label: '3', count: 76, priceMin: 9360000, priceMax: 16980000, priceAvg: 10969342, priceP25: 10300000, areaP25: 47.5, priceP50: 10770000, areaP50: 55.3, priceP75: 11490000, areaP75: 58.59, areaMin: 47.5, areaMax: 76.62 },
     { label: '4', count: 13, priceMin: 13710000, priceMax: 19560000, priceAvg: 16083846, priceP25: 13780000, areaP25: 63.61, priceP50: 14480000, areaP50: 66.61, priceP75: 18790000, areaP75: 87.82, areaMin: 63.61, areaMax: 90.82 },
   ]},
   /* ── Санкт-Петербург ── */
   { slug: 'lisino', city: 'spb', label: 'Лисино Город-парк', rooms: [
     { label: 'Студия', count: 48, priceMin: 8999000, priceMax: 14656000, priceAvg: 10452419, priceP25: 10100000, areaP25: 29.4, priceP50: 10330000, areaP50: 29.45, priceP75: 10814000, areaP75: 32.2, areaMin: 27.1, areaMax: 40.8 },
-    { label: '1', count: 144, priceMin: 11092000, priceMax: 35078000, priceAvg: 14498579, priceP25: 11906000, areaP25: 35.95, priceP50: 13114000, areaP50: 38.59, priceP75: 15031000, areaP75: 45.95, areaMin: 33.3, areaMax: 101.15 },
-    { label: '2', count: 175, priceMin: 15270000, priceMax: 26861000, priceAvg: 20428315, priceP25: 18605000, areaP25: 58.7, priceP50: 19910000, areaP50: 62.1, priceP75: 22010000, areaP75: 68.25, areaMin: 46.9, areaMax: 81.05 },
+    { label: '1', count: 142, priceMin: 11092000, priceMax: 35078000, priceAvg: 14478291, priceP25: 11890000, areaP25: 35.35, priceP50: 13038000, areaP50: 39.15, priceP75: 14997000, areaP75: 45.85, areaMin: 33.3, areaMax: 101.15 },
+    { label: '2', count: 176, priceMin: 15270000, priceMax: 26861000, priceAvg: 20413268, priceP25: 18594000, areaP25: 57.77, priceP50: 19910000, areaP50: 62.1, priceP75: 21990000, areaP75: 68.35, areaMin: 46.9, areaMax: 81.05 },
     { label: '3', count: 67, priceMin: 22120000, priceMax: 37055000, priceAvg: 26789358, priceP25: 25677000, areaP25: 84.3, priceP50: 26740000, areaP50: 86.69, priceP75: 28120000, areaP75: 90.85, areaMin: 71.95, areaMax: 115.37 },
   ]},
   { slug: 'upoint', city: 'spb', label: 'UPOINT', rooms: [

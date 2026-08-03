@@ -1,13 +1,13 @@
 {
-  "fetchedAt": "2026-08-02T13:27:58.608Z",
-  "totalFlats": 5500,
+  "fetchedAt": "2026-08-03T03:19:25.594Z",
+  "totalFlats": 5499,
   "cityTotals": {
     "ekb (Екатеринбург)": {
       "count": 1640,
       "projects": 4
     },
     "kzn (Казань)": {
-      "count": 2628,
+      "count": 2627,
       "projects": 12
     },
     "mhchkala (mhchkala)": {
@@ -289,14 +289,14 @@
       "rooms": [
         {
           "label": "Студия",
-          "count": 9,
+          "count": 8,
           "priceMin": 8900000,
           "priceMax": 9890000,
-          "priceAvg": 9340000,
-          "priceP25": 9080000,
-          "areaP25": 32.1,
-          "priceP50": 9210000,
-          "areaP50": 32,
+          "priceAvg": 9373750,
+          "priceP25": 9210000,
+          "areaP25": 32,
+          "priceP50": 9250000,
+          "areaP50": 32.1,
           "priceP75": 9670000,
           "areaP75": 32,
           "areaMin": 31.9,
@@ -599,7 +599,7 @@
           "priceMax": 22760000,
           "priceAvg": 18071316,
           "priceP25": 17470000,
-          "areaP25": 63.05,
+          "areaP25": 63.08,
           "priceP50": 17930000,
           "areaP50": 63.68,
           "priceP75": 18580000,
@@ -1297,9 +1297,9 @@
           "count": 67,
           "priceMin": 22120000,
           "priceMax": 37055000,
-          "priceAvg": 26789358,
-          "priceP25": 25677000,
-          "areaP25": 84.3,
+          "priceAvg": 26804254,
+          "priceP25": 25680000,
+          "areaP25": 84.8,
           "priceP50": 26740000,
           "areaP50": 86.69,
           "priceP75": 28120000,

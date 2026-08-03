@@ -1,4 +1,4 @@
-// Автосгенерировано scripts/fetch_unistroy_prices.mjs — 2026-08-02
+// Автосгенерировано scripts/fetch_unistroy_prices.mjs — 2026-08-03
 // Источник: unistroy.ru, публичный API /api/flats/, активные лоты в продаже.
 const PROJECTS = [
   /* ── Екатеринбург ── */
@@ -27,7 +27,7 @@ const PROJECTS = [
   ]},
   /* ── Казань ── */
   { slug: 'aqua', city: 'kzn', label: 'Аквамарин', rooms: [
-    { label: 'Студия', count: 9, priceMin: 8900000, priceMax: 9890000, priceAvg: 9340000, priceP25: 9080000, areaP25: 32.1, priceP50: 9210000, areaP50: 32, priceP75: 9670000, areaP75: 32, areaMin: 31.9, areaMax: 32.2 },
+    { label: 'Студия', count: 8, priceMin: 8900000, priceMax: 9890000, priceAvg: 9373750, priceP25: 9210000, areaP25: 32, priceP50: 9250000, areaP50: 32.1, priceP75: 9670000, areaP75: 32, areaMin: 31.9, areaMax: 32.2 },
     { label: '1', count: 10, priceMin: 9330000, priceMax: 12000000, priceAvg: 10149000, priceP25: 9420000, areaP25: 44.9, priceP50: 10070000, areaP50: 44.2, priceP75: 10580000, areaP75: 42.4, areaMin: 34.2, areaMax: 51.1 },
     { label: '2', count: 63, priceMin: 12040000, priceMax: 17200000, priceAvg: 14457937, priceP25: 13610000, areaP25: 56, priceP50: 14610000, areaP50: 66.9, priceP75: 15410000, areaP75: 61, areaMin: 46, areaMax: 76.6 },
     { label: '3', count: 22, priceMin: 16340000, priceMax: 18330000, priceAvg: 17087727, priceP25: 16640000, areaP25: 76.6, priceP50: 16890000, areaP50: 76.5, priceP75: 17290000, areaP75: 83, areaMin: 73.4, areaMax: 95.9 },
@@ -55,7 +55,7 @@ const PROJECTS = [
   ]},
   { slug: 'statum', city: 'kzn', label: 'Статум', rooms: [
     { label: '1', count: 162, priceMin: 11960000, priceMax: 34860000, priceAvg: 15018086, priceP25: 12620000, areaP25: 37.65, priceP50: 13430000, areaP50: 41.52, priceP75: 14040000, areaP75: 44.68, areaMin: 31.11, areaMax: 138.9 },
-    { label: '2', count: 190, priceMin: 14290000, priceMax: 22760000, priceAvg: 18071316, priceP25: 17470000, areaP25: 63.05, priceP50: 17930000, areaP50: 63.68, priceP75: 18580000, areaP75: 70.13, areaMin: 48.44, areaMax: 90 },
+    { label: '2', count: 190, priceMin: 14290000, priceMax: 22760000, priceAvg: 18071316, priceP25: 17470000, areaP25: 63.08, priceP50: 17930000, areaP50: 63.68, priceP75: 18580000, areaP75: 70.13, areaMin: 48.44, areaMax: 90 },
     { label: '3', count: 43, priceMin: 18400000, priceMax: 24800000, priceAvg: 21950465, priceP25: 21000000, areaP25: 89.74, priceP50: 21750000, areaP50: 90.87, priceP75: 23050000, areaP75: 104.01, areaMin: 72.69, areaMax: 106.84 },
     { label: '4', count: 1, priceMin: 33890000, priceMax: 33890000, priceAvg: 33890000, priceP25: 33890000, areaP25: 108.2, priceP50: 33890000, areaP50: 108.2, priceP75: 33890000, areaP75: 108.2, areaMin: 108.2, areaMax: 108.2 },
   ]},
@@ -120,7 +120,7 @@ const PROJECTS = [
     { label: 'Студия', count: 48, priceMin: 8999000, priceMax: 14656000, priceAvg: 10452419, priceP25: 10100000, areaP25: 29.4, priceP50: 10330000, areaP50: 29.45, priceP75: 10814000, areaP75: 32.2, areaMin: 27.1, areaMax: 40.8 },
     { label: '1', count: 142, priceMin: 11092000, priceMax: 35078000, priceAvg: 14478291, priceP25: 11890000, areaP25: 35.35, priceP50: 13038000, areaP50: 39.15, priceP75: 14997000, areaP75: 45.85, areaMin: 33.3, areaMax: 101.15 },
     { label: '2', count: 176, priceMin: 15270000, priceMax: 26861000, priceAvg: 20413268, priceP25: 18594000, areaP25: 57.77, priceP50: 19910000, areaP50: 62.1, priceP75: 21990000, areaP75: 68.35, areaMin: 46.9, areaMax: 81.05 },
-    { label: '3', count: 67, priceMin: 22120000, priceMax: 37055000, priceAvg: 26789358, priceP25: 25677000, areaP25: 84.3, priceP50: 26740000, areaP50: 86.69, priceP75: 28120000, areaP75: 90.85, areaMin: 71.95, areaMax: 115.37 },
+    { label: '3', count: 67, priceMin: 22120000, priceMax: 37055000, priceAvg: 26804254, priceP25: 25680000, areaP25: 84.8, priceP50: 26740000, areaP50: 86.69, priceP75: 28120000, areaP75: 90.85, areaMin: 71.95, areaMax: 115.37 },
   ]},
   { slug: 'upoint', city: 'spb', label: 'UPOINT', rooms: [
     { label: '2', count: 1, priceMin: 35140000, priceMax: 35140000, priceAvg: 35140000, priceP25: 35140000, areaP25: 144.8, priceP50: 35140000, areaP50: 144.8, priceP75: 35140000, areaP75: 144.8, areaMin: 144.8, areaMax: 144.8 },

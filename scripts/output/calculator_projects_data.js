@@ -1,6 +1,6 @@
-// Автосгенерировано fetch_unistroy_prices.mjs — 2026-08-05
+// Автосгенерировано fetch_unistroy_prices.mjs — 2026-08-06
 // P25/P50/P75 рассчитаны по фактическим лотам; квартиры от 3 комнат исключены.
-window.CALCULATOR_PROJECTS_META = {"fetchedAt":"2026-08-05T14:15:52.701Z","source":"unistroy.ru, публичный API /api/flats/"};
+window.CALCULATOR_PROJECTS_META = {"fetchedAt":"2026-08-06T02:48:43.293Z","source":"unistroy.ru, публичный API /api/flats/"};
 window.CALCULATOR_PROJECTS = [
   {
     "slug": "skies",
@@ -91,15 +91,15 @@ window.CALCULATOR_PROJECTS = [
       },
       {
         "label": "2",
-        "count": 314,
+        "count": 313,
         "priceMin": 7891000,
         "priceMax": 18844000,
-        "priceAvg": 11831232,
+        "priceAvg": 11822220,
         "priceP25": 10241000,
         "areaP25": 56.3,
-        "priceP50": 11842000,
-        "areaP50": 64.2,
-        "priceP75": 13036000,
+        "priceP50": 11832000,
+        "areaP50": 65.9,
+        "priceP75": 13005000,
         "areaP75": 67.7,
         "areaMin": 34.8,
         "areaMax": 88.81
@@ -120,7 +120,7 @@ window.CALCULATOR_PROJECTS = [
         "priceP25": 5310000,
         "areaP25": 28.39,
         "priceP50": 5411000,
-        "areaP50": 28.4,
+        "areaP50": 29.92,
         "priceP75": 5584000,
         "areaP75": 28.58,
         "areaMin": 23.87,
@@ -217,10 +217,10 @@ window.CALCULATOR_PROJECTS = [
     "rooms": [
       {
         "label": "Студия",
-        "count": 10,
+        "count": 9,
         "priceMin": 8900000,
         "priceMax": 9890000,
-        "priceAvg": 9311000,
+        "priceAvg": 9317778,
         "priceP25": 9080000,
         "areaP25": 32.1,
         "priceP50": 9210000,
@@ -321,16 +321,16 @@ window.CALCULATOR_PROJECTS = [
     "rooms": [
       {
         "label": "Студия",
-        "count": 17,
-        "priceMin": 9850000,
+        "count": 15,
+        "priceMin": 9870000,
         "priceMax": 11530000,
-        "priceAvg": 10274059,
-        "priceP25": 9910000,
-        "areaP25": 33.9,
-        "priceP50": 10150000,
-        "areaP50": 32.7,
-        "priceP75": 10200000,
-        "areaP75": 33.7,
+        "priceAvg": 10328600,
+        "priceP25": 10050000,
+        "areaP25": 32.66,
+        "priceP50": 10160000,
+        "areaP50": 33.73,
+        "priceP75": 10619000,
+        "areaP75": 33.6,
         "areaMin": 32.5,
         "areaMax": 33.9
       },
@@ -354,7 +354,7 @@ window.CALCULATOR_PROJECTS = [
         "count": 56,
         "priceMin": 10710000,
         "priceMax": 18470000,
-        "priceAvg": 15295071,
+        "priceAvg": 15326143,
         "priceP25": 14850000,
         "areaP25": 58.52,
         "priceP50": 15440000,
@@ -395,7 +395,7 @@ window.CALCULATOR_PROJECTS = [
         "priceP25": 17470000,
         "areaP25": 64.09,
         "priceP50": 17930000,
-        "areaP50": 63.68,
+        "areaP50": 63.71,
         "priceP75": 18580000,
         "areaP75": 70.13,
         "areaMin": 48.44,
@@ -633,11 +633,11 @@ window.CALCULATOR_PROJECTS = [
       },
       {
         "label": "2",
-        "count": 146,
+        "count": 145,
         "priceMin": 7770000,
         "priceMax": 11590000,
-        "priceAvg": 9133904,
-        "priceP25": 8650000,
+        "priceAvg": 9141103,
+        "priceP25": 8660000,
         "areaP25": 50.16,
         "priceP50": 9190000,
         "areaP50": 57.8,
@@ -690,7 +690,7 @@ window.CALCULATOR_PROJECTS = [
         "priceMax": 16560000,
         "priceAvg": 13951198,
         "priceP25": 13190000,
-        "areaP25": 61.44,
+        "areaP25": 62.02,
         "priceP50": 13460000,
         "areaP50": 73.59,
         "priceP75": 14060000,
@@ -848,12 +848,12 @@ window.CALCULATOR_PROJECTS = [
     "rooms": [
       {
         "label": "Студия",
-        "count": 48,
+        "count": 47,
         "priceMin": 8999000,
         "priceMax": 14656000,
-        "priceAvg": 10452419,
-        "priceP25": 10100000,
-        "areaP25": 29.4,
+        "priceAvg": 10481726,
+        "priceP25": 10130000,
+        "areaP25": 29.3,
         "priceP50": 10330000,
         "areaP50": 29.45,
         "priceP75": 10814000,

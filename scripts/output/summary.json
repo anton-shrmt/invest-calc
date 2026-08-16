@@ -1,17 +1,17 @@
 {
-  "fetchedAt": "2026-08-16T01:31:19.319Z",
-  "totalFlats": 5830,
+  "fetchedAt": "2026-08-16T12:44:21.334Z",
+  "totalFlats": 5821,
   "cityTotals": {
     "ekb (Екатеринбург)": {
       "count": 1602,
       "projects": 4
     },
     "goj (goj)": {
-      "count": 55,
+      "count": 54,
       "projects": 1
     },
     "kzn (Казань)": {
-      "count": 2628,
+      "count": 2624,
       "projects": 12
     },
     "mhchkala (mhchkala)": {
@@ -23,15 +23,15 @@
       "projects": 2
     },
     "spb (Санкт-Петербург)": {
-      "count": 429,
-      "projects": 2
+      "count": 425,
+      "projects": 1
     },
     "tlt (Тольятти)": {
       "count": 498,
       "projects": 2
     }
   },
-  "projectCount": 24,
+  "projectCount": 23,
   "projects": [
     {
       "slug": "skies",
@@ -107,13 +107,13 @@
         },
         {
           "label": "1",
-          "count": 145,
+          "count": 146,
           "priceMin": 7469000,
           "priceMax": 30371000,
-          "priceAvg": 9741848,
+          "priceAvg": 9737603,
           "priceP25": 8377000,
           "areaP25": 38.4,
-          "priceP50": 8705000,
+          "priceP50": 8716000,
           "areaP50": 39.2,
           "priceP75": 9385000,
           "areaP75": 35.1,
@@ -122,13 +122,13 @@
         },
         {
           "label": "2",
-          "count": 299,
+          "count": 298,
           "priceMin": 7791000,
           "priceMax": 18844000,
-          "priceAvg": 11595020,
+          "priceAvg": 11607141,
           "priceP25": 10220000,
           "areaP25": 56.3,
-          "priceP50": 11676000,
+          "priceP50": 11696000,
           "areaP50": 64.2,
           "priceP75": 12639000,
           "areaP75": 67.7,
@@ -189,14 +189,14 @@
         },
         {
           "label": "2",
-          "count": 223,
+          "count": 222,
           "priceMin": 7313000,
           "priceMax": 16198000,
-          "priceAvg": 9601327,
+          "priceAvg": 9607374,
           "priceP25": 8905000,
           "areaP25": 59.16,
-          "priceP50": 9542000,
-          "areaP50": 63.44,
+          "priceP50": 9580000,
+          "areaP50": 65.47,
           "priceP75": 10264000,
           "areaP75": 70.03,
           "areaMin": 47.09,
@@ -271,10 +271,10 @@
         },
         {
           "label": "2",
-          "count": 156,
+          "count": 157,
           "priceMin": 7728000,
           "priceMax": 14780000,
-          "priceAvg": 9273276,
+          "priceAvg": 9272981,
           "priceP25": 8330000,
           "areaP25": 54.3,
           "priceP50": 8973000,
@@ -338,12 +338,12 @@
         },
         {
           "label": "2",
-          "count": 38,
+          "count": 37,
           "priceMin": 6510000,
           "priceMax": 9490000,
-          "priceAvg": 7805263,
-          "priceP25": 6690000,
-          "areaP25": 34.28,
+          "priceAvg": 7839730,
+          "priceP25": 6820000,
+          "areaP25": 35.18,
           "priceP50": 8200000,
           "areaP50": 46.71,
           "priceP75": 8520000,
@@ -442,18 +442,18 @@
       "rooms": [
         {
           "label": "1",
-          "count": 13,
+          "count": 14,
           "priceMin": 17080000,
-          "priceMax": 63150000,
-          "priceAvg": 22578462,
+          "priceMax": 96760000,
+          "priceAvg": 27877143,
           "priceP25": 18900000,
           "areaP25": 46.14,
-          "priceP50": 19370000,
-          "areaP50": 46.14,
-          "priceP75": 19700000,
-          "areaP75": 46.18,
+          "priceP50": 19400000,
+          "areaP50": 46.18,
+          "priceP75": 20810000,
+          "areaP75": 39.71,
           "areaMin": 39.71,
-          "areaMax": 160.54
+          "areaMax": 208.16
         },
         {
           "label": "2",
@@ -524,14 +524,14 @@
         },
         {
           "label": "1",
-          "count": 68,
+          "count": 67,
           "priceMin": 6700000,
           "priceMax": 8070000,
-          "priceAvg": 7027206,
+          "priceAvg": 7020597,
           "priceP25": 6800000,
           "areaP25": 34.44,
-          "priceP50": 6930000,
-          "areaP50": 34.43,
+          "priceP50": 6920000,
+          "areaP50": 38.7,
           "priceP75": 7150000,
           "areaP75": 39.03,
           "areaMin": 33.69,
@@ -548,7 +548,7 @@
           "priceP50": 8640000,
           "areaP50": 60.79,
           "priceP75": 8670000,
-          "areaP75": 60.79,
+          "areaP75": 60.28,
           "areaMin": 45.13,
           "areaMax": 79.7
         },
@@ -576,14 +576,14 @@
       "rooms": [
         {
           "label": "1",
-          "count": 332,
+          "count": 331,
           "priceMin": 8120000,
           "priceMax": 13200000,
-          "priceAvg": 9457018,
+          "priceAvg": 9457281,
           "priceP25": 8490000,
           "areaP25": 22.06,
           "priceP50": 9180000,
-          "areaP50": 28.24,
+          "areaP50": 27.98,
           "priceP75": 9450000,
           "areaP75": 28.6,
           "areaMin": 21.63,
@@ -680,16 +680,16 @@
         },
         {
           "label": "2",
-          "count": 192,
+          "count": 191,
           "priceMin": 15650000,
           "priceMax": 23120000,
-          "priceAvg": 18110000,
+          "priceAvg": 18111990,
           "priceP25": 17470000,
           "areaP25": 63.05,
           "priceP50": 17930000,
           "areaP50": 63.68,
-          "priceP75": 18580000,
-          "areaP75": 65.96,
+          "priceP75": 18590000,
+          "areaP75": 69.83,
           "areaMin": 49.07,
           "areaMax": 90
         },
@@ -747,16 +747,16 @@
         },
         {
           "label": "1",
-          "count": 84,
+          "count": 83,
           "priceMin": 7650000,
           "priceMax": 9440000,
-          "priceAvg": 8622143,
-          "priceP25": 8340000,
-          "areaP25": 43.37,
+          "priceAvg": 8629157,
+          "priceP25": 8350000,
+          "areaP25": 36.42,
           "priceP50": 8650000,
           "areaP50": 36.42,
           "priceP75": 8900000,
-          "areaP75": 41.28,
+          "areaP75": 36.92,
           "areaMin": 29.51,
           "areaMax": 44.05
         },
@@ -1030,16 +1030,16 @@
         },
         {
           "label": "3",
-          "count": 49,
+          "count": 48,
           "priceMin": 9000000,
-          "priceMax": 13650000,
-          "priceAvg": 10358000,
+          "priceMax": 13010000,
+          "priceAvg": 10289417,
           "priceP25": 9840000,
           "areaP25": 61.93,
           "priceP50": 10310000,
           "areaP50": 71.38,
-          "priceP75": 10580000,
-          "areaP75": 75.9,
+          "priceP75": 10550000,
+          "areaP75": 71.94,
           "areaMin": 60.9,
           "areaMax": 76.3
         }
@@ -1350,10 +1350,10 @@
         },
         {
           "label": "1",
-          "count": 141,
+          "count": 140,
           "priceMin": 11092000,
           "priceMax": 35078000,
-          "priceAvg": 14525236,
+          "priceAvg": 14535202,
           "priceP25": 11890000,
           "areaP25": 35.35,
           "priceP50": 13114000,
@@ -1365,13 +1365,13 @@
         },
         {
           "label": "2",
-          "count": 176,
+          "count": 174,
           "priceMin": 15270000,
           "priceMax": 26861000,
-          "priceAvg": 20403128,
-          "priceP25": 18571000,
-          "areaP25": 57.77,
-          "priceP50": 19910000,
+          "priceAvg": 20380354,
+          "priceP25": 18570000,
+          "areaP25": 57.92,
+          "priceP50": 19750000,
           "areaP50": 62.1,
           "priceP75": 22010000,
           "areaP75": 68.25,
@@ -1392,28 +1392,6 @@
           "areaP75": 90.85,
           "areaMin": 71.95,
           "areaMax": 115.37
-        }
-      ]
-    },
-    {
-      "slug": "upoint",
-      "city": "spb",
-      "label": "UPOINT",
-      "rooms": [
-        {
-          "label": "2",
-          "count": 1,
-          "priceMin": 35160000,
-          "priceMax": 35160000,
-          "priceAvg": 35160000,
-          "priceP25": 35160000,
-          "areaP25": 138.4,
-          "priceP50": 35160000,
-          "areaP50": 138.4,
-          "priceP75": 35160000,
-          "areaP75": 138.4,
-          "areaMin": 138.4,
-          "areaMax": 138.4
         }
       ]
     },

@@ -1,6 +1,6 @@
 {
-  "fetchedAt": "2026-08-16T12:44:21.334Z",
-  "totalFlats": 5821,
+  "fetchedAt": "2026-08-17T01:25:19.688Z",
+  "totalFlats": 5818,
   "cityTotals": {
     "ekb (Екатеринбург)": {
       "count": 1602,
@@ -11,7 +11,7 @@
       "projects": 1
     },
     "kzn (Казань)": {
-      "count": 2624,
+      "count": 2623,
       "projects": 12
     },
     "mhchkala (mhchkala)": {
@@ -19,11 +19,11 @@
       "projects": 1
     },
     "per (Пермь)": {
-      "count": 411,
+      "count": 410,
       "projects": 2
     },
     "spb (Санкт-Петербург)": {
-      "count": 425,
+      "count": 424,
       "projects": 1
     },
     "tlt (Тольятти)": {
@@ -643,17 +643,17 @@
         },
         {
           "label": "3",
-          "count": 16,
+          "count": 15,
           "priceMin": 17840000,
           "priceMax": 26300000,
-          "priceAvg": 19545625,
+          "priceAvg": 19480000,
           "priceP25": 18130000,
           "areaP25": 73.6,
-          "priceP50": 18940000,
-          "areaP50": 86.1,
+          "priceP50": 18900000,
+          "areaP50": 87.9,
           "priceP75": 19190000,
           "areaP75": 86.1,
-          "areaMin": 71,
+          "areaMin": 72.8,
           "areaMax": 107.9
         }
       ]
@@ -1231,10 +1231,10 @@
         },
         {
           "label": "2",
-          "count": 41,
+          "count": 40,
           "priceMin": 8655000,
           "priceMax": 15900000,
-          "priceAvg": 9586390,
+          "priceAvg": 9582800,
           "priceP25": 9190000,
           "areaP25": 56.11,
           "priceP50": 9440000,
@@ -1335,12 +1335,12 @@
       "rooms": [
         {
           "label": "Студия",
-          "count": 44,
+          "count": 43,
           "priceMin": 9426000,
           "priceMax": 14656000,
-          "priceAvg": 10540752,
-          "priceP25": 10133000,
-          "areaP25": 29.3,
+          "priceAvg": 10562840,
+          "priceP25": 10167000,
+          "areaP25": 29.4,
           "priceP50": 10367100,
           "areaP50": 30.2,
           "priceP75": 10814000,

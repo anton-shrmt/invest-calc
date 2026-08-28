@@ -1,9 +1,9 @@
 {
-  "fetchedAt": "2026-08-27T21:59:11.450Z",
+  "fetchedAt": "2026-08-28T10:19:20.438Z",
   "totalFlats": 5685,
   "cityTotals": {
     "ekb (Екатеринбург)": {
-      "count": 1577,
+      "count": 1574,
       "projects": 4
     },
     "goj (goj)": {
@@ -11,11 +11,11 @@
       "projects": 1
     },
     "kzn (Казань)": {
-      "count": 2554,
+      "count": 2555,
       "projects": 13
     },
     "mhchkala (mhchkala)": {
-      "count": 199,
+      "count": 200,
       "projects": 1
     },
     "per (Пермь)": {
@@ -27,7 +27,7 @@
       "projects": 2
     },
     "tlt (Тольятти)": {
-      "count": 485,
+      "count": 486,
       "projects": 2
     }
   },
@@ -146,7 +146,7 @@
           "priceP50": 16760000,
           "areaP50": 88.8,
           "priceP75": 17734000,
-          "areaP75": 88.8,
+          "areaP75": 95.6,
           "areaMin": 63.3,
           "areaMax": 119
         }
@@ -174,12 +174,12 @@
         },
         {
           "label": "1",
-          "count": 261,
+          "count": 259,
           "priceMin": 5952000,
           "priceMax": 14441000,
-          "priceAvg": 7252364,
-          "priceP25": 6816000,
-          "areaP25": 34.4,
+          "priceAvg": 7252201,
+          "priceP25": 6818000,
+          "areaP25": 38.92,
           "priceP50": 7107000,
           "areaP50": 38.92,
           "priceP75": 7629000,
@@ -204,13 +204,13 @@
         },
         {
           "label": "3",
-          "count": 101,
+          "count": 100,
           "priceMin": 9969000,
           "priceMax": 17788000,
-          "priceAvg": 12361149,
+          "priceAvg": 12372270,
           "priceP25": 11249000,
           "areaP25": 83.56,
-          "priceP50": 11666000,
+          "priceP50": 11696000,
           "areaP50": 84.97,
           "priceP75": 13312000,
           "areaP75": 98.21,
@@ -499,9 +499,9 @@
           "priceMax": 7190000,
           "priceAvg": 5937083,
           "priceP25": 5840000,
-          "areaP25": 26,
+          "areaP25": 25.8,
           "priceP50": 5880000,
-          "areaP50": 25.9,
+          "areaP50": 25.6,
           "priceP75": 5960000,
           "areaP75": 25.3,
           "areaMin": 25.3,
@@ -531,9 +531,9 @@
           "priceP25": 8500000,
           "areaP25": 60.4,
           "priceP50": 8640000,
-          "areaP50": 60.3,
+          "areaP50": 60.4,
           "priceP75": 8670000,
-          "areaP75": 54.4,
+          "areaP75": 60.5,
           "areaMin": 45,
           "areaMax": 79.7
         },
@@ -696,7 +696,7 @@
           "priceP50": 13330000,
           "areaP50": 37.88,
           "priceP75": 14040000,
-          "areaP75": 44.68,
+          "areaP75": 42.15,
           "areaMin": 31.11,
           "areaMax": 138.9
         },
@@ -707,7 +707,7 @@
           "priceMax": 23120000,
           "priceAvg": 18074444,
           "priceP25": 17470000,
-          "areaP25": 63.08,
+          "areaP25": 63.05,
           "priceP50": 17890000,
           "areaP50": 68.51,
           "priceP75": 18580000,
@@ -791,7 +791,7 @@
           "priceP25": 10490000,
           "areaP25": 50.45,
           "priceP50": 10900000,
-          "areaP50": 65.2,
+          "areaP50": 51.39,
           "priceP75": 11400000,
           "areaP75": 52.62,
           "areaMin": 44.01,
@@ -1014,7 +1014,7 @@
           "priceP25": 6030000,
           "areaP25": 24.17,
           "priceP50": 6360000,
-          "areaP50": 26.45,
+          "areaP50": 26.57,
           "priceP75": 6670000,
           "areaP75": 27.22,
           "areaMin": 23.49,
@@ -1044,7 +1044,7 @@
           "priceP25": 8640000,
           "areaP25": 50.16,
           "priceP50": 9180000,
-          "areaP50": 58.24,
+          "areaP50": 57.63,
           "priceP75": 9370000,
           "areaP75": 58.31,
           "areaMin": 45.44,
@@ -1061,7 +1061,7 @@
           "priceP50": 10310000,
           "areaP50": 71.38,
           "priceP75": 10580000,
-          "areaP75": 75.9,
+          "areaP75": 71.94,
           "areaMin": 60.9,
           "areaMax": 76.3
         }
@@ -1104,14 +1104,14 @@
         },
         {
           "label": "2",
-          "count": 156,
+          "count": 157,
           "priceMin": 12310000,
           "priceMax": 16560000,
-          "priceAvg": 13988526,
+          "priceAvg": 13981783,
           "priceP25": 13180000,
           "areaP25": 61.24,
           "priceP50": 13470000,
-          "areaP50": 72.93,
+          "areaP50": 65.76,
           "priceP75": 14080000,
           "areaP75": 77.12,
           "areaMin": 56.02,
@@ -1126,9 +1126,9 @@
           "priceP25": 15380000,
           "areaP25": 82.24,
           "priceP50": 16390000,
-          "areaP50": 89.38,
+          "areaP50": 92.77,
           "priceP75": 16670000,
-          "areaP75": 93.99,
+          "areaP75": 95.87,
           "areaMin": 82.24,
           "areaMax": 99.83
         },
@@ -1201,15 +1201,15 @@
         },
         {
           "label": "3",
-          "count": 28,
+          "count": 29,
           "priceMin": 10872000,
           "priceMax": 15024000,
-          "priceAvg": 12383786,
+          "priceAvg": 12394897,
           "priceP25": 12263000,
           "areaP25": 77.93,
           "priceP50": 12397000,
           "areaP50": 78.79,
-          "priceP75": 12485000,
+          "priceP75": 12493000,
           "areaP75": 78.79,
           "areaMin": 64.81,
           "areaMax": 81.44
@@ -1247,7 +1247,7 @@
           "priceP50": 7210000,
           "areaP50": 38.34,
           "priceP75": 7560000,
-          "areaP75": 39.54,
+          "areaP75": 39.91,
           "areaMin": 28.86,
           "areaMax": 39.91
         },
@@ -1299,7 +1299,7 @@
           "priceP50": 7360000,
           "areaP50": 33.01,
           "priceP75": 7930000,
-          "areaP75": 30.45,
+          "areaP75": 29.09,
           "areaMin": 23.4,
           "areaMax": 33.01
         },
@@ -1522,22 +1522,22 @@
           "priceP50": 5320000,
           "areaP50": 32.48,
           "priceP75": 5420000,
-          "areaP75": 32.93,
+          "areaP75": 32.59,
           "areaMin": 30.53,
           "areaMax": 104.1
         },
         {
           "label": "1",
-          "count": 264,
+          "count": 265,
           "priceMin": 5680000,
           "priceMax": 8050000,
-          "priceAvg": 6573652,
+          "priceAvg": 6574053,
           "priceP25": 5950000,
           "areaP25": 36.56,
           "priceP50": 6550000,
           "areaP50": 40.66,
           "priceP75": 7020000,
-          "areaP75": 43.59,
+          "areaP75": 43.24,
           "areaMin": 35.72,
           "areaMax": 49.78
         },

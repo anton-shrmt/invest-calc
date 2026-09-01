@@ -1,6 +1,6 @@
-// Автосгенерировано fetch_unistroy_prices.mjs — 2026-08-31
+// Автосгенерировано fetch_unistroy_prices.mjs — 2026-09-01
 // P25/P50/P75 рассчитаны по фактическим лотам; квартиры от 3 комнат исключены.
-window.CALCULATOR_PROJECTS_META = {"fetchedAt":"2026-08-31T18:57:03.227Z","source":"unistroy.ru, публичный API /api/flats/"};
+window.CALCULATOR_PROJECTS_META = {"fetchedAt":"2026-09-01T04:15:27.323Z","source":"unistroy.ru, публичный API /api/flats/"};
 window.CALCULATOR_PROJECTS = [
   {
     "slug": "skies",
@@ -274,7 +274,7 @@ window.CALCULATOR_PROJECTS = [
         "priceMax": 8070000,
         "priceAvg": 7027576,
         "priceP25": 6800000,
-        "areaP25": 34.3,
+        "areaP25": 34.4,
         "priceP50": 6930000,
         "areaP50": 34.5,
         "priceP75": 7190000,
@@ -291,7 +291,7 @@ window.CALCULATOR_PROJECTS = [
         "priceP25": 8500000,
         "areaP25": 60.4,
         "priceP50": 8640000,
-        "areaP50": 60.8,
+        "areaP50": 60.9,
         "priceP75": 8670000,
         "areaP75": 60.4,
         "areaMin": 45,
@@ -556,7 +556,7 @@ window.CALCULATOR_PROJECTS = [
         "priceMax": 10180000,
         "priceAvg": 7525037,
         "priceP25": 7270000,
-        "areaP25": 34.7,
+        "areaP25": 34.71,
         "priceP50": 7410000,
         "areaP50": 26.7,
         "priceP75": 7740000,
@@ -801,7 +801,7 @@ window.CALCULATOR_PROJECTS = [
         "priceMax": 35078000,
         "priceAvg": 14631272,
         "priceP25": 11930000,
-        "areaP25": 35.85,
+        "areaP25": 35.95,
         "priceP50": 13830000,
         "areaP50": 42.1,
         "priceP75": 15160000,

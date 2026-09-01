@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-08-31T18:57:03.227Z",
+  "fetchedAt": "2026-09-01T04:15:27.323Z",
   "totalFlats": 5629,
   "cityTotals": {
     "ekb (Екатеринбург)": {
@@ -499,7 +499,7 @@
           "priceMax": 8070000,
           "priceAvg": 7027576,
           "priceP25": 6800000,
-          "areaP25": 34.3,
+          "areaP25": 34.4,
           "priceP50": 6930000,
           "areaP50": 34.5,
           "priceP75": 7190000,
@@ -516,7 +516,7 @@
           "priceP25": 8500000,
           "areaP25": 60.4,
           "priceP50": 8640000,
-          "areaP50": 60.8,
+          "areaP50": 60.9,
           "priceP75": 8670000,
           "areaP75": 60.4,
           "areaMin": 45,
@@ -1012,7 +1012,7 @@
           "priceMax": 10180000,
           "priceAvg": 7525037,
           "priceP25": 7270000,
-          "areaP25": 34.7,
+          "areaP25": 34.71,
           "priceP50": 7410000,
           "areaP50": 26.7,
           "priceP75": 7740000,
@@ -1046,7 +1046,7 @@
           "priceP50": 10310000,
           "areaP50": 71.34,
           "priceP75": 10580000,
-          "areaP75": 71.94,
+          "areaP75": 75.9,
           "areaMin": 60.9,
           "areaMax": 76.3
         }
@@ -1362,7 +1362,7 @@
           "priceMax": 35078000,
           "priceAvg": 14631272,
           "priceP25": 11930000,
-          "areaP25": 35.85,
+          "areaP25": 35.95,
           "priceP50": 13830000,
           "areaP50": 42.1,
           "priceP75": 15160000,

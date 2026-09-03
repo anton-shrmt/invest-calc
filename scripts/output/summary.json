@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-09-02T16:13:47.289Z",
+  "fetchedAt": "2026-09-03T03:37:42.055Z",
   "totalFlats": 5597,
   "cityTotals": {
     "ekb (Екатеринбург)": {
@@ -131,7 +131,7 @@
           "priceP50": 16760000,
           "areaP50": 88.8,
           "priceP75": 17734000,
-          "areaP75": 88.8,
+          "areaP75": 95.6,
           "areaMin": 63.3,
           "areaMax": 119
         }
@@ -149,7 +149,7 @@
           "priceMax": 12181000,
           "priceAvg": 5706368,
           "priceP25": 5310000,
-          "areaP25": 26.38,
+          "areaP25": 28.39,
           "priceP50": 5421000,
           "areaP50": 29.92,
           "priceP75": 5593000,
@@ -194,11 +194,11 @@
           "priceMax": 17788000,
           "priceAvg": 12354614,
           "priceP25": 11249000,
-          "areaP25": 81.24,
+          "areaP25": 83.56,
           "priceP50": 11666000,
           "areaP50": 84.97,
           "priceP75": 13312000,
-          "areaP75": 98.21,
+          "areaP75": 100.76,
           "areaMin": 70.48,
           "areaMax": 105.53
         },
@@ -347,7 +347,7 @@
           "priceP50": 14500000,
           "areaP50": 76.3,
           "priceP75": 15530000,
-          "areaP75": 61.1,
+          "areaP75": 60.8,
           "areaMin": 46,
           "areaMax": 76.6
         },
@@ -464,9 +464,9 @@
           "priceP25": 8490000,
           "areaP25": 61.1,
           "priceP50": 8660000,
-          "areaP50": 60.3,
+          "areaP50": 60.8,
           "priceP75": 8710000,
-          "areaP75": 60.5,
+          "areaP75": 60.4,
           "areaMin": 45,
           "areaMax": 79.7
         },
@@ -655,7 +655,7 @@
           "priceMax": 24800000,
           "priceAvg": 21968636,
           "priceP25": 21000000,
-          "areaP25": 89.73,
+          "areaP25": 89.74,
           "priceP50": 21800000,
           "areaP50": 90.65,
           "priceP75": 22900000,
@@ -964,7 +964,7 @@
           "priceP50": 7400000,
           "areaP50": 34.17,
           "priceP75": 7740000,
-          "areaP75": 36.24,
+          "areaP75": 34.7,
           "areaMin": 26,
           "areaMax": 42.96
         },
@@ -994,7 +994,7 @@
           "priceP50": 10310000,
           "areaP50": 71.34,
           "priceP75": 10580000,
-          "areaP75": 71.94,
+          "areaP75": 75.9,
           "areaMin": 60.9,
           "areaMax": 76.3
         }
@@ -1351,7 +1351,7 @@
           "priceP50": 10474000,
           "areaP50": 29.55,
           "priceP75": 10814000,
-          "areaP75": 32.2,
+          "areaP75": 32.3,
           "areaMin": 27.1,
           "areaMax": 40.8
         },

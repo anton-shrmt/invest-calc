@@ -1,13 +1,13 @@
 {
-  "fetchedAt": "2026-09-03T19:55:33.232Z",
-  "totalFlats": 5587,
+  "fetchedAt": "2026-09-04T05:16:47.246Z",
+  "totalFlats": 5589,
   "cityTotals": {
     "ekb (Екатеринбург)": {
       "count": 1548,
       "projects": 4
     },
     "kzn (Казань)": {
-      "count": 2531,
+      "count": 2530,
       "projects": 13
     },
     "mhc (Махачкала)": {
@@ -23,7 +23,7 @@
       "projects": 2
     },
     "spb (Санкт-Петербург)": {
-      "count": 416,
+      "count": 419,
       "projects": 2
     },
     "tlt (Тольятти)": {
@@ -131,7 +131,7 @@
           "priceP50": 16760000,
           "areaP50": 88.8,
           "priceP75": 17734000,
-          "areaP75": 95.6,
+          "areaP75": 88.8,
           "areaMin": 63.3,
           "areaMax": 119
         }
@@ -194,7 +194,7 @@
           "priceMax": 17788000,
           "priceAvg": 12354614,
           "priceP25": 11249000,
-          "areaP25": 83.56,
+          "areaP25": 81.24,
           "priceP50": 11666000,
           "areaP50": 84.97,
           "priceP75": 13312000,
@@ -345,7 +345,7 @@
           "priceP25": 13670000,
           "areaP25": 53.1,
           "priceP50": 14690000,
-          "areaP50": 68,
+          "areaP50": 56.4,
           "priceP75": 15530000,
           "areaP75": 60.8,
           "areaMin": 46,
@@ -447,7 +447,7 @@
           "priceMax": 8180000,
           "priceAvg": 7067077,
           "priceP25": 6830000,
-          "areaP25": 34.4,
+          "areaP25": 34.5,
           "priceP50": 6950000,
           "areaP50": 38.4,
           "priceP75": 7270000,
@@ -464,7 +464,7 @@
           "priceP25": 8500000,
           "areaP25": 60.4,
           "priceP50": 8660000,
-          "areaP50": 61,
+          "areaP50": 60.8,
           "priceP75": 8710000,
           "areaP75": 60.4,
           "areaMin": 45,
@@ -531,14 +531,14 @@
       "rooms": [
         {
           "label": "1",
-          "count": 318,
+          "count": 319,
           "priceMin": 7940000,
           "priceMax": 14130000,
-          "priceAvg": 9578585,
+          "priceAvg": 9575141,
           "priceP25": 8630000,
           "areaP25": 22.06,
           "priceP50": 9330000,
-          "areaP50": 27.98,
+          "areaP50": 28.61,
           "priceP75": 9960000,
           "areaP75": 21.75,
           "areaMin": 21.63,
@@ -629,7 +629,7 @@
           "priceP50": 13200000,
           "areaP50": 38.03,
           "priceP75": 14010000,
-          "areaP75": 44.27,
+          "areaP75": 47.88,
           "areaMin": 31.11,
           "areaMax": 138.9
         },
@@ -640,7 +640,7 @@
           "priceMax": 23120000,
           "priceAvg": 18107277,
           "priceP25": 17470000,
-          "areaP25": 63.73,
+          "areaP25": 64.68,
           "priceP50": 17890000,
           "areaP50": 68.51,
           "priceP75": 18580000,
@@ -659,7 +659,7 @@
           "priceP50": 21800000,
           "areaP50": 90.65,
           "priceP75": 22900000,
-          "areaP75": 103.85,
+          "areaP75": 104.01,
           "areaMin": 72.69,
           "areaMax": 106.84
         },
@@ -732,12 +732,12 @@
         },
         {
           "label": "3",
-          "count": 50,
+          "count": 49,
           "priceMin": 13280000,
           "priceMax": 15490000,
-          "priceAvg": 14036600,
-          "priceP25": 13670000,
-          "areaP25": 83.61,
+          "priceAvg": 14047347,
+          "priceP25": 13680000,
+          "areaP25": 86.62,
           "priceP50": 13990000,
           "areaP50": 78.94,
           "priceP75": 14300000,
@@ -841,7 +841,7 @@
           "priceMax": 19600000,
           "priceAvg": 17531519,
           "priceP25": 16500000,
-          "areaP25": 55.96,
+          "areaP25": 56.72,
           "priceP50": 17150000,
           "areaP50": 60,
           "priceP75": 18470000,
@@ -955,16 +955,16 @@
         },
         {
           "label": "1",
-          "count": 134,
+          "count": 133,
           "priceMin": 6770000,
           "priceMax": 10180000,
-          "priceAvg": 7533881,
+          "priceAvg": 7533609,
           "priceP25": 7270000,
           "areaP25": 34.7,
-          "priceP50": 7430000,
-          "areaP50": 34.7,
+          "priceP50": 7400000,
+          "areaP50": 34.17,
           "priceP75": 7740000,
-          "areaP75": 34.7,
+          "areaP75": 34,
           "areaMin": 26,
           "areaMax": 42.96
         },
@@ -977,7 +977,7 @@
           "priceP25": 8650000,
           "areaP25": 50.16,
           "priceP50": 9180000,
-          "areaP50": 58.24,
+          "areaP50": 57.63,
           "priceP75": 9360000,
           "areaP75": 59.83,
           "areaMin": 45.44,
@@ -1084,7 +1084,7 @@
     },
     {
       "slug": "grandbereg",
-      "city": "mhchkala",
+      "city": "mhc",
       "label": "Гранд Берег",
       "rooms": [
         {
@@ -1342,14 +1342,14 @@
       "rooms": [
         {
           "label": "Студия",
-          "count": 40,
+          "count": 41,
           "priceMin": 8999000,
           "priceMax": 14656000,
-          "priceAvg": 10582190,
-          "priceP25": 10167000,
-          "areaP25": 29.4,
-          "priceP50": 10474000,
-          "areaP50": 29.55,
+          "priceAvg": 10545429,
+          "priceP25": 10133000,
+          "areaP25": 29.3,
+          "priceP50": 10350000,
+          "areaP50": 29.45,
           "priceP75": 10814000,
           "areaP75": 32.2,
           "areaMin": 27.1,
@@ -1357,15 +1357,15 @@
         },
         {
           "label": "1",
-          "count": 139,
+          "count": 141,
           "priceMin": 11092000,
           "priceMax": 35078000,
-          "priceAvg": 14536758,
+          "priceAvg": 14514194,
           "priceP25": 11906000,
           "areaP25": 35.95,
-          "priceP50": 13750000,
-          "areaP50": 42.2,
-          "priceP75": 14931000,
+          "priceP50": 13720000,
+          "areaP50": 42.1,
+          "priceP75": 14930000,
           "areaP75": 45.1,
           "areaMin": 33.3,
           "areaMax": 101.15

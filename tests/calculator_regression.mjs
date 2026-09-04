@@ -82,6 +82,10 @@ assert.ok(
   cityOnlyHint.ranked.filter(strategy => strategy.model !== 'deposit').every(strategy => strategy.cityCode === 'kzn'),
   'Обычный поиск должен ограничиваться выбранным городом',
 );
+assert.ok(
+  cityOnlyHint.ranked.filter(strategy => strategy.model !== 'deposit').every(strategy => strategy.flowYearOne >= 0),
+  'Автоматическая рекомендация не должна включать варианты с отрицательным потоком',
+);
 Calc.data.searchAllCities = true;
 const globalHint = Calc._computeHint();
 assert.ok(
@@ -89,6 +93,10 @@ assert.ok(
   'Глобальный поиск должен включать объекты из других городов',
 );
 assert.ok(globalHint.ranked.length > cityOnlyHint.ranked.length, 'Глобальный поиск должен расширять список кандидатов');
+assert.ok(
+  globalHint.ranked.filter(strategy => strategy.model !== 'deposit').every(strategy => strategy.flowYearOne >= 0),
+  'Глобальная рекомендация не должна включать варианты с отрицательным потоком',
+);
 Calc.data.searchAllCities = false;
 
 Object.assign(Calc.data, {

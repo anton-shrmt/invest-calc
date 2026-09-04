@@ -2072,7 +2072,7 @@ const Calc = {
     // (не больше MAX_MORTGAGED_UNITS одновременно), пока на каждую хватает
     // минимум 30% первоначального взноса — то же правило, что и в основном
     // расчёте для выбранного объекта.
-    const evalCombo = (project, room, budget, targetUnits = 0) => {
+    const evalCombo = (project, room, budget, targetUnits = 0, { requireNonNegativeFlow = false } = {}) => {
       const cost = room.priceP50 ?? room.priceAvg;
       const availableModels = RENTAL_MODELS.filter(modelId =>
         isRentalModelAvailable(modelId, project.slug, room.label)
@@ -2129,7 +2129,12 @@ const Calc = {
           roi: (wealth - userCapital) / userCapital * 100,
         };
       };
-      const bestResult = availableModels.map(modelResult).sort((a, b) => b.roi - a.roi || b.wealth - a.wealth)[0];
+      const modelResults = availableModels.map(modelResult);
+      const eligibleResults = requireNonNegativeFlow
+        ? modelResults.filter(result => result.flowYearOne >= 0)
+        : modelResults;
+      if (eligibleResults.length === 0) return null;
+      const bestResult = eligibleResults.sort((a, b) => b.roi - a.roi || b.wealth - a.wealth)[0];
       const roomLabel = room.label === 'Студия' ? 'Студия' : room.label + '-комн.';
       return {
         key: `${project.slug}_${room.label}`,
@@ -2186,7 +2191,7 @@ const Calc = {
     // Единичные квартиры пропускаем: они не показательны как типовой вариант.
     PROJECTS.filter(project => d.searchAllCities || project.city === d.cityCode).forEach(project => {
       project.rooms.filter(room => room.count >= 3).forEach(room => {
-        const s = evalCombo(project, room, invest);
+        const s = evalCombo(project, room, invest, 0, { requireNonNegativeFlow: true });
         if (s) strategies.push(s);
       });
     });
@@ -2206,7 +2211,7 @@ const Calc = {
 
     const bestReason = best.model === 'deposit'
       ? `Среди вариантов ${searchScope} вклад опережает арендные стратегии за ${H} ${pluralYr(H)}.`
-      : `Лучшее соотношение цены и доходности ${searchScope} на этот бюджет.`;
+      : `Максимальный прогнозный ROI среди вариантов с неотрицательным потоком ${searchScope}.`;
 
     // Отдельно считаем объект, который пользователь выбрал вручную (тем же
     // методом, что и лучший вариант) — карточка «Ваш выбор» показывает

@@ -14,21 +14,24 @@ Object.assign(GoldenCalc.data, {
   mortgageRate: 17, mortgageYears: 30,
 });
 const hint = GoldenCalc._computeHint();
-assert.equal(hint.best.model, 'daily', 'Базовый golden case должен выбирать посуточную модель');
-assert.ok(hint.best.ownerRentYearOne / 12 > 125_000 && hint.best.ownerRentYearOne / 12 < 140_000, 'Выплата владельцу должна быть около 131 тыс. ₽/мес');
-assert.ok(hint.best.mortMonthly > 140_000 && hint.best.mortMonthly < 150_000, 'Ипотека должна быть около 146 тыс. ₽/мес');
-assert.ok(hint.best.flowYearOne < 0, 'Базовый сценарий обязан явно иметь отрицательный поток первого года');
-assert.ok(hint.best.totalTopup > 0, 'Отрицательный поток обязан порождать последующие доплаты');
-assert.equal(hint.best.userCapital, GoldenCalc.data.investAmount + hint.best.totalTopup);
-assert.ok(Number.isFinite(hint.best.roi));
-assert.equal(Math.round(hint.best.grossYearOne), 3_180_000, 'Golden: валовая аренда первого года');
-assert.equal(Math.round(hint.best.ownerRentYearOne), 1_573_344, 'Golden: выплата владельцу до ипотеки');
-assert.equal(Math.round(hint.best.mortMonthly), 146_559, 'Golden: ежемесячная ипотека');
-assert.equal(Math.round(hint.best.flowYearOne), -185_369, 'Golden: поток первого года после ипотеки');
-assert.equal(Math.round(hint.best.totalTopup), 316_172, 'Golden: суммарные доплаты за пять лет');
-assert.equal(Math.round(hint.best.userCapital), 8_316_172, 'Golden: все вложения пользователя');
-assert.equal(Math.round(hint.best.wealth), 23_702_705, 'Golden: итоговый капитал');
-assert.equal(Number(hint.best.roi.toFixed(3)), 185.019, 'Golden: ROI на все вложения');
+assert.equal(hint.best.model, 'deposit', 'Если все объекты дают отрицательный поток, рекомендация должна выбрать вклад');
+assert.ok(hint.ranked.filter(strategy => strategy.model !== 'deposit').every(strategy => strategy.flowYearOne >= 0));
+const selected = hint.selected;
+assert.equal(selected.model, 'daily', 'Ручной выбор должен продолжать рассчитывать посуточную модель');
+assert.ok(selected.ownerRentYearOne / 12 > 125_000 && selected.ownerRentYearOne / 12 < 140_000, 'Выплата владельцу должна быть около 131 тыс. ₽/мес');
+assert.ok(selected.mortMonthly > 140_000 && selected.mortMonthly < 150_000, 'Ипотека должна быть около 146 тыс. ₽/мес');
+assert.ok(selected.flowYearOne < 0, 'Ручной выбор должен сохранять диагностику отрицательного потока');
+assert.ok(selected.totalTopup > 0, 'Отрицательный поток обязан порождать последующие доплаты');
+assert.equal(selected.userCapital, GoldenCalc.data.investAmount + selected.totalTopup);
+assert.ok(Number.isFinite(selected.roi));
+assert.equal(Math.round(selected.grossYearOne), 3_180_000, 'Golden: валовая аренда первого года');
+assert.equal(Math.round(selected.ownerRentYearOne), 1_573_344, 'Golden: выплата владельцу до ипотеки');
+assert.equal(Math.round(selected.mortMonthly), 146_559, 'Golden: ежемесячная ипотека');
+assert.equal(Math.round(selected.flowYearOne), -185_369, 'Golden: поток первого года после ипотеки');
+assert.equal(Math.round(selected.totalTopup), 316_172, 'Golden: суммарные доплаты за пять лет');
+assert.equal(Math.round(selected.userCapital), 8_316_172, 'Golden: все вложения пользователя');
+assert.equal(Math.round(selected.wealth), 23_702_705, 'Golden: итоговый капитал');
+assert.equal(Number(selected.roi.toFixed(3)), 185.019, 'Golden: ROI на все вложения');
 
 const budgets = [17_500_000, 17_600_000, 26_200_000, 26_400_000, 34_900_000, 35_200_000, 61_000_000, 61_600_000];
 for (const budget of budgets) {

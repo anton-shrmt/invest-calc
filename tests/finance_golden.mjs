@@ -4,14 +4,13 @@ import { goldenProjectsSource } from './helpers/golden_projects.mjs';
 
 const { Calc, context } = loadCalculator();
 const { Calc: GoldenCalc } = loadCalculator({ projectsSource: goldenProjectsSource });
-const appreciation = { kzn: 13, mhc: 18, ekb: 13, nn: 13, spb: 11, per: 12, tlt: 14 };
 const cityCodes = ['kzn', 'mhc', 'ekb', 'nn', 'spb', 'per', 'tlt'];
 
 Object.assign(GoldenCalc.data, {
   investAmount: 8_000_000, cityCode: 'kzn', projectSlug: 'tech', roomLabel: '1',
   searchAllCities: false, objectManualOverride: false, unitsOverride: 0,
   rentalModel: 'daily',
-  rentGrowth: 5, appreciation: 13, horizon: 5, depositRate: 11, depositMonthly: true,
+  rentGrowth: 5, appreciationScenario: 'base', horizon: 5, depositRate: 11, depositMonthly: true,
   mortgageRate: 17, mortgageYears: 30,
 });
 const hint = GoldenCalc._computeHint();
@@ -31,14 +30,38 @@ assert.equal(Math.round(selected.mortMonthly), 146_559, 'Golden: ежемеся�
 assert.equal(Math.round(selected.flowYearOne), -185_369, 'Golden: поток первого года после ипотеки');
 assert.equal(Math.round(selected.totalTopup), 316_172, 'Golden: суммарные доплаты за пять лет');
 assert.equal(Math.round(selected.userCapital), 8_316_172, 'Golden: все вложения пользователя');
-assert.equal(Math.round(selected.wealth), 23_702_705, 'Golden: итоговый капитал');
-assert.equal(Number(selected.roi.toFixed(3)), 185.019, 'Golden: ROI на все вложения');
+assert.equal(Math.round(selected.wealth), 15_033_968, 'Golden: итоговый капитал с затухающим базовым ростом');
+assert.equal(Number(selected.roi.toFixed(3)), 80.78, 'Golden: ROI на все вложения');
+
+// Интеграционная проверка: перенаправление положительного сальдо аренды
+// уменьшает проценты и срок, а высвободившийся после погашения поток повышает ROI.
+Object.assign(GoldenCalc.data, {
+  investAmount: 7_769_000, cityCode: 'kzn', projectSlug: 'tech', roomLabel: '1',
+  searchAllCities: false, objectManualOverride: true, unitsOverride: 1,
+  rentalModel: 'longterm', rentGrowth: 5, appreciationBaseRate: 8.2,
+  appreciationScenario: 'base', horizon: 15, depositRate: 11,
+  depositDecline: true, depositMonthly: true, mortgageRate: 18,
+  mortgageYears: 30, refinancing: false, rentToMortgage: false,
+});
+const withoutRentPrepayment = GoldenCalc.compute();
+GoldenCalc.data.rentToMortgage = true;
+const withRentPrepayment = GoldenCalc.compute();
+const roiWithoutRentPrepayment = withoutRentPrepayment.roi(
+  withoutRentPrepayment.longterm.wealthArr[15], withoutRentPrepayment.longterm.userCapitalArr[15]
+);
+const roiWithRentPrepayment = withRentPrepayment.roi(
+  withRentPrepayment.longterm.wealthArr[15], withRentPrepayment.longterm.userCapitalArr[15]
+);
+assert.equal(withRentPrepayment.mortgagePayoffMonth, 39, 'Golden: ипотека должна закрыться на 39-м месяце');
+assert.equal(withRentPrepayment.mortgagePayoffMonthWithoutRentPrepayment, 360);
+assert.ok(withRentPrepayment.rentToMortgageInterestSaving > 0);
+assert.ok(roiWithRentPrepayment > roiWithoutRentPrepayment, 'Экономия процентов и ранний свободный поток должны повышать ROI');
 
 const budgets = [17_500_000, 17_600_000, 26_200_000, 26_400_000, 34_900_000, 35_200_000, 61_000_000, 61_600_000];
 for (const budget of budgets) {
   let signature = null;
   for (const startCity of cityCodes) {
-    Object.assign(Calc.data, { investAmount: budget, cityCode: startCity, appreciation: appreciation[startCity] || 13, searchAllCities: true, objectManualOverride: false, unitsOverride: 0 });
+    Object.assign(Calc.data, { investAmount: budget, cityCode: startCity, appreciationScenario: 'base', searchAllCities: true, objectManualOverride: false, unitsOverride: 0 });
     const best = Calc._computeHint().best;
     const current = `${best.cityCode}|${best.projectSlug}|${best.roomLabel}|${best.units}|${best.model}|${Math.round(best.wealth)}|${Math.round(best.userCapital)}`;
     signature ||= current;
@@ -60,7 +83,7 @@ for (const project of projects) {
         investAmount, cityCode: project.city, projectSlug: project.slug,
         roomLabel: room.label, searchAllCities: false,
         objectManualOverride: true, unitsOverride: 0,
-        rentGrowth: 5, appreciation: appreciation[project.city], horizon: 5,
+        rentGrowth: 5, appreciationScenario: 'base', horizon: 5,
         depositRate: 11, depositMonthly: true,
         mortgageRate: 17, mortgageYears: 30,
       });
@@ -80,7 +103,7 @@ assert.ok(marketScenarios >= 200, `Недостаточно полного по�
 
 const mortgageProject = Calc.getProject('grandbereg');
 const mortgageRoom = Calc.getRoom(mortgageProject, '1');
-Object.assign(Calc.data, { investAmount: Math.round(4.9 * Calc.priceForTier(mortgageRoom)), cityCode: 'mhc', projectSlug: 'grandbereg', roomLabel: '1', searchAllCities: false, unitsOverride: 0, objectManualOverride: true, appreciation: 18 });
+Object.assign(Calc.data, { investAmount: Math.round(4.9 * Calc.priceForTier(mortgageRoom)), cityCode: 'mhc', projectSlug: 'grandbereg', roomLabel: '1', searchAllCities: false, unitsOverride: 0, objectManualOverride: true, appreciationScenario: 'base' });
 const multi = Calc.compute();
 assert.equal(multi.mortgagedUnits, 2, 'Должно поддерживаться ровно до двух ипотечных квартир');
 for (const model of multi.availableModels) {

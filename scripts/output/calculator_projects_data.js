@@ -1,6 +1,6 @@
-// Автосгенерировано fetch_unistroy_prices.mjs — 2026-09-03
+// Автосгенерировано fetch_unistroy_prices.mjs — 2026-09-04
 // P25/P50/P75 рассчитаны по фактическим лотам; квартиры от 3 комнат исключены.
-window.CALCULATOR_PROJECTS_META = {"fetchedAt":"2026-09-03T16:03:13.401Z","source":"unistroy.ru, публичный API /api/flats/"};
+window.CALCULATOR_PROJECTS_META = {"fetchedAt":"2026-09-04T03:37:59.912Z","source":"unistroy.ru, публичный API /api/flats/"};
 window.CALCULATOR_PROJECTS = [
   {
     "slug": "skies",
@@ -76,15 +76,15 @@ window.CALCULATOR_PROJECTS = [
       },
       {
         "label": "2",
-        "count": 296,
+        "count": 295,
         "priceMin": 7791000,
         "priceMax": 18844000,
-        "priceAvg": 11605348,
-        "priceP25": 10220000,
-        "areaP25": 56.3,
+        "priceAvg": 11612885,
+        "priceP25": 10241000,
+        "areaP25": 56.5,
         "priceP50": 11676000,
         "areaP50": 64.2,
-        "priceP75": 12639000,
+        "priceP75": 12660000,
         "areaP75": 67.7,
         "areaMin": 34.8,
         "areaMax": 88.81
@@ -180,13 +180,13 @@ window.CALCULATOR_PROJECTS = [
       },
       {
         "label": "2",
-        "count": 146,
+        "count": 145,
         "priceMin": 7728000,
         "priceMax": 14780000,
-        "priceAvg": 9340445,
+        "priceAvg": 9342731,
         "priceP25": 8367000,
         "areaP25": 54.3,
-        "priceP50": 9009000,
+        "priceP50": 8994000,
         "areaP50": 61,
         "priceP75": 10190000,
         "areaP75": 61.6,
@@ -241,7 +241,7 @@ window.CALCULATOR_PROJECTS = [
         "priceP50": 14690000,
         "areaP50": 68,
         "priceP75": 15530000,
-        "areaP75": 61.1,
+        "areaP75": 60.8,
         "areaMin": 46,
         "areaMax": 76.6
       }
@@ -291,7 +291,7 @@ window.CALCULATOR_PROJECTS = [
         "priceP25": 8500000,
         "areaP25": 60.4,
         "priceP50": 8660000,
-        "areaP50": 60.6,
+        "areaP50": 60.2,
         "priceP75": 8710000,
         "areaP75": 60.5,
         "areaMin": 45,
@@ -363,11 +363,11 @@ window.CALCULATOR_PROJECTS = [
         "priceMax": 35030000,
         "priceAvg": 14862384,
         "priceP25": 12540000,
-        "areaP25": 37.78,
+        "areaP25": 37.47,
         "priceP50": 13200000,
         "areaP50": 38.03,
         "priceP75": 14010000,
-        "areaP75": 45.31,
+        "areaP75": 47.88,
         "areaMin": 31.11,
         "areaMax": 138.9
       },
@@ -378,7 +378,7 @@ window.CALCULATOR_PROJECTS = [
         "priceMax": 23120000,
         "priceAvg": 18107277,
         "priceP25": 17470000,
-        "areaP25": 63.05,
+        "areaP25": 63.73,
         "priceP50": 17890000,
         "areaP50": 68.51,
         "priceP75": 18580000,
@@ -573,7 +573,7 @@ window.CALCULATOR_PROJECTS = [
         "priceP25": 8650000,
         "areaP25": 50.16,
         "priceP50": 9180000,
-        "areaP50": 46.79,
+        "areaP50": 57.63,
         "priceP75": 9360000,
         "areaP75": 59.83,
         "areaMin": 45.44,
@@ -753,7 +753,7 @@ window.CALCULATOR_PROJECTS = [
         "priceP50": 7360000,
         "areaP50": 33.01,
         "priceP75": 7930000,
-        "areaP75": 29.1,
+        "areaP75": 30.45,
         "areaMin": 23.4,
         "areaMax": 33.01
       },
@@ -796,14 +796,14 @@ window.CALCULATOR_PROJECTS = [
       },
       {
         "label": "1",
-        "count": 138,
+        "count": 139,
         "priceMin": 11092000,
         "priceMax": 35078000,
-        "priceAvg": 14556633,
+        "priceAvg": 14536758,
         "priceP25": 11906000,
         "areaP25": 35.95,
-        "priceP50": 13760000,
-        "areaP50": 42.1,
+        "priceP50": 13750000,
+        "areaP50": 42.2,
         "priceP75": 14931000,
         "areaP75": 45.1,
         "areaMin": 33.3,

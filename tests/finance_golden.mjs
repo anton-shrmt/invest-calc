@@ -10,6 +10,7 @@ const cityCodes = ['kzn', 'mhc', 'ekb', 'nn', 'spb', 'per', 'tlt'];
 Object.assign(GoldenCalc.data, {
   investAmount: 8_000_000, cityCode: 'kzn', projectSlug: 'tech', roomLabel: '1',
   searchAllCities: false, objectManualOverride: false, unitsOverride: 0,
+  rentalModel: 'daily',
   rentGrowth: 5, appreciation: 13, horizon: 5, depositRate: 11, depositMonthly: true,
   mortgageRate: 17, mortgageYears: 30,
 });

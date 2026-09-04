@@ -435,8 +435,7 @@
     .rental-model-option input:focus-visible + label { outline: 3px solid var(--dark); outline-offset: 2px; }
     .rental-model-option input:disabled + label { opacity: .48; cursor: not-allowed; background: var(--mint-2); }
     .rental-model-help { margin-top: 7px; font-size: .72rem; color: var(--muted); line-height: 1.4; }
-    .rental-model-recommendation { margin: 10px 0 12px; padding: 8px 10px; border-radius: var(--r-sm); background: var(--mint-2); color: var(--muted); font-size: .74rem; line-height: 1.4; }
-    .rental-model-recommendation strong { color: var(--text); }
+    .strategy-hint .rental-model-fieldset { margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
 
     /* ── STRATEGY HINT ── */
     .strategy-hint {
@@ -591,7 +590,6 @@
     html[data-theme="dark"] .cmp-table tr.winner-row td { background: #3E5555; color: #FFFFFF; }
     html[data-theme="dark"] .rental-model-option label { background: #263535; }
     html[data-theme="dark"] .rental-model-option input:checked + label { background: #3E5555; border-color: var(--accent); color: #FFFFFF; }
-    html[data-theme="dark"] .rental-model-recommendation { background: #1C2727; }
     html[data-theme="dark"] .cashflow-negative { color: #FFB4AB !important; }
     html[data-theme="dark"] input[type="range"] { background: #637676; }
     html[data-theme="dark"] .amount-input { color: var(--text) !important; }
@@ -654,6 +652,24 @@
          независимо от того, что стоит в «Объект недвижимости» ниже -->
     <div id="strategy-hint" class="strategy-hint hidden">
       <div class="sh-head" id="sh-title"><svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 00-3.5 10.9c.5.4.8 1 .8 1.6V16h5.4v-.5c0-.6.3-1.2.8-1.6A6 6 0 0012 3z"/></svg>Лучший вариант под ваш бюджет</div>
+      <fieldset class="rental-model-fieldset">
+        <legend>Как планируете сдавать?</legend>
+        <div class="rental-model-options">
+          <div class="rental-model-option">
+            <input type="radio" name="rental-model" id="rental-model-longterm" value="longterm">
+            <label for="rental-model-longterm">Долгосрочно</label>
+          </div>
+          <div class="rental-model-option">
+            <input type="radio" name="rental-model" id="rental-model-guaranteed" value="guaranteed">
+            <label for="rental-model-guaranteed">Фикс. выплата</label>
+          </div>
+          <div class="rental-model-option">
+            <input type="radio" name="rental-model" id="rental-model-daily" value="daily">
+            <label for="rental-model-daily">Посуточно</label>
+          </div>
+        </div>
+        <div class="rental-model-help" id="rental-model-help">Подбираем лучший объект для выбранного сценария.</div>
+      </fieldset>
       <div class="sh-winner-row">
         <span class="sh-badge" id="sh-badge">—</span>
         <span class="sh-sublabel" id="sh-sublabel"></span>
@@ -759,27 +775,6 @@
     <!-- Модель аренды -->
     <div class="card" id="rental-card">
       <h2 class="card-title">Аренда</h2>
-
-      <fieldset class="rental-model-fieldset">
-        <legend>Как планируете сдавать?</legend>
-        <div class="rental-model-options">
-          <div class="rental-model-option">
-            <input type="radio" name="rental-model" id="rental-model-longterm" value="longterm">
-            <label for="rental-model-longterm">Долгосрочно</label>
-          </div>
-          <div class="rental-model-option">
-            <input type="radio" name="rental-model" id="rental-model-guaranteed" value="guaranteed">
-            <label for="rental-model-guaranteed">Фикс. выплата</label>
-          </div>
-          <div class="rental-model-option">
-            <input type="radio" name="rental-model" id="rental-model-daily" value="daily">
-            <label for="rental-model-daily">Посуточно</label>
-          </div>
-        </div>
-        <div class="rental-model-help" id="rental-model-help">Итог справа рассчитывается для выбранного сценария.</div>
-      </fieldset>
-
-      <div class="rental-model-recommendation" id="rental-model-recommendation" aria-live="polite"></div>
 
       <!-- Информационный дисплей — заполняется JS -->
       <div id="rent-info-display"></div>
@@ -1673,20 +1668,23 @@ const Calc = {
       rows.push(['Посуточная', '≈ ' + rub(r.dailyAnnualIncome / 12) + '/мес ср.']);
     }
     const roomLabel = d.roomLabel === 'Студия' ? 'Студия' : d.roomLabel + '-комн.';
-    const selectedRentalModel = r.availableModels.includes(d.rentalModel)
-      ? d.rentalModel
-      : (r.availableModels[0] || 'longterm');
+    // В ручном режиме сохраняем объект и не предлагаем для него продукт,
+    // которого нет в матрице. В авто-режиме все модели доступны: смена
+    // сценария сначала подберёт другой подходящий объект.
+    const selectedRentalModel = d.objectManualOverride && !r.availableModels.includes(d.rentalModel)
+      ? (r.availableModels[0] || 'longterm')
+      : d.rentalModel;
     if (selectedRentalModel !== d.rentalModel) {
       d.rentalModel = selectedRentalModel;
       this._saveLS();
     }
     document.querySelectorAll('input[name="rental-model"]').forEach(input => {
       input.checked = input.value === selectedRentalModel;
-      input.disabled = !r.availableModels.includes(input.value);
+      input.disabled = d.objectManualOverride && !r.availableModels.includes(input.value);
     });
-    document.getElementById('rental-model-help').textContent = r.availableModels.includes('daily')
-      ? 'Итог справа рассчитывается для выбранного сценария.'
-      : 'Посуточный сценарий недоступен для этой комнатности.';
+    document.getElementById('rental-model-help').textContent = d.objectManualOverride && !r.availableModels.includes('daily')
+      ? 'Посуточный сценарий недоступен для выбранной комнатности.'
+      : 'Подбираем лучший объект для выбранного сценария.';
     document.getElementById('rent-info-display').innerHTML =
       `<div class="rent-info-label">Расчётная выплата владельцу до ипотеки и исключённых расходов за 1 квартиру — ${escapeHtml(proj.label)}, ${escapeHtml(roomLabel)}</div>` +
       `<table class="rent-info-table">` +
@@ -1726,16 +1724,6 @@ const Calc = {
       daily:      'Посуточная аренда',
       deposit:    'Банковский вклад',
     };
-
-    const recommendationEl = document.getElementById('rental-model-recommendation');
-    const bestRoi = candidates[bestModel];
-    if (!r.isAffordable) {
-      recommendationEl.innerHTML = '<strong>Объект пока недоступен.</strong> Увеличьте бюджет или выберите другой объект.';
-    } else if (bestModel === winner) {
-      recommendationEl.innerHTML = `<strong>Ваш сценарий лидирует по расчёту:</strong> ROI ${pct(bestRoi)} на выбранном горизонте.`;
-    } else {
-      recommendationEl.innerHTML = `<strong>Максимальный расчётный ROI:</strong> ${modelLabels[bestModel]} — ${pct(bestRoi)}. Итог справа остаётся для вашего выбора.`;
-    }
 
     /* — Selected-scenario banner — */
     document.getElementById('wb-amount').textContent = rub(maxWealth);
@@ -2151,6 +2139,7 @@ const Calc = {
       const availableModels = RENTAL_MODELS.filter(modelId =>
         isRentalModelAvailable(modelId, project.slug, room.label)
       );
+      if (!availableModels.includes(d.rentalModel)) return null;
 
       const { monthlyRent, dailyGrossAnnual, dailyAnnualIncome, isEstimated } = this.getRentFigures(project.slug, room.label, cost);
       const mortgageBalanceAtHorizon = (principal, mortAnn) => {
@@ -2203,7 +2192,9 @@ const Calc = {
           roi: (wealth - userCapital) / userCapital * 100,
         };
       };
-      const modelResults = availableModels.map(modelResult);
+      // Ранжируем объекты строго внутри выбранного клиентом сценария,
+      // не позволяя более доходной модели незаметно изменить его намерение.
+      const modelResults = [modelResult(d.rentalModel)];
       const eligibleResults = requireNonNegativeFlow
         ? modelResults.filter(result => result.flowYearOne >= 0)
         : modelResults;
@@ -2238,7 +2229,11 @@ const Calc = {
       };
     };
 
-    const modelName = { longterm: 'долгосрочная', guaranteed: 'фиксированная выплата', daily: 'посуточная' };
+    const modelName = {
+      longterm: 'долгосрочная аренда',
+      guaranteed: 'фиксированная арендная выплата',
+      daily: 'посуточная аренда',
+    };
 
     const strategies = [];
 
@@ -2273,19 +2268,23 @@ const Calc = {
     // Sort by wealth
     strategies.sort((a, b) => b.roi - a.roi || b.wealth - a.wealth || String(a.key).localeCompare(String(b.key)));
 
-    const best = strategies[0];
+    const depositStrategy = strategies.find(strategy => strategy.model === 'deposit');
+    // Вклад — контрольное сравнение, а не замена объекта в карточке
+    // «Лучший вариант». Показываем его вместо объекта только если для
+    // выбранной модели не нашлось ни одного варианта с допустимым потоком.
+    const best = strategies.find(strategy => strategy.model !== 'deposit') || depositStrategy;
     const cityIn = CITY_IN[d.cityCode] || (CITIES.find(c => c.code === d.cityCode) || {}).label || '';
     const searchScope = d.searchAllCities ? 'среди всех доступных городов' : `в ${cityIn}`;
     const decorate = (s, reason) => ({
       ...s,
-      sublabel: s.model === 'deposit' ? `${d.depositRate}% годовых` : modelName[s.model] + ' аренда',
+      sublabel: s.model === 'deposit' ? `${d.depositRate}% годовых` : modelName[s.model],
       roi: s.roi,
       reason,
     });
 
     const bestReason = best.model === 'deposit'
-      ? `Среди вариантов ${searchScope} вклад опережает арендные стратегии за ${H} ${pluralYr(H)}.`
-      : `Максимальный прогнозный ROI среди вариантов с неотрицательным потоком ${searchScope}.`;
+      ? `Для сценария «${modelName[d.rentalModel]}» не найден объект с неотрицательным потоком ${searchScope}.`
+      : `Максимальный прогнозный ROI для сценария «${modelName[d.rentalModel]}» среди объектов с неотрицательным потоком ${searchScope}.`;
 
     // Отдельно считаем объект, который пользователь выбрал вручную (тем же
     // методом, что и лучший вариант) — карточка «Ваш выбор» показывает
@@ -2297,7 +2296,6 @@ const Calc = {
     const selRoom = selProject ? this.getRoom(selProject, d.roomLabel) : null;
     const selectedRaw = selRoom ? evalCombo(selProject, selRoom, invest, d.unitsOverride) : null;
 
-    const depositStrategy = strategies.find(s => s.key === 'deposit');
     const selReason = selectedRaw && depositStrategy
       ? (selectedRaw.roi >= depositStrategy.roi
           ? `ROI на все вложения выше вклада на ${pct(selectedRaw.roi - depositStrategy.roi)} п. п.`
@@ -2314,10 +2312,15 @@ const Calc = {
     const h  = this._computeHint();
     const H  = this.data.horizon;
     const d  = this.data;
+    const modelLabels = {
+      longterm: 'долгосрочной аренды',
+      guaranteed: 'фиксированной выплаты',
+      daily: 'посуточной аренды',
+    };
 
     const bestEl = document.getElementById('strategy-hint');
     bestEl.classList.remove('hidden');
-    document.getElementById('sh-title').innerHTML = `<svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 00-3.5 10.9c.5.4.8 1 .8 1.6V16h5.4v-.5c0-.6.3-1.2.8-1.6A6 6 0 0012 3z"/></svg>${d.searchAllCities ? 'Лучший вариант среди всех городов' : 'Лучший вариант под ваш бюджет'}`;
+    document.getElementById('sh-title').innerHTML = `<svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 00-3.5 10.9c.5.4.8 1 .8 1.6V16h5.4v-.5c0-.6.3-1.2.8-1.6A6 6 0 0012 3z"/></svg>Лучший вариант для ${modelLabels[d.rentalModel]}`;
     document.getElementById('sh-badge').textContent = h.best.label;
     document.getElementById('sh-sublabel').textContent = h.best.sublabel + (h.best.isEstimated ? ' · доход оценочный' : '');
     document.getElementById('sh-wealth').textContent = fmtM(h.best.wealth);
@@ -2353,8 +2356,8 @@ const Calc = {
     const autoHint = document.getElementById('property-auto-hint');
     autoHint.classList.toggle('hidden', d.objectManualOverride);
     autoHint.textContent = d.searchAllCities
-      ? 'Город, ЖК и комнатность подставлены автоматически — лучший вариант среди всех городов. Можно выбрать вручную.'
-      : 'ЖК и комнатность подставлены автоматически — лучший вариант под ваш бюджет. Можно выбрать вручную.';
+      ? `Город, ЖК и комнатность подставлены автоматически — лучший вариант для ${modelLabels[d.rentalModel]} среди всех городов. Можно выбрать вручную.`
+      : `ЖК и комнатность подставлены автоматически — лучший вариант для ${modelLabels[d.rentalModel]} под ваш бюджет. Можно выбрать вручную.`;
     this._renderSearchScope();
   },
 
@@ -2779,7 +2782,7 @@ const Calc = {
         if (!e.target.checked || e.target.disabled) return;
         this.data.rentalModel = e.target.value;
         this._saveLS();
-        this.render(this.compute());
+        this._recompute();
       });
     });
 

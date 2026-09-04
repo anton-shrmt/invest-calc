@@ -75,6 +75,7 @@ assert.deepEqual(
 
 Object.assign(Calc.data, {
   investAmount: 8_000_000, cityCode: 'kzn', searchAllCities: false,
+  rentalModel: 'longterm',
   rentGrowth: 5, appreciation: 13, horizon: 5, depositRate: 11, depositMonthly: true,
   mortgageRate: 17, mortgageYears: 30,
 });
@@ -86,6 +87,10 @@ assert.ok(
 assert.ok(
   cityOnlyHint.ranked.filter(strategy => strategy.model !== 'deposit').every(strategy => strategy.flowYearOne >= 0),
   'Автоматическая рекомендация не должна включать варианты с отрицательным потоком',
+);
+assert.ok(
+  cityOnlyHint.ranked.filter(strategy => strategy.model !== 'deposit').every(strategy => strategy.model === 'longterm'),
+  'Автоподбор должен ранжировать объекты только внутри выбранной модели аренды',
 );
 Calc.data.searchAllCities = true;
 const globalHint = Calc._computeHint();
@@ -99,6 +104,14 @@ assert.ok(
   'Глобальная рекомендация не должна включать варианты с отрицательным потоком',
 );
 Calc.data.searchAllCities = false;
+
+Calc.data.rentalModel = 'daily';
+const dailyHint = Calc._computeHint();
+assert.ok(
+  dailyHint.ranked.filter(strategy => strategy.model !== 'deposit').every(strategy => strategy.model === 'daily'),
+  'При выборе посуточной аренды автоподбор не должен подмешивать другие модели',
+);
+Calc.data.rentalModel = 'longterm';
 
 Object.assign(Calc.data, {
   investAmount: 8_000_000, cityCode: 'kzn', projectSlug: 'aqua', roomLabel: '2',

@@ -49,5 +49,37 @@ not accepted as 375 px evidence.
 
 ## Public deployment
 
-This section is completed by the final operator report after GitHub Pages
-returns the expected `releaseSha` and all manifest hashes pass.
+- Deployment candidate: `9c9062b2607bf724a75e0d7a2e5035f028898630`
+- Workflow: <https://github.com/anton-shrmt/invest-calc/actions/runs/33840100062>
+- Public URL: <https://anton-shrmt.github.io/invest-calc/investment_calculator.html>
+
+Both the workflow gate and an independent local invocation returned:
+
+```text
+post_deploy_smoke: OK (9c9062b2607b)
+```
+
+This proves that the public `release-manifest.json` carried the expected SHA,
+every published SHA-256 matched, external QR/CDN URLs were absent, and the
+financial golden case executed successfully from the published HTML and data.
+
+Independent interactive production QA then confirmed:
+
+- release meta: `9c9062b2607bf724a75e0d7a2e5035f028898630`;
+- price data: updated 4 September 2026, 5,589 source lots passed the pipeline;
+- 1440 px: `scrollWidth = innerWidth = 1440`, chart visible, no console errors;
+- 768 px: `scrollWidth = innerWidth = 768`, mobile result dock visible;
+- 375 px: `scrollWidth = innerWidth = 375`, dock bounds 8…367 px;
+- minimum production test viewport 240 px: `scrollWidth = innerWidth = 240`;
+- dark theme colors: background `rgb(28, 39, 39)`, foreground and amount field
+  `rgb(235, 241, 241)`;
+- invalid rent growth `31`: value/focus retained, `aria-invalid=true`, adjacent
+  error `Значение должно быть от 0 до 30. Расчёт пока не изменён.`;
+- mortgage sequence `9` → 600 ms → `.5`: value `9.5`, focus retained;
+- QR: expanded panel, local 140×140 canvas and `data:image/png;base64` image;
+- keyboard focus on `#invest-slider`: 3 px solid outline with 5 px offset;
+- console errors: none.
+
+The follow-up commit that records this evidence changes repository
+documentation only. Its final production SHA is verified in the operator's
+post-deploy report using the same manifest/hash/golden gate.

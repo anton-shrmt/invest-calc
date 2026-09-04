@@ -919,7 +919,9 @@
     .analysis-card[open] { grid-column: 1 / -1; }
     .analysis-card > .section-summary { margin: -8px 0; }
     .analysis-card[open] > .section-summary { margin-bottom: 2px; }
-    .detail-card { grid-column: 1 / -1; }
+    .detail-card { grid-column: 1 / -1; min-width: 0; }
+    .detail-card .detail-acc,
+    .detail-card .table-wrap { min-width: 0; max-width: 100%; }
     .detail-card .detail-acc > summary { min-height: 48px; }
 
     .mobile-result-dock { display: none !important; }
@@ -2262,7 +2264,7 @@ const Calc = {
       ? `<span class="badge badge-yellow">Региональное значение введено менеджером — зафиксируйте источник и дату</span>`
       : (appreciationAgeDays > appreciationMeta.maxAgeDays
           ? `<span class="badge badge-yellow">Срез старше ${appreciationMeta.maxAgeDays} дней — требуется обновление</span>`
-          : `Срез: рынок новостроек РФ, II квартал 2026 года; опубликован ${formatDataDate(appreciationMeta.publishedAt)}.`);
+          : `Срез: рынок новостроек РФ, II квартал 2026 года; опубликован ${formatDataDate(appreciationMeta.publishedAt)}`);
     document.getElementById('deposit-path-help').textContent = d.depositDecline
       ? `Ставка в расчёте: ${fmtRatePath(r.depositRates.slice(1))}${H > 1 ? ' по годам' : ''}.`
       : `Фиксированная ставка ${fmtRate(d.depositRate)} на весь горизонт.`;

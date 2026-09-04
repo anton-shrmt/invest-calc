@@ -104,6 +104,8 @@ assert.match(Calc._updateWhatsAppButton.toString(), /Обсудить расчё
 assert.match(html, /Показать все показатели/);
 assert.match(html, /Показать остальные стратегии/);
 assert.match(html, /mobile-extra-strategy/);
+assert.match(html, /\.detail-card \{ grid-column: 1 \/ -1; min-width: 0; \}/);
+assert.match(html, /\.detail-card \.table-wrap \{ min-width: 0; max-width: 100%; \}/);
 assert.match(html, /Итоговый капитал<\/strong> — капитал в недвижимости/);
 assert.match(html, /Ваш бюджет — собственные средства/);
 

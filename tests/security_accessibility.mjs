@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import vm from 'node:vm';
 import { loadCalculator, root } from './helpers/load_calculator.mjs';
 
 const html = fs.readFileSync(path.join(root, 'investment_calculator.html'), 'utf8');
@@ -18,8 +19,14 @@ assert.match(html, /data-theme="dark"/);
 assert.doesNotMatch(html, /доход уже в первый год|Гарантированный доход: риск минимален/);
 assert.match(html, /Упрощённая модель/);
 assert.match(html, /налоги, ремонт, меблировку/);
+assert.match(html, /Даты, владелец и периодичность обновления ставок аренды/);
 
 const { Calc, context } = loadCalculator();
+const assumptions = vm.runInContext('FINANCIAL_ASSUMPTIONS_META', context);
+assert.equal(assumptions.rentRates.asOf, null);
+assert.equal(assumptions.rentRates.owner, null);
+assert.equal(assumptions.appreciation.asOf, null);
+assert.equal(assumptions.appreciation.owner, null);
 context.window.location = { origin: 'https://example.test', pathname: '/investment_calculator.html' };
 Calc.data.managerName = '<img src=x onerror=alert(1)>';
 Calc.data.managerPhone = '+7 999 123-45-67';

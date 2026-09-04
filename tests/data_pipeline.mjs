@@ -26,6 +26,7 @@ const context = { window: {} };
 vm.createContext(context);
 vm.runInContext(fs.readFileSync(path.join(root, 'scripts/output/calculator_projects_data.js'), 'utf8'), context);
 assert.doesNotThrow(() => validateProjects(context.window.CALCULATOR_PROJECTS, { calculatorOnly: true }));
+assert.ok(Number.isFinite(Date.parse(context.window.CALCULATOR_PROJECTS_META?.fetchedAt)), 'Дата выгрузки должна быть ISO-датой');
 const dataCities = new Set(context.window.CALCULATOR_PROJECTS.map(project => project.city));
 for (const city of dataCities) assert.ok(CALCULATOR_CITY_PARAMETERS[city], `Нет финансовых параметров города ${city}`);
 

@@ -2,6 +2,7 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { loadCalculator } from '../tests/helpers/load_calculator.mjs';
+import { goldenProjectsSource } from '../tests/helpers/golden_projects.mjs';
 
 const baseUrl = (process.argv[2] || '').replace(/\/$/, '');
 const expectedSha = process.argv[3] || process.env.GITHUB_SHA;
@@ -52,7 +53,14 @@ for (const asset of [
   assert.match(htmlSource, new RegExp(`${asset.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\?v=${expectedSha}`), `${asset} не привязан к release SHA`);
 }
 assert.match(htmlSource, new RegExp(`calculator_projects_data\\.js\\?v=${expectedSha}`), 'Файл цен не привязан к release SHA');
-const { Calc } = loadCalculator({ htmlSource, projectsSource });
+const { Calc: PublishedCalc } = loadCalculator({ htmlSource, projectsSource });
+Object.assign(PublishedCalc.data, { investAmount: 8_000_000, cityCode: 'kzn', searchAllCities: true, objectManualOverride: false, unitsOverride: 0, rentGrowth: 5, appreciation: 13, horizon: 5, depositRate: 11, depositMonthly: true, mortgageRate: 17, mortgageYears: 30 });
+const publishedBest = PublishedCalc._computeHint().best;
+assert.ok(publishedBest && Number.isFinite(publishedBest.wealth) && Number.isFinite(publishedBest.roi), 'Опубликованные живые данные не дают конечный результат');
+
+// Exact formula regression uses a stable fixture, so a legitimate market-price
+// update cannot invalidate the financial model gate.
+const { Calc } = loadCalculator({ htmlSource, projectsSource: goldenProjectsSource });
 Object.assign(Calc.data, { investAmount: 8_000_000, cityCode: 'kzn', searchAllCities: false, objectManualOverride: false, unitsOverride: 0, rentGrowth: 5, appreciation: 13, horizon: 5, depositRate: 11, depositMonthly: true, mortgageRate: 17, mortgageYears: 30 });
 const golden = Calc._computeHint().best;
 assert.equal(Math.round(golden.grossYearOne), 3_180_000);

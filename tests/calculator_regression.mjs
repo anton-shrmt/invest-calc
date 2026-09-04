@@ -21,16 +21,21 @@ vm.runInContext(inlineScript.replace(/Calc\.init\(\);\s*$/, 'globalThis.Calc = C
 
 // Внешний файл с данными может загрузиться без ошибок, но содержать пустой
 // массив. В этом случае встроенный снимок должен оставаться рабочим.
-const fallbackContext = {
-  window: { CALCULATOR_PROJECTS: [] }, console, setTimeout, clearTimeout,
-  Date, Math, Number, JSON, URLSearchParams,
-};
-vm.createContext(fallbackContext);
-vm.runInContext(inlineScript.replace(/Calc\.init\(\);\s*$/, 'globalThis.Calc = Calc;'), fallbackContext);
-assert.ok(
-  fallbackContext.Calc.getProject('aqua'),
-  'Пустой CALCULATOR_PROJECTS должен переключать калькулятор на встроенный снимок',
-);
+for (const [label, payload] of [
+  ['отсутствующий', undefined],
+  ['пустой', []],
+  ['повреждённый', [{ slug: 'broken', city: 'unknown', label: '', rooms: [] }]],
+]) {
+  const fallbackWindow = {};
+  if (payload !== undefined) fallbackWindow.CALCULATOR_PROJECTS = payload;
+  const fallbackContext = {
+    window: fallbackWindow, console, setTimeout, clearTimeout,
+    Date, Math, Number, JSON, URLSearchParams,
+  };
+  vm.createContext(fallbackContext);
+  vm.runInContext(inlineScript.replace(/Calc\.init\(\);\s*$/, 'globalThis.Calc = Calc;'), fallbackContext);
+  assert.ok(fallbackContext.Calc.getProject('aqua'), `${label} CALCULATOR_PROJECTS должен включать fallback`);
+}
 
 const { Calc } = context;
 assert.ok(Calc, 'Расчётный модуль не экспортирован в тестовый контекст');
@@ -214,5 +219,10 @@ assert.equal(
   1,
   'В PDF должна быть ровно одна карточка «Ваш выбор»',
 );
+Calc.data.managerName = '<img src=x onerror=alert(1)>';
+Calc.data.managerPhone = '<script>alert(2)</script>';
+Calc._printClientSelection();
+assert.doesNotMatch(printTarget.innerHTML, /<(?:img|script)\b/i, 'Контакты не должны создавать HTML/JS в PDF');
+assert.match(printTarget.innerHTML, /&lt;img/, 'Опасный текст должен быть экранирован, а не потерян');
 
 console.log('calculator_regression: OK');

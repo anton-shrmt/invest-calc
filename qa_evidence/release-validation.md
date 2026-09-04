@@ -15,7 +15,11 @@ git diff --check: OK
 ```
 
 The financial golden case is asserted exactly in `tests/finance_golden.mjs`
-and repeated against the public artifact by `scripts/post_deploy_smoke.mjs`.
+using a stable price fixture, and repeated against the public artifact by
+`scripts/post_deploy_smoke.mjs`. The same suite separately executes every
+current project/room at minimum, maximum and 30% affordability boundaries
+(at least 200 live-market scenarios), so legitimate price updates do not
+invalidate formula expectations while malformed market data still fails.
 
 ## Browser QA
 

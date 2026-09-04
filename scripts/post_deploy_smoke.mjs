@@ -41,6 +41,17 @@ const htmlSource = text(await get('investment_calculator.html'));
 const projectsSource = text(await get('scripts/output/calculator_projects_data.js'));
 assert.doesNotMatch(htmlSource, /api\.qrserver\.com|cdnjs\.cloudflare\.com|fonts\.googleapis\.com/);
 assert.match(htmlSource, /Упрощённая модель/);
+for (const asset of [
+  'release-meta.js',
+  'vendor/qrcode.min.js',
+  'vendor/chart.umd.min.js',
+  'assets/favicon.svg',
+  'assets/img/unistroy-logo.svg',
+  'assets/font/TTNormsPro-Regular.woff2',
+]) {
+  assert.match(htmlSource, new RegExp(`${asset.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\?v=${expectedSha}`), `${asset} не привязан к release SHA`);
+}
+assert.match(htmlSource, new RegExp(`calculator_projects_data\\.js\\?v=${expectedSha}`), 'Файл цен не привязан к release SHA');
 const { Calc } = loadCalculator({ htmlSource, projectsSource });
 Object.assign(Calc.data, { investAmount: 8_000_000, cityCode: 'kzn', searchAllCities: false, objectManualOverride: false, unitsOverride: 0, rentGrowth: 5, appreciation: 13, horizon: 5, depositRate: 11, depositMonthly: true, mortgageRate: 17, mortgageYears: 30 });
 const golden = Calc._computeHint().best;

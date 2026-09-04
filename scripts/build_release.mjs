@@ -29,6 +29,40 @@ for (const relative of files) {
   await cp(source, target, { recursive: true });
 }
 
+// GitHub Pages may cache immutable-looking JS/font/image paths between
+// deployments. The release HTML therefore pins every runtime asset and the
+// generated data file to the exact commit SHA. A normal browser reload then
+// cannot combine a new HTML document with an older release-meta or price file.
+const releaseVersion = encodeURIComponent(releaseSha);
+const htmlPath = path.join(outDir, 'investment_calculator.html');
+let releaseHtml = await readFile(htmlPath, 'utf8');
+const versionedAssets = [
+  'release-meta.js',
+  'vendor/qrcode.min.js',
+  'vendor/chart.umd.min.js',
+  'assets/favicon.svg',
+  'assets/og-preview.svg',
+  'assets/img/unistroy-logo.svg',
+  'assets/font/TTNormsPro-Regular.woff2',
+  'assets/font/TTNormsPro-Medium.woff2',
+  'assets/font/TTNormsPro-Bold.woff2',
+  'assets/font/TTNormsProTrlExp-DemiBold.woff2',
+  'assets/font/TTNormsProTrlExp-Bold.woff2',
+];
+for (const asset of versionedAssets) {
+  assertReplacement(asset, `${asset}?v=${releaseVersion}`);
+}
+assertReplacement(
+  `document.write('<script src="scripts/output/calculator_projects_data.js?v=' + Math.floor(Date.now() / 43200000) + '"><' + '/script>');`,
+  `document.write('<script src="scripts/output/calculator_projects_data.js?v=${releaseVersion}"><' + '/script>');`,
+);
+await writeFile(htmlPath, releaseHtml, 'utf8');
+
+function assertReplacement(from, to) {
+  if (!releaseHtml.includes(from)) throw new Error(`Не найден runtime asset для версионирования: ${from}`);
+  releaseHtml = releaseHtml.split(from).join(to);
+}
+
 const releaseMeta = `window.CALCULATOR_RELEASE = ${JSON.stringify({ sha: releaseSha, builtAt })};\n` +
   `document.querySelector('meta[name="release-sha"]')?.setAttribute('content', ${JSON.stringify(releaseSha)});\n` +
   `window.dispatchEvent(new Event('release-ready'));\n`;

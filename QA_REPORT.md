@@ -17,7 +17,7 @@
 
 | ID | Статус | Проверяемое исправление |
 |---|---|---|
-| REL-001 | CLOSED | HTML, данные, assets, vendor, release/test manifests собираются одним workflow; публичные SHA и SHA-256 проверяет post-deploy smoke |
+| REL-001 | CLOSED | HTML, данные, assets, vendor, release/test manifests собираются одним workflow; все runtime URL привязаны к release SHA против смешивания кэша; публичные SHA и SHA-256 проверяет post-deploy smoke |
 | DATA-001 | CLOSED | `mhchkala`/`mahachkala` → `mhc`, `perm` → `per`; закрытый словарь и schema gate; неизвестный код/пустой результат останавливают обновление |
 | FIN-001 | CLOSED | Разделены валовая выручка, выплата владельцу, ипотека, поток, доплаты, все вложения, equity и final capital; ROI считается на стартовый бюджет + доплаты |
 | FIN-002 | MITIGATED | Неучтённые расходы перечислены рядом с результатом; неподтверждённые владелец/источник/дата/SLA ставок явно помечены. Их нельзя считать проверенными до продуктового подтверждения |

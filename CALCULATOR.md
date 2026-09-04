@@ -39,7 +39,9 @@
 - Хостится на GitHub Pages: `https://anton-shrmt.github.io/invest-calc/investment_calculator.html`.
 - Деплой выполняет `.github/workflows/deploy-pages.yml`: тесты → сборка
   атомарного артефакта → GitHub Pages → проверка SHA/хешей и golden case на
-  публичном URL. Простого копирования HTML на Pages недостаточно.
+  публичном URL. Сборка версионирует все runtime URL точным release SHA, чтобы
+  браузер не смешал файлы двух релизов. Простого копирования HTML на Pages
+  недостаточно.
 - Данные о квартирах подгружаются отдельным сгенерированным JS-файлом
   (`scripts/output/calculator_projects_data.js`) через `<script>`, который
   калькулятор сам дописывает в `<head>`/тело документа при загрузке.

@@ -80,6 +80,15 @@ Independent interactive production QA then confirmed:
 - keyboard focus on `#invest-slider`: 3 px solid outline with 5 px offset;
 - console errors: none.
 
-The follow-up commit that records this evidence changes repository
-documentation only. Its final production SHA is verified in the operator's
-post-deploy report using the same manifest/hash/golden gate.
+### Cache-coherence follow-up
+
+After the successful `9c9062b` manifest check, an ordinary browser reload
+still showed the previous release SHA in the footer because GitHub Pages had
+served a cached `release-meta.js`. This was treated as a release defect rather
+than ignored. `scripts/build_release.mjs` now appends the exact release SHA to
+every runtime asset and the generated price-data URL. The post-deploy smoke
+asserts those bindings in the published HTML, in addition to file hashes.
+
+The final production SHA after this correction is verified in the operator's
+post-deploy report using the same manifest/hash/golden gate and a warm-browser
+reload.

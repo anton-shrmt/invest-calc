@@ -11,13 +11,25 @@ if (!baseUrl || !expectedSha) {
   process.exit(2);
 }
 
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 const get = async relative => {
-  const response = await fetch(`${baseUrl}/${relative}`, { cache: 'no-store' });
-  assert.equal(response.ok, true, `${relative}: HTTP ${response.status}`);
-  return new Uint8Array(await response.arrayBuffer());
+  let lastError;
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      const response = await fetch(`${baseUrl}/${relative}`, {
+        cache: 'no-store',
+        signal: AbortSignal.timeout(15_000),
+      });
+      assert.equal(response.ok, true, `${relative}: HTTP ${response.status}`);
+      return new Uint8Array(await response.arrayBuffer());
+    } catch (error) {
+      lastError = error;
+      if (attempt < 3) await sleep(attempt * 500);
+    }
+  }
+  throw lastError;
 };
 const text = bytes => new TextDecoder().decode(bytes);
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 let manifest = null;
 let lastPublishedSha = 'неизвестен';
 for (let attempt = 1; attempt <= 30; attempt += 1) {

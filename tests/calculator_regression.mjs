@@ -42,6 +42,7 @@ assert.ok(Calc, 'Расчётный модуль не экспортирован
 
 assert.equal(Calc.data.mortgageRate, 17, 'Ставка ипотеки по умолчанию должна быть 17%');
 assert.equal(Calc.data.mortgageYears, 30, 'Срок ипотеки по умолчанию должен быть 30 лет');
+assert.equal(Calc.data.rentalModel, 'longterm', 'По умолчанию итог должен показывать долгосрочную аренду');
 const appreciationByCity = vm.runInContext('APPRECIATION_BY_CITY', context);
 assert.deepEqual(
   JSON.parse(JSON.stringify(appreciationByCity)),
@@ -187,6 +188,7 @@ context.window.location = { origin: 'https://example.test', pathname: '/calculat
 Calc.data.objectManualOverride = false;
 const autoShareUrl = Calc.buildShareUrl();
 const autoShareParams = new URL(autoShareUrl).searchParams;
+assert.equal(autoShareParams.get('rm'), Calc.data.rentalModel, 'Ссылка должна сохранять выбранный сценарий аренды');
 assert.equal(autoShareParams.has('proj'), false, 'Автоматическая ссылка не должна фиксировать ЖК');
 assert.equal(autoShareParams.has('room'), false, 'Автоматическая ссылка не должна фиксировать комнатность');
 assert.equal(autoShareParams.has('qty'), false, 'Автоматическая ссылка не должна передавать qty=0');

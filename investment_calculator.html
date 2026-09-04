@@ -298,6 +298,7 @@
     }
     .cmp-table td:first-child { text-align: left; font-weight: 600; }
     .strategy-row-meta { margin-top: 3px; max-width: 250px; white-space: normal; color: var(--muted); font-size: .66rem; line-height: 1.3; font-weight: 500; }
+    .choice-tag { display: inline-block; margin-left: 5px; padding: 1px 5px; border: 1px solid currentColor; border-radius: 999px; font-size: .61rem; font-weight: 700; vertical-align: 1px; }
     .cmp-table td strong { font-weight: 700; }
     .cmp-table tr.winner-row td { background: var(--mint); color: var(--dark); }
     .cmp-table tr.winner-row td:first-child::before {
@@ -419,6 +420,23 @@
     }
     .rent-info-table td:last-child { text-align: right; font-weight: 700; }
     .rent-info-label { font-size: .72rem; color: var(--muted); margin-bottom: 2px; }
+    .rental-model-fieldset { border: 0; margin: 0 0 12px; min-width: 0; }
+    .rental-model-fieldset legend { font-size: .78rem; font-weight: 700; color: var(--text); margin-bottom: 7px; }
+    .rental-model-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+    .rental-model-option { position: relative; min-width: 0; }
+    .rental-model-option input { position: absolute; opacity: 0; pointer-events: none; }
+    .rental-model-option label {
+      display: grid; place-items: center; min-height: 50px; padding: 7px 5px;
+      border: 1.5px solid var(--line); border-radius: var(--r-sm); background: var(--white);
+      color: var(--muted); font-size: .72rem; font-weight: 700; line-height: 1.15;
+      text-align: center; cursor: pointer; transition: border-color .15s var(--ease), background-color .15s var(--ease), color .15s var(--ease);
+    }
+    .rental-model-option input:checked + label { border-color: var(--dark); background: var(--mint); color: var(--dark); }
+    .rental-model-option input:focus-visible + label { outline: 3px solid var(--dark); outline-offset: 2px; }
+    .rental-model-option input:disabled + label { opacity: .48; cursor: not-allowed; background: var(--mint-2); }
+    .rental-model-help { margin-top: 7px; font-size: .72rem; color: var(--muted); line-height: 1.4; }
+    .rental-model-recommendation { margin: 10px 0 12px; padding: 8px 10px; border-radius: var(--r-sm); background: var(--mint-2); color: var(--muted); font-size: .74rem; line-height: 1.4; }
+    .rental-model-recommendation strong { color: var(--text); }
 
     /* ── STRATEGY HINT ── */
     .strategy-hint {
@@ -571,6 +589,9 @@
     html[data-theme="dark"] .model-disclosure,
     html[data-theme="dark"] .chart-fallback { background: #1C2727; }
     html[data-theme="dark"] .cmp-table tr.winner-row td { background: #3E5555; color: #FFFFFF; }
+    html[data-theme="dark"] .rental-model-option label { background: #263535; }
+    html[data-theme="dark"] .rental-model-option input:checked + label { background: #3E5555; border-color: var(--accent); color: #FFFFFF; }
+    html[data-theme="dark"] .rental-model-recommendation { background: #1C2727; }
     html[data-theme="dark"] .cashflow-negative { color: #FFB4AB !important; }
     html[data-theme="dark"] input[type="range"] { background: #637676; }
     html[data-theme="dark"] .amount-input { color: var(--text) !important; }
@@ -738,6 +759,27 @@
     <!-- Модель аренды -->
     <div class="card" id="rental-card">
       <h2 class="card-title">Аренда</h2>
+
+      <fieldset class="rental-model-fieldset">
+        <legend>Как планируете сдавать?</legend>
+        <div class="rental-model-options">
+          <div class="rental-model-option">
+            <input type="radio" name="rental-model" id="rental-model-longterm" value="longterm">
+            <label for="rental-model-longterm">Долгосрочно</label>
+          </div>
+          <div class="rental-model-option">
+            <input type="radio" name="rental-model" id="rental-model-guaranteed" value="guaranteed">
+            <label for="rental-model-guaranteed">Фикс. выплата</label>
+          </div>
+          <div class="rental-model-option">
+            <input type="radio" name="rental-model" id="rental-model-daily" value="daily">
+            <label for="rental-model-daily">Посуточно</label>
+          </div>
+        </div>
+        <div class="rental-model-help" id="rental-model-help">Итог справа рассчитывается для выбранного сценария.</div>
+      </fieldset>
+
+      <div class="rental-model-recommendation" id="rental-model-recommendation" aria-live="polite"></div>
 
       <!-- Информационный дисплей — заполняется JS -->
       <div id="rent-info-display"></div>
@@ -1290,6 +1332,7 @@ const Calc = {
     mortgageYears:      30,
     managerName:        '',
     managerPhone:       '',
+    rentalModel:        'longterm',
   },
 
   /* ── helpers: project/room lookup ── */
@@ -1630,6 +1673,20 @@ const Calc = {
       rows.push(['Посуточная', '≈ ' + rub(r.dailyAnnualIncome / 12) + '/мес ср.']);
     }
     const roomLabel = d.roomLabel === 'Студия' ? 'Студия' : d.roomLabel + '-комн.';
+    const selectedRentalModel = r.availableModels.includes(d.rentalModel)
+      ? d.rentalModel
+      : (r.availableModels[0] || 'longterm');
+    if (selectedRentalModel !== d.rentalModel) {
+      d.rentalModel = selectedRentalModel;
+      this._saveLS();
+    }
+    document.querySelectorAll('input[name="rental-model"]').forEach(input => {
+      input.checked = input.value === selectedRentalModel;
+      input.disabled = !r.availableModels.includes(input.value);
+    });
+    document.getElementById('rental-model-help').textContent = r.availableModels.includes('daily')
+      ? 'Итог справа рассчитывается для выбранного сценария.'
+      : 'Посуточный сценарий недоступен для этой комнатности.';
     document.getElementById('rent-info-display').innerHTML =
       `<div class="rent-info-label">Расчётная выплата владельцу до ипотеки и исключённых расходов за 1 квартиру — ${escapeHtml(proj.label)}, ${escapeHtml(roomLabel)}</div>` +
       `<table class="rent-info-table">` +
@@ -1643,7 +1700,7 @@ const Calc = {
       (!r.availableModels.includes('daily') ? `<div class="hint-sm">Посуточная аренда для этой комнатности не рекомендуется в рамках продукта УК.</div>` : '') +
       (r.isEstimated ? `<div class="hint-sm">Доход рассчитан оценочно по доходности комнатности: подтвердите ставку у УК.</div>` : '');
 
-    /* — Winner determination — */
+    /* — Best-model recommendation and user-selected result — */
     const hasRentalModels = r.isAffordable;
     const candidates = {};
     if (r.isAffordable) {
@@ -1654,7 +1711,10 @@ const Calc = {
     candidates.deposit = r.roi(r.depositArr[H]);
 
     const sorted    = Object.entries(candidates).sort((a, b) => b[1] - a[1]);
-    const winner    = sorted[0][0];
+    const bestModel = sorted[0][0];
+    // Итоговая карточка следует намерению пользователя. Вклад становится
+    // итогом только когда выбранный объект не проходит по бюджету.
+    const winner    = r.isAffordable ? selectedRentalModel : 'deposit';
     const winnerData = winner === 'deposit' ? null : r[winner];
     const maxWealth = winnerData ? winnerData.wealthArr[H] : r.depositArr[H];
     const winnerUserCapital = winnerData ? winnerData.userCapitalArr[H] : d.investAmount;
@@ -1667,11 +1727,22 @@ const Calc = {
       deposit:    'Банковский вклад',
     };
 
-    /* — Winner banner — */
+    const recommendationEl = document.getElementById('rental-model-recommendation');
+    const bestRoi = candidates[bestModel];
+    if (!r.isAffordable) {
+      recommendationEl.innerHTML = '<strong>Объект пока недоступен.</strong> Увеличьте бюджет или выберите другой объект.';
+    } else if (bestModel === winner) {
+      recommendationEl.innerHTML = `<strong>Ваш сценарий лидирует по расчёту:</strong> ROI ${pct(bestRoi)} на выбранном горизонте.`;
+    } else {
+      recommendationEl.innerHTML = `<strong>Максимальный расчётный ROI:</strong> ${modelLabels[bestModel]} — ${pct(bestRoi)}. Итог справа остаётся для вашего выбора.`;
+    }
+
+    /* — Selected-scenario banner — */
     document.getElementById('wb-amount').textContent = rub(maxWealth);
-    const wbLabelText = r.isAffordable ? `Итог для выбранного объекта · ${H} ${pluralYr(H)}` : `Вклад вместо выбранного объекта · ${H} ${pluralYr(H)}`;
+    const wbLabelText = r.isAffordable
+      ? `Итог: ${modelLabels[winner]} · ${H} ${pluralYr(H)}`
+      : `Вклад вместо выбранного объекта · ${H} ${pluralYr(H)}`;
     document.getElementById('wb-label').innerHTML = `<svg class="ic14" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 01-8 0V4z"/><path d="M8 5H5a1 1 0 00-1 1v1a3 3 0 003 3M16 5h3a1 1 0 011 1v1a3 3 0 01-3 3"/><path d="M12 13v3"/><path d="M9 20h6M10 17h4v3h-4z"/></svg>${wbLabelText}`;
-    const winnerYearOneIncome = winner === 'deposit' ? r.depositArr[1] - r.depositArr[0] : winnerData.rentArr[1];
     const grossMonthly = winnerData ? winnerData.grossRentArr[1] / 12 : 0;
     const ownerRentMonthly = winnerData ? winnerData.rentArr[1] / 12 : 0;
     const cashflowMonthly = winnerData ? winnerData.flowArr[1] / 12 : 0;
@@ -1704,13 +1775,15 @@ const Calc = {
     } else {
       paybackEl.textContent = '';
     }
-    const trophyIcon = '<svg class="ic14" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 01-8 0V4z"/><path d="M8 5H5a1 1 0 00-1 1v1a3 3 0 003 3M16 5h3a1 1 0 011 1v1a3 3 0 01-3 3"/><path d="M12 13v3"/><path d="M9 20h6M10 17h4v3h-4z"/></svg>';
     if (winner === 'deposit') {
-      document.getElementById('wb-delta').innerHTML =
-        `${trophyIcon}${r.isAffordable ? modelLabels[winner] : 'Выбранный объект не проходит по бюджету; вклад'} — итоговый капитал через ${H} ${pluralYr(H)}`;
-    } else {
       document.getElementById('wb-delta').textContent =
-        `ROI на все вложения выше вклада на ${pct(winnerRoi - r.roi(r.depositArr[H]))} п. п.`;
+        `Выбранный объект не проходит по бюджету; показан итог банковского вклада через ${H} ${pluralYr(H)}`;
+    } else {
+      const depositRoi = r.roi(r.depositArr[H]);
+      const roiDelta = winnerRoi - depositRoi;
+      document.getElementById('wb-delta').textContent = Math.abs(roiDelta) < 0.05
+        ? 'ROI на все вложения примерно равен доходности вклада'
+        : `ROI на все вложения ${roiDelta > 0 ? 'выше' : 'ниже'} вклада на ${Math.abs(roiDelta).toFixed(1)} п. п.`;
     }
     const noteEl = document.getElementById('wb-note');
     if (!r.isAffordable) {
@@ -1723,7 +1796,7 @@ const Calc = {
       noteEl.textContent = '';
     }
 
-    // Снимок для кнопки WhatsApp — собран здесь, где winner/maxWealth уже посчитаны.
+    // Снимок для кнопки WhatsApp — собран для выбранного сценария.
     this._summary = {
       amountText: rub(maxWealth),
       scenarioLabel: modelLabels[winner] || '',
@@ -1747,7 +1820,8 @@ const Calc = {
     tfoot.innerHTML = '';
 
     const addRow = (id, label, data, extraClass) => {
-      const isWin = id === winner;
+      const isWin = id === bestModel;
+      const isSelected = id === winner;
       const tr = document.createElement('tr');
       if (isWin) tr.className = 'winner-row';
       else if (extraClass) tr.className = extraClass;
@@ -1760,7 +1834,7 @@ const Calc = {
       const userCapital = isDeposit ? d.investAmount : data.userCapitalArr[H];
       const roiVal = r.roi(total, userCapital);
       tr.innerHTML = `
-        <td data-label="Модель">${label}<div class="strategy-row-meta">${isDeposit ? `Вложения ${rub(userCapital)}` : `Выплата владельцу ${rub(ownerRentYearOne)} · ипотека ${r.monthlyMortgage > 0 ? `${rub(r.monthlyMortgage)}/мес` : 'нет'} · доплаты ${rub(data.topupArr[H])} · вложения ${rub(userCapital)}`}</div></td>
+        <td data-label="Модель">${label}${isSelected && !isDeposit ? '<span class="choice-tag">Ваш выбор</span>' : ''}<div class="strategy-row-meta">${isDeposit ? `Вложения ${rub(userCapital)}` : `Выплата владельцу ${rub(ownerRentYearOne)} · ипотека ${r.monthlyMortgage > 0 ? `${rub(r.monthlyMortgage)}/мес` : 'нет'} · доплаты ${rub(data.topupArr[H])} · вложения ${rub(userCapital)}`}</div></td>
         <td data-label="Валовая аренда / доход 1 года">${rub(grossYearOne)}</td>
         <td data-label="Поток после ипотеки" class="${cumulativeFlow < 0 ? 'cashflow-negative' : ''}">${cumulativeFlow < 0 ? '−' : '+'}${rub(Math.abs(cumulativeFlow))}</td>
         <td data-label="Капитал в кв.">${propertyEquity == null ? '—' : rub(propertyEquity)}</td>
@@ -2429,16 +2503,17 @@ const Calc = {
     d.unitsOverride = clamp(integerOr(d.unitsOverride, 0), 0, 20);
     d.managerName = String(d.managerName || '').slice(0, 60);
     d.managerPhone = String(d.managerPhone || '').slice(0, 20);
+    if (!RENTAL_MODELS.includes(d.rentalModel)) d.rentalModel = 'longterm';
   },
   // Строковые поля ссылки/localStorage — записываются как есть, без parseFloat.
-  _stringFields: new Set(['cityCode', 'projectSlug', 'roomLabel', 'managerName', 'managerPhone']),
+  _stringFields: new Set(['cityCode', 'projectSlug', 'roomLabel', 'managerName', 'managerPhone', 'rentalModel']),
   // Параметры ссылки, которой продажник может поделиться с клиентом —
   // приоритетнее сохранённого localStorage, чтобы получатель ссылки видел
   // именно присланный сценарий, а не свою предыдущую сессию.
   _urlParamMap: {
     amt: 'investAmount', city: 'cityCode', all: 'searchAllCities', proj: 'projectSlug', room: 'roomLabel',
     qty: 'unitsOverride',
-    rg: 'rentGrowth', h: 'horizon', dr: 'depositRate',
+    rm: 'rentalModel', rg: 'rentGrowth', h: 'horizon', dr: 'depositRate',
     dm: 'depositMonthly', mr: 'mortgageRate', my: 'mortgageYears',
   },
   _applyUrlParams() {
@@ -2699,6 +2774,15 @@ const Calc = {
       this._saveLS(); this._recompute();
     });
 
+    document.querySelectorAll('input[name="rental-model"]').forEach(input => {
+      input.addEventListener('change', (e) => {
+        if (!e.target.checked || e.target.disabled) return;
+        this.data.rentalModel = e.target.value;
+        this._saveLS();
+        this.render(this.compute());
+      });
+    });
+
     document.getElementById('units-input').addEventListener('input', (e) => {
       const raw = Number(e.target.value);
       if (!isIntegerInRange(raw, 1, 20)) {
@@ -2772,7 +2856,7 @@ const Calc = {
         objectManualOverride: false, unitsOverride: 0,
         rentGrowth: 5, appreciation: 13, horizon: 5, depositRate: 11, depositMonthly: true,
         mortgageRate: 17, mortgageYears: 30,
-        managerName: keepName, managerPhone: keepPhone,
+        managerName: keepName, managerPhone: keepPhone, rentalModel: 'longterm',
       };
       // Контакты менеджера — это профиль продажника, а не параметр расчёта,
       // поэтому сохраняем их и после сброса.

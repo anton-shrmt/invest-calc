@@ -73,7 +73,7 @@ assert.ok(publishedBest && Number.isFinite(publishedBest.wealth) && Number.isFin
 // Exact formula regression uses a stable fixture, so a legitimate market-price
 // update cannot invalidate the financial model gate.
 const { Calc } = loadCalculator({ htmlSource, projectsSource: goldenProjectsSource });
-Object.assign(Calc.data, { investAmount: 8_000_000, cityCode: 'kzn', projectSlug: 'tech', roomLabel: '1', searchAllCities: false, objectManualOverride: false, unitsOverride: 0, rentGrowth: 5, appreciation: 13, horizon: 5, depositRate: 11, depositMonthly: true, mortgageRate: 17, mortgageYears: 30 });
+Object.assign(Calc.data, { investAmount: 8_000_000, cityCode: 'kzn', projectSlug: 'tech', roomLabel: '1', searchAllCities: false, objectManualOverride: false, unitsOverride: 0, rentalModel: 'daily', rentGrowth: 5, appreciation: 13, horizon: 5, depositRate: 11, depositMonthly: true, mortgageRate: 17, mortgageYears: 30 });
 const goldenHint = Calc._computeHint();
 assert.equal(goldenHint.best.model, 'deposit', 'Отрицательный поток не должен попадать в автоматическую рекомендацию');
 assert.ok(goldenHint.ranked.filter(strategy => strategy.model !== 'deposit').every(strategy => strategy.flowYearOne >= 0));

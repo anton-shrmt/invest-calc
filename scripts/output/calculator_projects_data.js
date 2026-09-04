@@ -686,6 +686,43 @@ window.CALCULATOR_PROJECTS = [
     ]
   },
   {
+    "slug": "Avtorika",
+    "city": "nn",
+    "label": "Авторика",
+    "rooms": [
+      {
+        "label": "1",
+        "count": 9,
+        "priceMin": 6780000,
+        "priceMax": 8200000,
+        "priceAvg": 7212222,
+        "priceP25": 6970000,
+        "areaP25": 34.73,
+        "priceP50": 7100000,
+        "areaP50": 34.72,
+        "priceP75": 7140000,
+        "areaP75": 34.73,
+        "areaMin": 31.38,
+        "areaMax": 38.17
+      },
+      {
+        "label": "2",
+        "count": 23,
+        "priceMin": 7010000,
+        "priceMax": 9710000,
+        "priceAvg": 7948261,
+        "priceP25": 7180000,
+        "areaP25": 34.28,
+        "priceP50": 7320000,
+        "areaP50": 35.22,
+        "priceP75": 9170000,
+        "areaP75": 47.95,
+        "areaMin": 33.62,
+        "areaMax": 53.9
+      }
+    ]
+  },
+  {
     "slug": "berth",
     "city": "per",
     "label": "Причал",

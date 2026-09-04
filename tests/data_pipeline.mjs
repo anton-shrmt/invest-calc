@@ -5,6 +5,7 @@ import vm from 'node:vm';
 import {
   CALCULATOR_CITY_PARAMETERS,
   normalizeCityCode,
+  selectCalculatorProjects,
   validateProjects,
   validateSourceFlat,
 } from '../scripts/fetch_unistroy_prices.mjs';
@@ -12,6 +13,7 @@ import { root } from './helpers/load_calculator.mjs';
 
 for (const alias of ['mhc', 'mhchkala', 'mahachkala']) assert.equal(normalizeCityCode(alias), 'mhc');
 assert.equal(normalizeCityCode('perm'), 'per');
+assert.equal(normalizeCityCode('nn'), 'nn');
 assert.throws(() => normalizeCityCode('mystery-city'), /неизвестный city_code/);
 
 const validFlat = {
@@ -29,6 +31,11 @@ assert.doesNotThrow(() => validateProjects(context.window.CALCULATOR_PROJECTS, {
 assert.ok(Number.isFinite(Date.parse(context.window.CALCULATOR_PROJECTS_META?.fetchedAt)), 'Дата выгрузки должна быть ISO-датой');
 const dataCities = new Set(context.window.CALCULATOR_PROJECTS.map(project => project.city));
 for (const city of dataCities) assert.ok(CALCULATOR_CITY_PARAMETERS[city], `Нет финансовых параметров города ${city}`);
+const fullSnapshot = JSON.parse(fs.readFileSync(path.join(root, 'scripts/output/summary.json'), 'utf8')).projects;
+const selectedAvtorika = selectCalculatorProjects(fullSnapshot).find(project => project.slug === 'Avtorika');
+const runtimeAvtorika = context.window.CALCULATOR_PROJECTS.find(project => project.slug === 'Avtorika');
+assert.deepEqual(JSON.parse(JSON.stringify(runtimeAvtorika)), selectedAvtorika, 'ЖК «Авторика» должен собираться из свежей выгрузки без ручных расхождений');
+assert.deepEqual([...runtimeAvtorika.rooms].map(room => room.label), ['1', '2'], 'Для «Авторики» должны остаться только целевые комнатности');
 
 const corrupted = structuredClone(context.window.CALCULATOR_PROJECTS);
 corrupted[0].rooms[0].priceP50 = 0;

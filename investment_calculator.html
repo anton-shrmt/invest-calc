@@ -898,6 +898,7 @@ const CITIES = [
   { code: 'kzn', label: 'Казань' },
   { code: 'ekb', label: 'Екатеринбург' },
   { code: 'mhc', label: 'Махачкала' },
+  { code: 'nn', label: 'Нижний Новгород' },
   { code: 'per', label: 'Пермь' },
   { code: 'spb', label: 'Санкт-Петербург' },
   { code: 'tlt', label: 'Тольятти' },
@@ -908,6 +909,7 @@ const CITY_IN = {
   mhc: 'Махачкале',
   kzn: 'Казани',
   ekb: 'Екатеринбурге',
+  nn: 'Нижнем Новгороде',
   spb: 'Санкт-Петербурге',
   per: 'Перми',
   tlt: 'Тольятти',
@@ -938,6 +940,11 @@ const PROJECTS = !USING_FALLBACK_DATA
     { label: 'Студия', count: 58, priceMin: 5614000, priceMax: 7614000, priceAvg: 6243759, areaMin: 28.11, areaMax: 35.24 },
     { label: '1', count: 47, priceMin: 6802000, priceMax: 10233000, priceAvg: 8406851, areaMin: 33.87, areaMax: 46.48 },
     { label: '2', count: 86, priceMin: 9721000, priceMax: 13738000, priceAvg: 11888279, areaMin: 56.02, areaMax: 83.45 },
+  ]},
+  /* ── Нижний Новгород ── */
+  { slug: 'Avtorika', city: 'nn', label: 'Авторика', rooms: [
+    { label: '1', count: 9, priceMin: 6780000, priceMax: 8200000, priceAvg: 7212222, priceP25: 6970000, areaP25: 34.73, priceP50: 7100000, areaP50: 34.72, priceP75: 7140000, areaP75: 34.73, areaMin: 31.38, areaMax: 38.17 },
+    { label: '2', count: 23, priceMin: 7010000, priceMax: 9710000, priceAvg: 7948261, priceP25: 7180000, areaP25: 34.28, priceP50: 7320000, areaP50: 35.22, priceP75: 9170000, areaP75: 47.95, areaMin: 33.62, areaMax: 53.9 },
   ]},
   /* ── Казань ── */
   { slug: 'aqua', city: 'kzn', label: 'Аквамарин', rooms: [
@@ -1184,6 +1191,7 @@ const APPRECIATION_BY_CITY = {
   kzn: 13,
   mhc: 18,
   ekb: 13,
+  nn: 13,
   spb: 11,
   per: 12,
   tlt: 14,

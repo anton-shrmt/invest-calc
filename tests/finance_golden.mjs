@@ -4,8 +4,8 @@ import { goldenProjectsSource } from './helpers/golden_projects.mjs';
 
 const { Calc, context } = loadCalculator();
 const { Calc: GoldenCalc } = loadCalculator({ projectsSource: goldenProjectsSource });
-const appreciation = { kzn: 13, mhc: 18, ekb: 13, spb: 11, per: 12, tlt: 14 };
-const cityCodes = ['kzn', 'mhc', 'ekb', 'spb', 'per', 'tlt'];
+const appreciation = { kzn: 13, mhc: 18, ekb: 13, nn: 13, spb: 11, per: 12, tlt: 14 };
+const cityCodes = ['kzn', 'mhc', 'ekb', 'nn', 'spb', 'per', 'tlt'];
 
 Object.assign(GoldenCalc.data, {
   investAmount: 8_000_000, cityCode: 'kzn', projectSlug: 'tech', roomLabel: '1',

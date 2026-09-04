@@ -94,12 +94,14 @@ export function normalizeCityCode(code) {
   return canonical;
 }
 
-// В калькулятор попадают только ЖК, для которых утверждены ставки аренды.
+// В калькулятор попадают только ЖК, которые явно одобрены для продукта.
+// Для объектов без собственной ставки аренды используется оценочный RENT_YIELD.
 // art16, yes_gorki и upoint исключены по решению команды. Квартиры от
 // 3 комнат и больше также не выводятся: они не являются целевым продуктом
 // инвестора.
 export const CALCULATOR_PROJECT_SLUGS = new Set([
   'grandbereg',
+  'Avtorika',
   'aqua', 'atmos', 'letokzn', 'statum', 'zalesnaia', 'tech',
   'unicum_amir', 'unicum_pob', 'tsarciti', 'qkulagina',
   'skies', 'parkblock', 'riverside', 'stadium',
@@ -229,7 +231,8 @@ export function validateProjects(projects, { calculatorOnly = false } = {}) {
 // APPRECIATION_BY_CITY в HTML и проверяются тестом контракта.
 export const CALCULATOR_CITY_PARAMETERS = Object.freeze({
   kzn: { appreciation: 13 }, mhc: { appreciation: 18 }, ekb: { appreciation: 13 },
-  spb: { appreciation: 11 }, per: { appreciation: 12 }, tlt: { appreciation: 14 },
+  nn: { appreciation: 13 }, spb: { appreciation: 11 }, per: { appreciation: 12 },
+  tlt: { appreciation: 14 },
 });
 
 export function aggregate(flats) {

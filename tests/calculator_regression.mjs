@@ -45,7 +45,7 @@ assert.equal(Calc.data.mortgageYears, 30, 'Срок ипотеки по умол
 const appreciationByCity = vm.runInContext('APPRECIATION_BY_CITY', context);
 assert.deepEqual(
   JSON.parse(JSON.stringify(appreciationByCity)),
-  { kzn: 13, mhc: 18, ekb: 13, spb: 11, per: 12, tlt: 14 },
+  { kzn: 13, mhc: 18, ekb: 13, nn: 13, spb: 11, per: 12, tlt: 14 },
   'Ставки роста стоимости жилья по городам расходятся с согласованными',
 );
 

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Инвестиционный калькулятор Унистрой.Аренда</title>
+  <desc id="desc">Фирменная карточка калькулятора недвижимости и банковского вклада</desc>
+  <rect width="1200" height="630" fill="#364B4B"/>
+  <circle cx="1030" cy="80" r="260" fill="#A5FF00" opacity=".13"/>
+  <circle cx="105" cy="610" r="240" fill="#A5FF00" opacity=".08"/>
+  <path d="M96 96h168v44H96zM96 154h112v16H96z" fill="#A5FF00"/>
+  <text x="96" y="292" fill="#FFFFFF" font-family="TT Norms Pro Expanded,Arial,sans-serif" font-size="68" font-weight="700">Инвестиционный</text>
+  <text x="96" y="372" fill="#FFFFFF" font-family="TT Norms Pro Expanded,Arial,sans-serif" font-size="68" font-weight="700">калькулятор</text>
+  <text x="96" y="448" fill="#C7D4D4" font-family="TT Norms Pro,Arial,sans-serif" font-size="30">Недвижимость · ипотека · денежный поток · вклад</text>
+  <rect x="96" y="510" width="416" height="56" rx="28" fill="#A5FF00"/>
+  <text x="304" y="548" text-anchor="middle" fill="#263535" font-family="TT Norms Pro,Arial,sans-serif" font-size="24" font-weight="700">Унистрой.Аренда</text>
+</svg>

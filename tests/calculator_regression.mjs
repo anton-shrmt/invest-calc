@@ -63,7 +63,7 @@ assert.deepEqual(
 );
 assert.deepEqual(
   JSON.parse(JSON.stringify(Calc.getRentFigures('aqua', '1', 0))),
-  { monthlyRent: 0, dailyAnnualIncome: 0, isEstimated: true },
+  { monthlyRent: 0, dailyGrossAnnual: 0, dailyAnnualIncome: 0, isEstimated: true },
   'Некорректная цена не должна порождать доходность с некорректными значениями',
 );
 

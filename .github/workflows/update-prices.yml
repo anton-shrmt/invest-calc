@@ -21,6 +21,9 @@ jobs:
       - name: Fetch latest prices from unistroy.ru
         run: node scripts/fetch_unistroy_prices.mjs
 
+      - name: Validate generated data and calculator regressions
+        run: node tests/run_all.mjs
+
       - name: Commit and push if data changed
         run: |
           git config user.name "github-actions[bot]"

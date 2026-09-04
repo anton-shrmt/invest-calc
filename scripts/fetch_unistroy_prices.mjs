@@ -27,7 +27,8 @@
  *
  * ВАЖНО: этот скрипт даёт только ЦЕНЫ/ПЛОЩАДИ/КОЛ-ВО ЛОТОВ (данные о продаже).
  * Ставки аренды (RENT_RATES в калькуляторе) сюда не входят — они берутся из
- * отдельного прайс-листа УК (см. цены_для_калк.xlsx), unistroy.ru — сайт
+ * встроенной таблицы ставок, первичный владелец/источник которой пока не
+ * подтверждён; unistroy.ru — только источник цен и наличия квартир
  * продаж, не аренды.
  *
  * После запуска: свежий projects_data.js нужно вручную сверить с текущим
@@ -35,7 +36,7 @@
  * измениться список городов с активными продажами и т.д.) и внести правки.
  */
 
-import { writeFile, mkdir } from 'node:fs/promises';
+import { writeFile, mkdir, rename, rm } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
@@ -52,7 +53,7 @@ const FETCH_HEADERS = {
   'Referer': 'https://unistroy.ru/search',
 };
 
-const CITY_NAMES = {
+export const CITY_NAMES = Object.freeze({
   kzn: 'Казань',
   spb: 'Санкт-Петербург',
   ekb: 'Екатеринбург',
@@ -60,7 +61,17 @@ const CITY_NAMES = {
   mhc: 'Махачкала',
   per: 'Пермь',
   ufa: 'Уфа',
-};
+  nn: 'Нижний Новгород',
+});
+
+// Закрытый справочник кодов, которые разрешено принимать от источника.
+// Любой новый код должен быть осознанно добавлен сюда до публикации данных.
+export const SUPPORTED_SOURCE_CITY_CODES = new Set([
+  ...Object.keys(CITY_NAMES),
+  'mahachkala',
+  'mhchkala',
+  'perm',
+]);
 
 // unistroy.ru не гарантирует стабильность city_code: в июле 2026 API стало
 // отдавать для части городов полное название вместо короткого кода без
@@ -68,19 +79,26 @@ const CITY_NAMES = {
 // PROJECTS.filter(p => p.city === 'mhc') тихо возвращал пустой массив, и
 // калькулятор падал при выборе города. Нормализуем на входе; при появлении
 // новых алиасов достаточно дополнить список ниже.
-const CITY_CODE_ALIASES = {
+export const CITY_CODE_ALIASES = Object.freeze({
   mahachkala: 'mhc',
+  mhchkala: 'mhc',
   perm: 'per',
-};
-function normalizeCityCode(code) {
-  return CITY_CODE_ALIASES[code] || code;
+});
+export function normalizeCityCode(code) {
+  const normalizedInput = String(code || '').trim().toLowerCase();
+  if (!SUPPORTED_SOURCE_CITY_CODES.has(normalizedInput)) {
+    throw new Error(`неизвестный city_code: ${JSON.stringify(code)}`);
+  }
+  const canonical = CITY_CODE_ALIASES[normalizedInput] || normalizedInput;
+  if (!CITY_NAMES[canonical]) throw new Error(`нет названия для канонического города ${canonical}`);
+  return canonical;
 }
 
 // В калькулятор попадают только ЖК, для которых утверждены ставки аренды.
 // art16, yes_gorki и upoint исключены по решению команды. Квартиры от
 // 3 комнат и больше также не выводятся: они не являются целевым продуктом
 // инвестора.
-const CALCULATOR_PROJECT_SLUGS = new Set([
+export const CALCULATOR_PROJECT_SLUGS = new Set([
   'grandbereg',
   'aqua', 'atmos', 'letokzn', 'statum', 'zalesnaia', 'tech',
   'unicum_amir', 'unicum_pob', 'tsarciti', 'qkulagina',
@@ -156,10 +174,69 @@ function quantileLot(lots, percentile) {
   return sorted[Math.round((sorted.length - 1) * percentile)];
 }
 
-function aggregate(flats) {
+function assertFinitePositive(value, pathLabel) {
+  if (!Number.isFinite(value) || value <= 0) throw new Error(`${pathLabel}: ожидалось положительное число`);
+}
+
+export function validateSourceFlat(flat, index = 0) {
+  const prefix = `лот[${index}]`;
+  if (!flat || typeof flat !== 'object') throw new Error(`${prefix}: ожидался объект`);
+  normalizeCityCode(flat.city_code);
+  if (!flat.project || typeof flat.project !== 'object') throw new Error(`${prefix}.project: ожидался объект`);
+  if (!String(flat.project.slug || '').trim()) throw new Error(`${prefix}.project.slug: обязательное поле`);
+  if (!String(flat.project.name || '').trim()) throw new Error(`${prefix}.project.name: обязательное поле`);
+  const room = roomLabel(flat);
+  if (!ROOM_SORT_ORDER.includes(room)) throw new Error(`${prefix}.rooms: неизвестная комнатность ${JSON.stringify(room)}`);
+  assertFinitePositive(Number(flat.price), `${prefix}.price`);
+  assertFinitePositive(Number(flat.area), `${prefix}.area`);
+}
+
+export function validateProjects(projects, { calculatorOnly = false } = {}) {
+  if (!Array.isArray(projects) || projects.length === 0) throw new Error('generated data: массив проектов пуст');
+  const slugs = new Set();
+  projects.forEach((project, projectIndex) => {
+    const prefix = `projects[${projectIndex}]`;
+    if (!project || typeof project !== 'object') throw new Error(`${prefix}: ожидался объект`);
+    if (!String(project.slug || '').trim()) throw new Error(`${prefix}.slug: обязательное поле`);
+    if (slugs.has(project.slug)) throw new Error(`${prefix}.slug: дубликат ${project.slug}`);
+    slugs.add(project.slug);
+    if (!String(project.label || '').trim()) throw new Error(`${prefix}.label: обязательное поле`);
+    if (!CITY_NAMES[project.city]) throw new Error(`${prefix}.city: неизвестный канонический город ${project.city}`);
+    if (calculatorOnly && !CALCULATOR_CITY_PARAMETERS[project.city]) {
+      throw new Error(`${prefix}.city: нет обязательных финансовых параметров для ${project.city}`);
+    }
+    if (!Array.isArray(project.rooms) || project.rooms.length === 0) throw new Error(`${prefix}.rooms: пустой массив`);
+    const roomLabels = new Set();
+    project.rooms.forEach((room, roomIndex) => {
+      const roomPrefix = `${prefix}.rooms[${roomIndex}]`;
+      if (!ROOM_SORT_ORDER.includes(room.label)) throw new Error(`${roomPrefix}.label: неизвестная комнатность ${room.label}`);
+      if (roomLabels.has(room.label)) throw new Error(`${roomPrefix}.label: дубликат ${room.label}`);
+      roomLabels.add(room.label);
+      for (const field of ['count', 'priceMin', 'priceMax', 'priceAvg', 'priceP25', 'priceP50', 'priceP75', 'areaP25', 'areaP50', 'areaP75', 'areaMin', 'areaMax']) {
+        assertFinitePositive(Number(room[field]), `${roomPrefix}.${field}`);
+      }
+      if (!Number.isInteger(room.count)) throw new Error(`${roomPrefix}.count: ожидалось целое число`);
+      if (!(room.priceMin <= room.priceP25 && room.priceP25 <= room.priceP50 && room.priceP50 <= room.priceP75 && room.priceP75 <= room.priceMax)) {
+        throw new Error(`${roomPrefix}: нарушен порядок цен min/P25/P50/P75/max`);
+      }
+      if (room.areaMin > room.areaMax) throw new Error(`${roomPrefix}: areaMin больше areaMax`);
+    });
+  });
+  return true;
+}
+
+// Обязательные параметры городов калькулятора. Значения синхронизированы с
+// APPRECIATION_BY_CITY в HTML и проверяются тестом контракта.
+export const CALCULATOR_CITY_PARAMETERS = Object.freeze({
+  kzn: { appreciation: 13 }, mhc: { appreciation: 18 }, ekb: { appreciation: 13 },
+  spb: { appreciation: 11 }, per: { appreciation: 12 }, tlt: { appreciation: 14 },
+});
+
+export function aggregate(flats) {
   const groups = new Map(); // key: city|slug|room
   const projectMeta = new Map(); // slug -> {city, label}
 
+  flats.forEach(validateSourceFlat);
   for (const f of flats) {
     const city = normalizeCityCode(f.city_code);
     const slug = f.project.slug;
@@ -167,7 +244,6 @@ function aggregate(flats) {
     const room = roomLabel(f);
     const price = parseFloat(f.price);
     const area = parseFloat(f.area);
-    if (!Number.isFinite(price) || !Number.isFinite(area)) continue;
 
     projectMeta.set(slug, { city, label });
 
@@ -216,6 +292,7 @@ function aggregate(flats) {
     cityTotals[p.city].count += p.rooms.reduce((s, r) => s + r.count, 0);
   }
 
+  validateProjects(projects);
   return { projects, cityTotals };
 }
 
@@ -248,7 +325,7 @@ function toProjectsJs(projects) {
 // Студия не участвует в сравнении «< 3» — сравниваем только числовые label'ы.
 const isThreePlusRoom = label => label !== 'Студия' && Number(label) >= 3;
 
-function toCalculatorProjectsJs(projects, fetchedAt) {
+export function selectCalculatorProjects(projects) {
   const calculatorProjects = projects
     .filter(project => CALCULATOR_PROJECT_SLUGS.has(project.slug))
     .map(project => ({
@@ -256,6 +333,12 @@ function toCalculatorProjectsJs(projects, fetchedAt) {
       rooms: project.rooms.filter(room => !isThreePlusRoom(room.label)),
     }))
     .filter(project => project.rooms.length > 0);
+  validateProjects(calculatorProjects, { calculatorOnly: true });
+  return calculatorProjects;
+}
+
+function toCalculatorProjectsJs(projects, fetchedAt) {
+  const calculatorProjects = selectCalculatorProjects(projects);
 
   return `// Автосгенерировано fetch_unistroy_prices.mjs — ${fetchedAt.slice(0, 10)}\n` +
     `// P25/P50/P75 рассчитаны по фактическим лотам; квартиры от 3 комнат исключены.\n` +
@@ -263,7 +346,23 @@ function toCalculatorProjectsJs(projects, fetchedAt) {
     `window.CALCULATOR_PROJECTS = ${JSON.stringify(calculatorProjects, null, 2)};\n`;
 }
 
-async function main() {
+async function writeAtomically(files) {
+  const tempFiles = [];
+  try {
+    for (const [target, content] of files) {
+      const temp = `${target}.tmp-${process.pid}`;
+      tempFiles.push(temp);
+      await writeFile(temp, content, 'utf8');
+    }
+    for (let index = 0; index < files.length; index += 1) {
+      await rename(tempFiles[index], files[index][0]);
+    }
+  } finally {
+    await Promise.all(tempFiles.map(file => rm(file, { force: true })));
+  }
+}
+
+export async function main() {
   process.stderr.write('Забираю все лоты с unistroy.ru/api/flats/ ...\n');
   const flats = await fetchAllFlats();
   process.stderr.write(`Готово: ${flats.length} лотов.\n`);
@@ -276,13 +375,9 @@ async function main() {
   await mkdir(outDir, { recursive: true });
 
   const jsPath = path.join(outDir, 'projects_data.js');
-  await writeFile(jsPath, toProjectsJs(projects), 'utf8');
-
   const calculatorDataPath = path.join(outDir, 'calculator_projects_data.js');
-  await writeFile(calculatorDataPath, toCalculatorProjectsJs(projects, fetchedAt), 'utf8');
-
   const summaryPath = path.join(outDir, 'summary.json');
-  await writeFile(summaryPath, JSON.stringify({
+  const summaryJson = JSON.stringify({
     fetchedAt,
     totalFlats: flats.length,
     cityTotals: Object.fromEntries(
@@ -290,7 +385,15 @@ async function main() {
     ),
     projectCount: projects.length,
     projects,
-  }, null, 2), 'utf8');
+  }, null, 2);
+
+  // Все артефакты строятся и валидируются в памяти до первой записи, затем
+  // заменяются одной группой. Ошибка не оставляет частично свежий набор.
+  await writeAtomically([
+    [jsPath, toProjectsJs(projects)],
+    [calculatorDataPath, toCalculatorProjectsJs(projects, fetchedAt)],
+    [summaryPath, summaryJson],
+  ]);
 
   process.stderr.write('\nПо городам:\n');
   for (const [code, v] of Object.entries(cityTotals)) {
@@ -301,7 +404,9 @@ async function main() {
   process.stderr.write(`\ncalculator_projects_data.js будет автоматически использован калькулятором.\n`);
 }
 
-main().catch(err => {
-  console.error('Ошибка:', err.message);
-  process.exit(1);
-});
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().catch(err => {
+    console.error('Ошибка:', err.message);
+    process.exit(1);
+  });
+}

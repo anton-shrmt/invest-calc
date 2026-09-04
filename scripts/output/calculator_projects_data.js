@@ -635,7 +635,7 @@ window.CALCULATOR_PROJECTS = [
   },
   {
     "slug": "grandbereg",
-    "city": "mhc",
+    "city": "mhchkala",
     "label": "Гранд Берег",
     "rooms": [
       {

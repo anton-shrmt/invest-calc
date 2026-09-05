@@ -15,7 +15,21 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  test-and-deploy:
+  test-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Regression and contract tests
+        run: node tests/run_all.mjs
+      - name: Build atomic release artifact
+        run: node scripts/build_release.mjs
+
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: test-and-build
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -25,8 +39,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Regression and contract tests
-        run: node tests/run_all.mjs
       - name: Build atomic release artifact
         run: node scripts/build_release.mjs
       - uses: actions/configure-pages@v5

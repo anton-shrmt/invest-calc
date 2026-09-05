@@ -89,7 +89,7 @@ for (const relative of artifactFiles) {
 const manifest = {
   releaseSha, builtAt,
   priceDataFetchedAt: dataContext.window.CALCULATOR_PROJECTS_META?.fetchedAt || null,
-  tests: ['calculator_regression', 'data_pipeline', 'finance_golden', 'security_accessibility'],
+  tests: ['calculator_regression', 'data_pipeline', 'finance_golden', 'scenario_matrix', 'security_accessibility', 'usability_regression'],
   files: hashes,
 };
 await writeFile(path.join(outDir, 'release-manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');

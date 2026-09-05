@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import { loadCalculator } from './helpers/load_calculator.mjs';
+import { goldenProjectsSource } from './helpers/golden_projects.mjs';
 
 const { Calc, context, html } = loadCalculator();
 
@@ -37,9 +38,12 @@ const last = Calc.data.horizon;
 assert.ok(Math.abs(Math.round(detail.equityArr[last]) + Math.round(detail.cashArr[last]) - Math.round(detail.wealthArr[last])) <= 1);
 assert.match(html, /id="detail-formula"/);
 assert.match(Calc.render.toString(), /data-detail-total="\$\{i === H \? 'final'/);
-Object.assign(Calc.data, { investAmount: 8_000_000, cityCode: 'kzn', projectSlug: 'tsarciti', roomLabel: '1', unitsOverride: 0, objectManualOverride: false, appreciationScenario: 'base', horizon: 5, rentalModel: 'longterm' });
-const defaultDetail = Calc.compute();
-assert.equal(Math.round(defaultDetail.cashRemainder), 600_000, 'Default должен явно показывать 600 000 ₽ неиспользованных средств');
+// Фиксированная цена 9 140 000 ₽ сохраняет проверку остатка при обновлениях прайса.
+const { Calc: RemainderCalc } = loadCalculator({ projectsSource: goldenProjectsSource });
+Object.assign(RemainderCalc.data, { investAmount: 9_740_000, cityCode: 'kzn', projectSlug: 'tech', roomLabel: '1', unitsOverride: 0, objectManualOverride: false, appreciationScenario: 'base', horizon: 5, rentalModel: 'longterm' });
+const defaultDetail = RemainderCalc.compute();
+assert.equal(defaultDetail.units, 1);
+assert.equal(Math.round(defaultDetail.cashRemainder), 600_000, 'После покупки должны оставаться 600 000 ₽ неиспользованных средств');
 assert.match(Calc.render.toString(), /data-unused-cash/);
 
 // FLOW-001: возврат в auto сбрасывает только manual overrides.
